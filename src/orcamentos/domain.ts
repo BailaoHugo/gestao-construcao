@@ -96,11 +96,15 @@ export interface BudgetLine {
 }
 
 export interface DraftBudgetItem {
+  rowId: string;
   code: string;
   description: string;
   unit: string;
   quantity: number;
   unitPrice: number;
+  custoUnitario?: number;
+  precoVendaUnitario?: number;
+  margemPercent?: number;
   grandeCapituloCode: string;
   capituloCode: string;
 }

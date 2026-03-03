@@ -22,6 +22,10 @@ function normalizeText(value: string) {
     .toLowerCase();
 }
 
+function createRowId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 interface BudgetItem {
   code: string;
   description: string;
@@ -40,6 +44,17 @@ export function OrcamentoBuilder() {
   const { items, setItems, meta } = useBudgetDraft();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [visibleColumns, setVisibleColumns] = useState({
+    code: true,
+    description: true,
+    qty: true,
+    unit: true,
+    unitPrice: true,
+    total: true,
+    custoUnitario: false,
+    precoVendaUnitario: false,
+    margemPercent: false,
+  });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const arvore = useMemo(() => {
@@ -93,6 +108,56 @@ export function OrcamentoBuilder() {
       .slice(0, 10);
   }, [input]);
 
+  function addArticleByCode(code: string, qty: number) {
+    const artigo = artigos.find((a) => a.code === code);
+    if (!artigo) {
+      setStatus(`Não encontrei o artigo com código ${code}.`);
+      return;
+    }
+
+    const existing = items.find((it) => it.code === code);
+    if (existing) {
+      const proceed =
+        typeof window !== "undefined"
+          ? window.confirm(
+              `O artigo ${code} já existe no orçamento com quantidade atual ${existing.quantity}. Deseja adicionar outra linha mesmo assim?`,
+            )
+          : false;
+
+      if (!proceed) {
+        setStatus(
+          `Artigo ${code} já existe no orçamento (não foi adicionada nova linha).`,
+        );
+        return;
+      }
+    }
+
+    const custoUnitario = artigo.puCusto ?? 0;
+    const precoVendaUnitario = custoUnitario;
+    const unitPrice = precoVendaUnitario;
+    setItems((prev) => [
+      ...prev,
+      {
+        rowId: createRowId(),
+        code: artigo.code,
+        description: artigo.description,
+        unit: artigo.unit,
+        quantity: qty,
+        unitPrice,
+        custoUnitario,
+        precoVendaUnitario,
+        grandeCapituloCode: artigo.grandeCapituloCode,
+        capituloCode: artigo.capituloCode,
+      },
+    ]);
+    setStatus(`Adicionado artigo ${artigo.code} x ${qty}.`);
+  }
+
+  function removeItem(rowId: string) {
+    setItems((prev) => prev.filter((it) => it.rowId !== rowId));
+    setStatus("Artigo removido.");
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -109,26 +174,7 @@ export function OrcamentoBuilder() {
         parts.find((p) => p.toLowerCase().startsWith("q=")) ?? "q=1";
       const qty = Number(qPart.split("=")[1] ?? "1") || 1;
 
-      const artigo = artigos.find((a) => a.code === codePart);
-      if (!artigo) {
-        setStatus(`Não encontrei o artigo com código ${codePart}.`);
-        return;
-      }
-
-      const unitPrice = artigo.puCusto ?? 0;
-      setItems((prev) => [
-        ...prev,
-        {
-          code: artigo.code,
-          description: artigo.description,
-          unit: artigo.unit,
-          quantity: qty,
-          unitPrice,
-          grandeCapituloCode: artigo.grandeCapituloCode,
-          capituloCode: artigo.capituloCode,
-        },
-      ]);
-      setStatus(`Adicionado artigo ${artigo.code} x ${qty}.`);
+      addArticleByCode(codePart, qty);
     } else if (lower.startsWith("limpar")) {
       setItems([]);
       setStatus("Orçamento limpo.");
@@ -276,11 +322,19 @@ export function OrcamentoBuilder() {
                       <ul className="space-y-0.5 pl-3 text-slate-600">
                         {arts.slice(0, 5).map((a) => (
                           <li key={a.code}>
-                            <span className="font-mono text-[11px]">
-                              {a.code}
-                            </span>
-                            {" — "}
-                            {a.description}
+                            <button
+                              type="button"
+                              className="inline-flex max-w-full items-baseline gap-1 rounded-full px-2 py-1 text-left hover:bg-slate-100"
+                              onClick={() => addArticleByCode(a.code, 1)}
+                            >
+                              <span className="font-mono text-[11px] text-slate-900">
+                                {a.code}
+                              </span>
+                              <span className="truncate text-[11px] text-slate-700">
+                                {" — "}
+                                {a.description}
+                              </span>
+                            </button>
                           </li>
                         ))}
                       </ul>
@@ -312,23 +366,81 @@ export function OrcamentoBuilder() {
 
           <FolhaRostoResumo meta={meta} />
 
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
+            <span className="font-medium text-slate-600">
+              Colunas visíveis:
+            </span>
+            {(
+              [
+                ["code", "Código"],
+                ["description", "Descrição"],
+                ["qty", "Qtd."],
+                ["unit", "Unid."],
+                ["unitPrice", "PU"],
+                ["total", "Total"],
+                ["custoUnitario", "Custo"],
+                ["precoVendaUnitario", "Preço venda"],
+                ["margemPercent", "Margem %"],
+              ] as const
+            ).map(([key, label]) => (
+              <label key={key} className="inline-flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  className="h-3 w-3 rounded border-slate-300 text-slate-900"
+                  checked={visibleColumns[key]}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setVisibleColumns((prev) => ({
+                      ...prev,
+                      [key]: checked,
+                    }));
+                  }}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+
           <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-100">
             <table className="min-w-full border-collapse text-left text-xs">
               <thead className="bg-slate-50">
                 <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-                  <th className="px-3 py-2">Código</th>
-                  <th className="px-3 py-2">Descrição</th>
-                  <th className="px-3 py-2 text-right">Qtd.</th>
-                  <th className="px-3 py-2">Unid.</th>
-                  <th className="px-3 py-2 text-right">PU</th>
-                  <th className="px-3 py-2 text-right">Total</th>
+                  {visibleColumns.code && (
+                    <th className="px-3 py-2">Código</th>
+                  )}
+                  {visibleColumns.description && (
+                    <th className="px-3 py-2">Descrição</th>
+                  )}
+                  {visibleColumns.qty && (
+                    <th className="px-3 py-2 text-right">Qtd.</th>
+                  )}
+                  {visibleColumns.unit && (
+                    <th className="px-3 py-2">Unid.</th>
+                  )}
+                  {visibleColumns.unitPrice && (
+                    <th className="px-3 py-2 text-right">PU</th>
+                  )}
+                  {visibleColumns.total && (
+                    <th className="px-3 py-2 text-right">Total</th>
+                  )}
+                  {visibleColumns.custoUnitario && (
+                    <th className="px-3 py-2 text-right">Custo</th>
+                  )}
+                  {visibleColumns.precoVendaUnitario && (
+                    <th className="px-3 py-2 text-right">Preço venda</th>
+                  )}
+                  {visibleColumns.margemPercent && (
+                    <th className="px-3 py-2 text-right">Margem %</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {items.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={
+                        Object.values(visibleColumns).filter(Boolean).length || 1
+                      }
                       className="px-3 py-6 text-center text-[11px] text-slate-400"
                     >
                       Ainda não adicionou artigos. Use o campo de comandos para
@@ -361,7 +473,11 @@ export function OrcamentoBuilder() {
                         rows.push(
                           <tr key={`gc-${lastGC}`}>
                             <td
-                              colSpan={6}
+                              colSpan={
+                                Object.values(visibleColumns).filter(
+                                  Boolean,
+                                ).length || 1
+                              }
                               className="bg-slate-100 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700"
                             >
                               {lastGC} — {gc?.description ?? "Grande capítulo"}
@@ -378,7 +494,11 @@ export function OrcamentoBuilder() {
                         rows.push(
                           <tr key={`cap-${lastGC}-${lastCap}`}>
                             <td
-                              colSpan={6}
+                              colSpan={
+                                Object.values(visibleColumns).filter(
+                                  Boolean,
+                                ).length || 1
+                              }
                               className="bg-slate-50 px-3 py-2 text-[11px] font-medium text-slate-700"
                             >
                               {lastCap} — {cap?.description ?? "Capítulo"}
@@ -389,40 +509,98 @@ export function OrcamentoBuilder() {
 
                       rows.push(
                         <tr
-                          key={`${it.code}-${rows.length}`}
+                          key={it.rowId ?? `${it.code}-${rows.length}`}
                           className="border-b border-slate-100 last:border-0"
                         >
-                          <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-slate-800">
-                            {it.code}
-                          </td>
-                          <td className="max-w-xs px-3 py-2 text-[11px] text-slate-800">
-                            {it.description}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                            {it.quantity.toLocaleString("pt-PT", {
-                              maximumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-700">
-                            {it.unit}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                            {it.unitPrice.toLocaleString("pt-PT", {
-                              style: "currency",
-                              currency: "EUR",
-                              minimumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                            {(it.quantity * it.unitPrice).toLocaleString(
-                              "pt-PT",
-                              {
+                          {visibleColumns.code && (
+                            <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-slate-800">
+                              <button
+                                type="button"
+                                className="mr-1 text-slate-300 hover:text-red-600"
+                                aria-label="Remover artigo"
+                                onClick={() => removeItem(it.rowId)}
+                              >
+                                ×
+                              </button>
+                              {it.code}
+                            </td>
+                          )}
+                          {visibleColumns.description && (
+                            <td className="max-w-xs px-3 py-2 text-[11px] text-slate-800">
+                              {it.description}
+                            </td>
+                          )}
+                          {visibleColumns.qty && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {it.quantity.toLocaleString("pt-PT", {
+                                maximumFractionDigits: 2,
+                              })}
+                            </td>
+                          )}
+                          {visibleColumns.unit && (
+                            <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-700">
+                              {it.unit}
+                            </td>
+                          )}
+                          {visibleColumns.unitPrice && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {it.unitPrice.toLocaleString("pt-PT", {
                                 style: "currency",
                                 currency: "EUR",
                                 minimumFractionDigits: 2,
-                              },
-                            )}
-                          </td>
+                              })}
+                            </td>
+                          )}
+                          {visibleColumns.total && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {(it.quantity * it.unitPrice).toLocaleString(
+                                "pt-PT",
+                                {
+                                  style: "currency",
+                                  currency: "EUR",
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.custoUnitario && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {(it.custoUnitario ?? 0).toLocaleString(
+                                "pt-PT",
+                                {
+                                  style: "currency",
+                                  currency: "EUR",
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.precoVendaUnitario && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {(it.precoVendaUnitario ?? it.unitPrice).toLocaleString(
+                                "pt-PT",
+                                {
+                                  style: "currency",
+                                  currency: "EUR",
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </td>
+                          )}
+                          {visibleColumns.margemPercent && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              {it.custoUnitario && it.custoUnitario > 0
+                                ? `${(
+                                    ((it.precoVendaUnitario ?? it.unitPrice) -
+                                      it.custoUnitario) /
+                                    it.custoUnitario *
+                                    100
+                                  ).toLocaleString("pt-PT", {
+                                    maximumFractionDigits: 1,
+                                  })} %`
+                                : "—"}
+                            </td>
+                          )}
                         </tr>,
                       );
                     }
