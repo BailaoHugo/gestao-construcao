@@ -1,0 +1,146 @@
+[
+  {
+    "enumType": "Unidade",
+    "value": "%",
+    "active": true,
+    "order": 1
+  },
+  {
+    "enumType": "Unidade",
+    "value": "h",
+    "active": true,
+    "order": 2
+  },
+  {
+    "enumType": "Unidade",
+    "value": "kg",
+    "active": true,
+    "order": 3
+  },
+  {
+    "enumType": "Unidade",
+    "value": "m2",
+    "active": true,
+    "order": 4
+  },
+  {
+    "enumType": "Unidade",
+    "value": "m3",
+    "active": true,
+    "order": 5
+  },
+  {
+    "enumType": "Unidade",
+    "value": "ml",
+    "active": true,
+    "order": 6
+  },
+  {
+    "enumType": "Unidade",
+    "value": "mês",
+    "active": true,
+    "order": 7
+  },
+  {
+    "enumType": "Unidade",
+    "value": "un",
+    "active": true,
+    "order": 8
+  },
+  {
+    "enumType": "Unidade",
+    "value": "vg",
+    "active": true,
+    "order": 9
+  },
+  {
+    "enumType": "Disciplina",
+    "value": "ARQ",
+    "active": true,
+    "order": 1
+  },
+  {
+    "enumType": "Disciplina",
+    "value": "EST",
+    "active": true,
+    "order": 2
+  },
+  {
+    "enumType": "Disciplina",
+    "value": "OUTRA",
+    "active": true,
+    "order": 3
+  },
+  {
+    "enumType": "Categoria_Custo",
+    "value": "MATERIAL",
+    "active": true,
+    "order": 1
+  },
+  {
+    "enumType": "Categoria_Custo",
+    "value": "SUBEMPREITADA",
+    "active": true,
+    "order": 2
+  },
+  {
+    "enumType": "Categoria_Custo",
+    "value": "MO_INTERNA",
+    "active": true,
+    "order": 3
+  },
+  {
+    "enumType": "Categoria_Custo",
+    "value": "EQUIPAMENTO",
+    "active": true,
+    "order": 4
+  },
+  {
+    "enumType": "Categoria_Custo",
+    "value": "OUTROS",
+    "active": true,
+    "order": 5
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "AREA",
+    "active": true,
+    "order": 1
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "COMPRIMENTO",
+    "active": true,
+    "order": 2
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "LOTE",
+    "active": true,
+    "order": 3
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "PERCENTAGEM",
+    "active": true,
+    "order": 4
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "TEMPO",
+    "active": true,
+    "order": 5
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "UNIDADE",
+    "active": true,
+    "order": 6
+  },
+  {
+    "enumType": "Tipo_Medicao",
+    "value": "VOLUME",
+    "active": true,
+    "order": 7
+  }
+]

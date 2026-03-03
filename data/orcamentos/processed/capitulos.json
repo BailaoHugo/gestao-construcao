@@ -1,0 +1,440 @@
+[
+  {
+    "code": "A1",
+    "description": "Processos Camarários e Taxas",
+    "grandeCapituloCode": "A",
+    "kFactor": 1.15
+  },
+  {
+    "code": "A2",
+    "description": "Entidades e Ramais (Água / Luz / Gás / Telecom)",
+    "grandeCapituloCode": "A",
+    "kFactor": 1.18
+  },
+  {
+    "code": "A3",
+    "description": "Certificações, Vistorias e Licenças",
+    "grandeCapituloCode": "A",
+    "kFactor": 1.2
+  },
+  {
+    "code": "A4",
+    "description": "Consultoria e Tramitação Administrativa",
+    "grandeCapituloCode": "A",
+    "kFactor": 1.25
+  },
+  {
+    "code": "B1",
+    "description": "Levantamentos e Diagnóstico",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.25
+  },
+  {
+    "code": "B2",
+    "description": "Projeto de Arquitetura",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.3
+  },
+  {
+    "code": "B3",
+    "description": "Projeto de Estruturas",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.3
+  },
+  {
+    "code": "B4",
+    "description": "Projetos de Especialidades",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.3
+  },
+  {
+    "code": "B5",
+    "description": "Medições, Caderno de Encargos e Mapa de Quantidades",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.22
+  },
+  {
+    "code": "B6",
+    "description": "Coordenação de Projetos e Assistência Técnica",
+    "grandeCapituloCode": "B",
+    "kFactor": 1.25
+  },
+  {
+    "code": "C1",
+    "description": "Implantação e Preparação do Terreno",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.3
+  },
+  {
+    "code": "C2",
+    "description": "Escavações e Desmonte",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.3
+  },
+  {
+    "code": "C3",
+    "description": "Aterros, Regularizações e Compactações",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.28
+  },
+  {
+    "code": "C4",
+    "description": "Transporte, Cargas e Vazadouros",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.2
+  },
+  {
+    "code": "C5",
+    "description": "Drenagens e Trabalhos Associados",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.28
+  },
+  {
+    "code": "C6",
+    "description": "Reabilitação: Escavações e Reforços em Espaço Confinado",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.25
+  },
+  {
+    "code": "C7",
+    "description": "Trabalhos Especiais em Edifício Existente",
+    "grandeCapituloCode": "C",
+    "kFactor": 1.25
+  },
+  {
+    "code": "D1",
+    "description": "Demolições Estruturais e Abertura de Vãos",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.25
+  },
+  {
+    "code": "D2",
+    "description": "Escoramentos e Contenções Provisórias",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.25
+  },
+  {
+    "code": "D3",
+    "description": "Fundações e Elementos de Fundação",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.22
+  },
+  {
+    "code": "D4",
+    "description": "Estruturas em Betão Armado",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.22
+  },
+  {
+    "code": "D5",
+    "description": "Estruturas Metálicas",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.22
+  },
+  {
+    "code": "D6",
+    "description": "Estruturas em Madeira",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.22
+  },
+  {
+    "code": "D7",
+    "description": "Reforços e Consolidações Estruturais",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.25
+  },
+  {
+    "code": "D8",
+    "description": "Tratamento de Patologias Estruturais",
+    "grandeCapituloCode": "D",
+    "kFactor": 1.25
+  },
+  {
+    "code": "E1",
+    "description": "Trabalhos Preparatórios",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.2
+  },
+  {
+    "code": "E2",
+    "description": "Demolições e Remoções Interiores",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.2
+  },
+  {
+    "code": "E3",
+    "description": "Divisórias e Construção Interior",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.22
+  },
+  {
+    "code": "E4",
+    "description": "Regularizações e Preparações de Suporte",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.22
+  },
+  {
+    "code": "E5",
+    "description": "Impermeabilizações Interiores",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.22
+  },
+  {
+    "code": "E6",
+    "description": "Revestimentos de Tetos e Sancas",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.22
+  },
+  {
+    "code": "E7",
+    "description": "Revestimentos de Paredes",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.25
+  },
+  {
+    "code": "E8",
+    "description": "Pavimentos e Rodapés",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.25
+  },
+  {
+    "code": "E9",
+    "description": "Carpintarias Interiores",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.3
+  },
+  {
+    "code": "E10",
+    "description": "Sistemas Envidraçados e Caixilharias Interiores",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.28
+  },
+  {
+    "code": "E11",
+    "description": "Pinturas e Acabamentos",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.25
+  },
+  {
+    "code": "E12",
+    "description": "Trabalhos Complementares Interiores",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.2
+  },
+  {
+    "code": "E13",
+    "description": "Caixilharias Exteriores e Vãos",
+    "grandeCapituloCode": "E",
+    "kFactor": 1.22
+  },
+  {
+    "code": "F1",
+    "description": "Instalação Elétrica – Infraestruturas",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.18
+  },
+  {
+    "code": "F2",
+    "description": "Instalação Elétrica – Aparelhagem e Instalação Final",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.15
+  },
+  {
+    "code": "F3",
+    "description": "ITED e Comunicações",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.18
+  },
+  {
+    "code": "F4",
+    "description": "Águas e Esgotos – Infraestruturas",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.2
+  },
+  {
+    "code": "F5",
+    "description": "Águas e Esgotos – Equipamentos e Louças",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.15
+  },
+  {
+    "code": "F6",
+    "description": "AVAC – Infraestruturas",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.2
+  },
+  {
+    "code": "F7",
+    "description": "AVAC – Equipamentos",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.15
+  },
+  {
+    "code": "F8",
+    "description": "Gás",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.18
+  },
+  {
+    "code": "F9",
+    "description": "Segurança e SCIE",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.22
+  },
+  {
+    "code": "F10",
+    "description": "Domótica e Sistemas Especiais",
+    "grandeCapituloCode": "F",
+    "kFactor": 1.22
+  },
+  {
+    "code": "G1",
+    "description": "Coberturas Planas – Impermeabilização e Isolamento",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.28
+  },
+  {
+    "code": "G2",
+    "description": "Coberturas Inclinadas e Telhados",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.28
+  },
+  {
+    "code": "G3",
+    "description": "Fachadas – Revestimentos e Sistemas ETICS",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.3
+  },
+  {
+    "code": "G4",
+    "description": "Fachadas – Reparações e Consolidações",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.3
+  },
+  {
+    "code": "G5",
+    "description": "Elementos de Remate e Complementares de Fachada",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.25
+  },
+  {
+    "code": "G6",
+    "description": "Trabalhos Complementares Exteriores",
+    "grandeCapituloCode": "G",
+    "kFactor": 1.25
+  },
+  {
+    "code": "H1",
+    "description": "Regularizações e Modelação para Arranjos Exteriores",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.25
+  },
+  {
+    "code": "H2",
+    "description": "Pavimentos Exteriores",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.25
+  },
+  {
+    "code": "H3",
+    "description": "Muros e Elementos de Contenção",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.25
+  },
+  {
+    "code": "H4",
+    "description": "Redes Exteriores (Águas Pluviais / Drenagens / Rega)",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.28
+  },
+  {
+    "code": "H5",
+    "description": "Espaços Verdes e Plantação",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.22
+  },
+  {
+    "code": "H6",
+    "description": "Equipamentos e Elementos Exteriores",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.2
+  },
+  {
+    "code": "H7",
+    "description": "Trabalhos Complementares Exteriores",
+    "grandeCapituloCode": "H",
+    "kFactor": 1.25
+  },
+  {
+    "code": "I1",
+    "description": "Cozinhas e Mobiliário Integrado",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.15
+  },
+  {
+    "code": "I2",
+    "description": "Louças Sanitárias e Torneiras",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.12
+  },
+  {
+    "code": "I3",
+    "description": "Iluminação Decorativa",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.12
+  },
+  {
+    "code": "I4",
+    "description": "Eletrodomésticos",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.1
+  },
+  {
+    "code": "I5",
+    "description": "Equipamentos AVAC (Fornecimento)",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.12
+  },
+  {
+    "code": "I6",
+    "description": "Equipamentos Técnicos Especiais",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.15
+  },
+  {
+    "code": "I7",
+    "description": "Mobiliário Fixo e Elementos Decorativos",
+    "grandeCapituloCode": "I",
+    "kFactor": 1.18
+  },
+  {
+    "code": "J1",
+    "description": "Estaleiro e Infraestruturas Provisórias",
+    "grandeCapituloCode": "J",
+    "kFactor": 1.25
+  },
+  {
+    "code": "J2",
+    "description": "Direção Técnica e Gestão de Obra",
+    "grandeCapituloCode": "J",
+    "kFactor": 1.3
+  },
+  {
+    "code": "J3",
+    "description": "Segurança e Saúde",
+    "grandeCapituloCode": "J",
+    "kFactor": 1.28
+  },
+  {
+    "code": "J4",
+    "description": "Limpezas e Entrega Final",
+    "grandeCapituloCode": "J",
+    "kFactor": 1.22
+  },
+  {
+    "code": "J5",
+    "description": "Encargos Gerais e Administrativos",
+    "grandeCapituloCode": "J",
+    "kFactor": 1.35
+  }
+]

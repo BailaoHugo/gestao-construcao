@@ -1,0 +1,6961 @@
+[
+  {
+    "code": "A1.0001",
+    "description": "Taxas camarárias para licenciamento de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A1",
+    "subgrupo": "Taxas Municipais",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 2500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A1.0002",
+    "description": "Taxa de comunicação prévia",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A1",
+    "subgrupo": "Taxas Municipais",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A1.0003",
+    "description": "Taxa de ocupação de via pública",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A1",
+    "subgrupo": "Ocupação Espaço Público",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 600,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A1.0004",
+    "description": "Taxa de emissão de alvará de construção",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A1",
+    "subgrupo": "Licenças",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A2.0001",
+    "description": "Pedido de ramal provisório de eletricidade",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A2",
+    "subgrupo": "Ramais Provisórios",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A2.0002",
+    "description": "Pedido de ramal definitivo de eletricidade",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A2",
+    "subgrupo": "Ramais Definitivos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A2.0003",
+    "description": "Pedido de ramal de água",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A2",
+    "subgrupo": "Ramais Água",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 950,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A2.0004",
+    "description": "Pedido de ramal de gás",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A2",
+    "subgrupo": "Ramais Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1100,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A2.0005",
+    "description": "Pedido de ligação telecomunicações",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A2",
+    "subgrupo": "Telecom",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A3.0001",
+    "description": "Certificação energética",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A3",
+    "subgrupo": "Certificações",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 350,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A3.0002",
+    "description": "Vistoria final de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A3",
+    "subgrupo": "Vistorias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 600,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A3.0003",
+    "description": "Emissão de licença de utilização",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A3",
+    "subgrupo": "Licenças Finais",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A3.0004",
+    "description": "Ficha técnica de habitação",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A3",
+    "subgrupo": "Documentação Técnica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 250,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "A4.0001",
+    "description": "Gestão de processo camarário",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A4",
+    "subgrupo": "Consultoria",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "A4.0002",
+    "description": "Tramitação administrativa junto de entidades",
+    "unit": "vg",
+    "grandeCapituloCode": "A",
+    "capituloCode": "A4",
+    "subgrupo": "Consultoria",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B1.0001",
+    "description": "Levantamento arquitetónico (as built)",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B1",
+    "subgrupo": "Levantamentos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B1.0002",
+    "description": "Levantamento fotográfico técnico e diagnóstico",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B1",
+    "subgrupo": "Diagnóstico",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B1.0003",
+    "description": "Levantamento topográfico",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B1",
+    "subgrupo": "Levantamentos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B1.0004",
+    "description": "Relatório geotécnico",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B1",
+    "subgrupo": "Estudos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 3200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B2.0001",
+    "description": "Projeto de Arquitetura – Estudo Prévio",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B2",
+    "subgrupo": "Arquitetura",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 4500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B2.0002",
+    "description": "Projeto de Arquitetura – Licenciamento",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B2",
+    "subgrupo": "Arquitetura",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 3800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B2.0003",
+    "description": "Projeto de Execução de Arquitetura",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B2",
+    "subgrupo": "Arquitetura",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 5200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B3.0001",
+    "description": "Projeto de Estruturas",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B3",
+    "subgrupo": "Estruturas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 3500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0001",
+    "description": "Projeto de Instalações Elétricas",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0002",
+    "description": "Projeto de ITED",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1400,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0003",
+    "description": "Projeto de AVAC",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1600,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0004",
+    "description": "Projeto de Águas e Esgotos",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0005",
+    "description": "Projeto de Gás",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B4.0006",
+    "description": "Projeto de SCIE",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B4",
+    "subgrupo": "Especialidades",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1400,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B5.0001",
+    "description": "Medições e mapa de quantidades (MQ)",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B5",
+    "subgrupo": "Medições",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B5.0002",
+    "description": "Caderno de encargos e especificações técnicas",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B5",
+    "subgrupo": "Documentação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0001",
+    "description": "Coordenação de projetos e especialidades",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Coordenação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 2500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0002",
+    "description": "Coordenação de Segurança e Saúde – Projeto",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 2200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0003",
+    "description": "Plano de Segurança e Saúde",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0004",
+    "description": "Fiscalização de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Fiscalização",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 3000,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0005",
+    "description": "Direção de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Direção Técnica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 2800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0006",
+    "description": "Estudo acústico",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Estudos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "B6.0007",
+    "description": "Estudo térmico (REH/RECS)",
+    "unit": "vg",
+    "grandeCapituloCode": "B",
+    "capituloCode": "B6",
+    "subgrupo": "Estudos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C1.0001",
+    "description": "Limpeza e desmatação de terreno",
+    "unit": "m2",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C1",
+    "subgrupo": "Limpezas",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 3,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C1.0002",
+    "description": "Implantação e marcação de obra",
+    "unit": "un",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C1",
+    "subgrupo": "Implantação",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C2.0001",
+    "description": "Escavação em terreno comum",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C2",
+    "subgrupo": "Escavações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C2.0002",
+    "description": "Escavação em terreno rochoso",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C2",
+    "subgrupo": "Escavações Especiais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C2.0003",
+    "description": "Escavação para fundações",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C2",
+    "subgrupo": "Escavações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C3.0001",
+    "description": "Aterro com material selecionado e compactação",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C3",
+    "subgrupo": "Aterros",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 24,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C3.0002",
+    "description": "Fornecimento e aplicação de tout-venant",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C3",
+    "subgrupo": "Bases Granulares",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 40,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C3.0003",
+    "description": "Regularização e compactação de plataforma",
+    "unit": "m2",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C3",
+    "subgrupo": "Regularizações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C4.0001",
+    "description": "Remoção e transporte de entulho para vazadouro",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C4",
+    "subgrupo": "Vazadouros",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C4.0002",
+    "description": "Transporte de terras a depósito autorizado",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C4",
+    "subgrupo": "Transporte",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C5.0001",
+    "description": "Execução de drenagem periférica",
+    "unit": "ml",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C5",
+    "subgrupo": "Drenagens",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C5.0002",
+    "description": "Execução de camada de brita drenante",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C5",
+    "subgrupo": "Drenagens",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C6.0001",
+    "description": "Escavação manual em espaço confinado",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C6",
+    "subgrupo": "Escavações Reabilitação",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C6.0002",
+    "description": "Microescavação para reforço estrutural",
+    "unit": "m3",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C6",
+    "subgrupo": "Reforços",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C6.0003",
+    "description": "Recalçamento de fundações existentes",
+    "unit": "ml",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C6",
+    "subgrupo": "Consolidações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C7.0001",
+    "description": "Rebaixamento pontual de piso interior",
+    "unit": "m2",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C7",
+    "subgrupo": "Rebaixamentos",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C7.0002",
+    "description": "Execução de caixa de elevador em edifício existente",
+    "unit": "un",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C7",
+    "subgrupo": "Estruturas Especiais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 2500,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C7.0003",
+    "description": "Execução de drenagem interior anti-humidade",
+    "unit": "ml",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C7",
+    "subgrupo": "Drenagens Reabilitação",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "C7.0004",
+    "description": "Remoção de pavimento exterior para intervenção estrutural",
+    "unit": "m2",
+    "grandeCapituloCode": "C",
+    "capituloCode": "C7",
+    "subgrupo": "Demolições Técnicas",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 25,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D1.0001",
+    "description": "Demolição de elemento estrutural em betão",
+    "unit": "m3",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D1",
+    "subgrupo": "Demolições Estruturais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D1.0002",
+    "description": "Abertura de vão em parede estrutural",
+    "unit": "un",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D1",
+    "subgrupo": "Abertura de Vãos",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 2200,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D1.0003",
+    "description": "Corte controlado de laje estrutural",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D1",
+    "subgrupo": "Demolições Técnicas",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D2.0001",
+    "description": "Execução de escoramento provisório metálico",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D2",
+    "subgrupo": "Escoramentos",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D2.0002",
+    "description": "Execução de contenção provisória de terras",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D2",
+    "subgrupo": "Contenções Provisórias",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D3.0001",
+    "description": "Execução de sapatas isoladas em betão armado",
+    "unit": "m3",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D3",
+    "subgrupo": "Fundações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 320,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D3.0002",
+    "description": "Execução de vigas de fundação",
+    "unit": "m3",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D3",
+    "subgrupo": "Fundações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 380,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D3.0003",
+    "description": "Execução de microestacas",
+    "unit": "un",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D3",
+    "subgrupo": "Fundações Especiais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1800,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D4.0001",
+    "description": "Execução de pilares em betão armado",
+    "unit": "m3",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D4",
+    "subgrupo": "Betão Armado",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 420,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D4.0002",
+    "description": "Execução de vigas em betão armado",
+    "unit": "m3",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D4",
+    "subgrupo": "Betão Armado",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D4.0003",
+    "description": "Execução de laje maciça em betão armado",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D4",
+    "subgrupo": "Lajes",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 110,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D4.0004",
+    "description": "Execução de parede estrutural em betão armado",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D4",
+    "subgrupo": "Paredes Estruturais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 350,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D5.0001",
+    "description": "Fornecimento e montagem de estrutura metálica",
+    "unit": "kg",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D5",
+    "subgrupo": "Estruturas Metálicas",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 4,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D5.0002",
+    "description": "Execução de reforço estrutural com perfis metálicos",
+    "unit": "kg",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D5",
+    "subgrupo": "Reforços Metálicos",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D6.0001",
+    "description": "Execução de estrutura em madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D6",
+    "subgrupo": "Estruturas Madeira",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 140,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D6.0002",
+    "description": "Reforço estrutural em madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D6",
+    "subgrupo": "Reforços Madeira",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D7.0001",
+    "description": "Execução de reforço estrutural com fibra de carbono",
+    "unit": "ml",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D7",
+    "subgrupo": "Reforços Especiais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D7.0002",
+    "description": "Execução de encamisamento de pilares",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D7",
+    "subgrupo": "Reforços Betão",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 160,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D7.0003",
+    "description": "Execução de recalçamento de fundações",
+    "unit": "ml",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D7",
+    "subgrupo": "Consolidações",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D8.0001",
+    "description": "Tratamento de armaduras expostas e betão degradado",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D8",
+    "subgrupo": "Patologias Betão",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D8.0002",
+    "description": "Injeção de fissuras estruturais com resina",
+    "unit": "un",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D8",
+    "subgrupo": "Patologias Estruturais",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 450,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "D8.0003",
+    "description": "Aplicação de proteção anticorrosiva estrutural",
+    "unit": "m2",
+    "grandeCapituloCode": "D",
+    "capituloCode": "D8",
+    "subgrupo": "Proteções",
+    "disciplina": "EST",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0001",
+    "description": "Proteção de pavimentos existentes com tela/placa",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 3.5,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0002",
+    "description": "Proteção de portas e caixilharias existentes",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0003",
+    "description": "Proteção de zonas comuns do edifício",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0004",
+    "description": "Isolamento de área de obra com plástico e estrutura leve",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0005",
+    "description": "Montagem de divisória provisória em OSB/gesso",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Instalações Provisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 32,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0006",
+    "description": "Instalação provisória de água interior",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Instalações Provisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 150,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0007",
+    "description": "Instalação provisória elétrica interior",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Instalações Provisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0008",
+    "description": "Limpeza inicial de fração/loja",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Limpeza",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 2.2,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0009",
+    "description": "Sinalização interior de obra",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Sinalização",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0010",
+    "description": "Proteção de elevador e acessos",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0011",
+    "description": "Montagem de andaime interior móvel",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Equipamentos Temporários",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0012",
+    "description": "Transporte manual de materiais no interior do edifício",
+    "unit": "h",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Logística",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "TEMPO",
+    "incluiMO": true,
+    "puCusto": 25,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E1.0013",
+    "description": "Encapsulamento anti-poeiras (obras em funcionamento)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0001",
+    "description": "Demolição de parede não estrutural (alvenaria/gesso)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Demolições",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0002",
+    "description": "Demolição parcial de parede não estrutural",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Demolições",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0003",
+    "description": "Demolição de revestimento cerâmico parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0004",
+    "description": "Remoção de pavimento cerâmico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0005",
+    "description": "Remoção de pavimento flutuante/madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0006",
+    "description": "Remoção de rodapés",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 4.5,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0007",
+    "description": "Demolição de teto falso",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Demolições",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 10,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0008",
+    "description": "Remoção de portas interiores",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 25,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0009",
+    "description": "Remoção de roupeiros embutidos",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0010",
+    "description": "Remoção de cozinha existente",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0011",
+    "description": "Remoção de louças sanitárias",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0012",
+    "description": "Remoção de móveis fixos",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 30,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0013",
+    "description": "Abertura de roços em parede para instalações",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 6.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0014",
+    "description": "Fecho de roços após instalação",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 5.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0015",
+    "description": "Remoção de caixilharia interior não estrutural",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0016",
+    "description": "Remoção de sancas decorativas existentes",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Remoções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0017",
+    "description": "Carga manual e acondicionamento de entulho interior",
+    "unit": "m3",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Entulho",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0018",
+    "description": "Remoção de entulho – camião (inertes)",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Entulho",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 170,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0019",
+    "description": "Remoção de entulho – camião (lixo misto)",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Entulho",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 240,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0020",
+    "description": "Remoção de entulho – camião (madeira)",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Entulho",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 240,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E2.0021",
+    "description": "Carregamento manual de entulho para camião",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E2",
+    "subgrupo": "Entulho",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 60,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E3.0001",
+    "description": "Execução de parede em gesso cartonado standard",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E3",
+    "subgrupo": "Divisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E3.0002",
+    "description": "Execução de parede em gesso cartonado hidrófugo",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E3",
+    "subgrupo": "Divisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 42,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E3.0003",
+    "description": "Execução de parede em gesso cartonado acústico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E3",
+    "subgrupo": "Divisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 48,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E3.0004",
+    "description": "Execução de parede dupla com isolamento interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E3",
+    "subgrupo": "Divisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E3.0005",
+    "description": "Execução de forra de parede em gesso cartonado",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E3",
+    "subgrupo": "Divisórias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0001",
+    "description": "Reboco interior tradicional",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Rebocos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 16,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0002",
+    "description": "Reboco hidrófugo interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Rebocos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 19,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0003",
+    "description": "Estuque projetado interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Estuques",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0004",
+    "description": "Barramento e regularização com massa de acabamento",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Massas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 9.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0005",
+    "description": "Regularização de pavimento com autonivelante",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Betonilhas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0006",
+    "description": "Execução de betonilha tradicional",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Betonilhas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0007",
+    "description": "Betonilha leve com argila expandida",
+    "unit": "m3",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Betonilhas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 24,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E4.0014",
+    "description": "Aplicação de primário de aderência",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E4",
+    "subgrupo": "Preparação",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 3,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E5.0001",
+    "description": "Impermeabilização de pavimento em zona húmida",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E5",
+    "subgrupo": "Sistemas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E5.0002",
+    "description": "Impermeabilização de paredes em zona húmida",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E5",
+    "subgrupo": "Sistemas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 17,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E5.0006",
+    "description": "Aplicação de banda perimetral elástica",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E5",
+    "subgrupo": "Complementos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 2.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E6.0001",
+    "description": "Execução de teto falso em gesso cartonado standard",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E6",
+    "subgrupo": "Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 32,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E6.0002",
+    "description": "Execução de teto falso hidrófugo",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E6",
+    "subgrupo": "Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 36,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E6.0006",
+    "description": "Execução de sanca para iluminação indireta",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E6",
+    "subgrupo": "Sancas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E6.0010",
+    "description": "Aplicação de isolamento térmico em teto",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E6",
+    "subgrupo": "Isolamentos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 10,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0001",
+    "description": "Aplicação de revestimento cerâmico parede formato standard",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0002",
+    "description": "Aplicação de revestimento cerâmico grande formato",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0003",
+    "description": "Aplicação de mosaico cerâmico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 32,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0004",
+    "description": "Aplicação de perfil de remate em revestimento cerâmico",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 4.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0010",
+    "description": "Aplicação de revestimento em pedra natural colada",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0011",
+    "description": "Aplicação de revestimento em pedra natural ventilada interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 58,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0020",
+    "description": "Aplicação de microcimento em parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Microcimento",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0021",
+    "description": "Aplicação de resina técnica em parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Microcimento",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 48,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0030",
+    "description": "Aplicação de painel compacto fenólico em parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Painéis",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 42,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0031",
+    "description": "Aplicação de painel MDF lacado em parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Painéis",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0032",
+    "description": "Aplicação de painel acústico decorativo",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Painéis",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 36,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0040",
+    "description": "Aplicação de lambrim madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Madeira",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 34,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0041",
+    "description": "Aplicação de rodameio decorativo",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Madeira",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0050",
+    "description": "Aplicação de papel de parede vinílico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Papel",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E7.0051",
+    "description": "Aplicação de revestimento mural técnico lavável",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E7",
+    "subgrupo": "Papel",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 26,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0001",
+    "description": "Aplicação de pavimento cerâmico formato standard",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0002",
+    "description": "Aplicação de pavimento cerâmico grande formato",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 36,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0003",
+    "description": "Aplicação de mosaico cerâmico pavimento",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 32,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0004",
+    "description": "Aplicação de perfil de transição em pavimento cerâmico",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 4.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0010",
+    "description": "Aplicação de pavimento em pedra natural colada",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 48,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0011",
+    "description": "Aplicação de pavimento em pedra natural ventilada interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 60,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0020",
+    "description": "Aplicação de pavimento flutuante laminado",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Madeira",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0021",
+    "description": "Aplicação de pavimento flutuante madeira natural",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Madeira",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 26,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0022",
+    "description": "Aplicação de soalho maciço pregado/colado",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Madeira",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0030",
+    "description": "Aplicação de pavimento vinílico em régua",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Vinílico",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 20,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0031",
+    "description": "Aplicação de pavimento vinílico em rolo",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Vinílico",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0032",
+    "description": "Aplicação de pavimento técnico elevado",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Técnico",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0040",
+    "description": "Aplicação de microcimento em pavimento",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Microcimento",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 42,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0041",
+    "description": "Aplicação de resina técnica autonivelante",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Microcimento",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 48,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0050",
+    "description": "Aplicação de rodapé cerâmico",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Rodapés",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0051",
+    "description": "Aplicação de rodapé madeira",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Rodapés",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 8,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0052",
+    "description": "Aplicação de rodapé MDF lacado",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Rodapés",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 10,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E8.0053",
+    "description": "Aplicação de rodapé PVC/técnico",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E8",
+    "subgrupo": "Rodapés",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 7,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0001",
+    "description": "Aplicação de porta interior de abrir",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Portas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0002",
+    "description": "Aplicação de porta interior de correr com cassete embutida",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Portas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 140,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0003",
+    "description": "Aplicação de porta interior de correr com calha aparente",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Portas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 110,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0004",
+    "description": "Aplicação de porta de segurança de entrada de fração",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Portas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0005",
+    "description": "Aplicação de porta técnica interior (EI/acústica)",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Portas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 160,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0010",
+    "description": "Aplicação de roupeiro embutido",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Roupeiros",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 220,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0011",
+    "description": "Aplicação de frente de roupeiro de correr",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Roupeiros",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0012",
+    "description": "Aplicação de armário técnico interior",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Roupeiros",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0030",
+    "description": "Aplicação de painel decorativo em madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Especiais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E9.0031",
+    "description": "Aplicação de divisória interior em madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E9",
+    "subgrupo": "Especiais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0001",
+    "description": "Aplicação de caixilharia interior em alumínio (vão interior)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Alumínio/Aço",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 75,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0002",
+    "description": "Aplicação de porta interior em alumínio e vidro",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Alumínio/Aço",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 160,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0003",
+    "description": "Aplicação de aro/contra-aro metálico para vão interior",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Alumínio/Aço",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0010",
+    "description": "Montagem de vidro temperado/laminado em vão interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0011",
+    "description": "Aplicação de kit de ferragens para porta de vidro",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0012",
+    "description": "Aplicação de calha/sistema de correr para porta de vidro",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0020",
+    "description": "Aplicação de divisória interior envidraçada com perfis",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Divisórias Envidraçadas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0021",
+    "description": "Aplicação de divisória interior em vidro sem aro (fixo)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Divisórias Envidraçadas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0022",
+    "description": "Aplicação de porta em divisória envidraçada",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Divisórias Envidraçadas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0030",
+    "description": "Aplicação de guarda interior em vidro",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Guardas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 90,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0031",
+    "description": "Aplicação de guarda interior metálica",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Guardas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 70,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0040",
+    "description": "Aplicação de resguardo de duche em vidro temperado",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0041",
+    "description": "Aplicação de espelho colado em parede",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E10.0042",
+    "description": "Aplicação de espelho fixado com suportes",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E10",
+    "subgrupo": "Vidro",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0000",
+    "description": "Preparação de superfície para pintura (lixagem e pequenas reparações)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Preparação",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 4.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0001",
+    "description": "Pintura plástica interior em paredes (2 demãos)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Paredes/Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 7.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0002",
+    "description": "Pintura plástica interior em tetos (2 demãos)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Paredes/Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 8,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0003",
+    "description": "Aplicação de primário selante em paredes",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Paredes/Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 3,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0004",
+    "description": "Pintura esmalte aquoso sobre parede preparada",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Paredes/Tetos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 9.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0010",
+    "description": "Envernizamento de madeira interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Madeiras",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0011",
+    "description": "Lacagem de portas/elementos madeira",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Madeiras",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0012",
+    "description": "Pintura esmalte sobre madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Madeiras",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0020",
+    "description": "Pintura esmalte sobre elemento metálico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Metais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 13,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0021",
+    "description": "Tratamento anticorrosivo em elemento metálico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Metais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0030",
+    "description": "Pintura técnica para pavimento interior",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Pavimentos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0031",
+    "description": "Aplicação de verniz de proteção em pavimento madeira",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Pavimentos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 9,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0040",
+    "description": "Aplicação de revestimento decorativo tipo estuque veneziano",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Especiais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0041",
+    "description": "Aplicação de tinta epóxi em parede técnica",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Especiais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E11.0042",
+    "description": "Aplicação de tinta intumescente (proteção passiva)",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E11",
+    "subgrupo": "Especiais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0001",
+    "description": "Execução de remates em silicone/acrílico",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Remates",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 4,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0002",
+    "description": "Execução de junta de dilatação interior",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Remates",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0003",
+    "description": "Aplicação de perfil de remate diverso",
+    "unit": "ml",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Remates",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0010",
+    "description": "Execução de abertura pontual em parede não estrutural",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Pontuais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0011",
+    "description": "Fecho pontual de vão interior",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Pontuais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0012",
+    "description": "Regularização pontual de superfície",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Pontuais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E12.0022",
+    "description": "Execução de nicho técnico em parede",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E12",
+    "subgrupo": "Integração",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E13.0001",
+    "description": "Fornecimento e instalação de caixilharia exterior em alumínio",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E13",
+    "subgrupo": "Caixilharias Exteriores",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 420,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E13.0002",
+    "description": "Fornecimento e instalação de caixilharia PVC",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E13",
+    "subgrupo": "Caixilharias Exteriores",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 380,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E13.0003",
+    "description": "Substituição de caixilharia exterior existente",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E13",
+    "subgrupo": "Reabilitação",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 750,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E13.0004",
+    "description": "Fornecimento e instalação de estores exteriores",
+    "unit": "un",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E13",
+    "subgrupo": "Proteções Solares",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "E13.0005",
+    "description": "Fornecimento e instalação de vidro duplo térmico",
+    "unit": "m2",
+    "grandeCapituloCode": "E",
+    "capituloCode": "E13",
+    "subgrupo": "Vidros",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 160,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F1.0001",
+    "description": "Execução completa de rede elétrica – Habitação Nova",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F1",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F1.0002",
+    "description": "Execução completa de rede elétrica – Habitação Reabilitação",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F1",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 42,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F1.0003",
+    "description": "Execução completa de rede elétrica – Comércio Novo",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F1",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 44,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F1.0004",
+    "description": "Execução completa de rede elétrica – Comércio Reabilitação",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F1",
+    "subgrupo": "Infraestruturas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 52,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0001",
+    "description": "Instalação de aparelhagem elétrica – Habitação Nova",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Aparelhagem",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 7.5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0002",
+    "description": "Instalação de aparelhagem elétrica – Habitação Reabilitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Aparelhagem",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 10,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0003",
+    "description": "Instalação de aparelhagem elétrica – Comércio Novo",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Aparelhagem",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 9,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0004",
+    "description": "Instalação de aparelhagem elétrica – Comércio Reabilitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Aparelhagem",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0010",
+    "description": "Instalação de luminárias",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Luminárias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 25,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0020",
+    "description": "Instalação de quadros elétricos",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Quadros",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 820,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F2.0021",
+    "description": "Instalação de sistema linear LED (calha/fita)",
+    "unit": "ml",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F2",
+    "subgrupo": "Iluminação Linear",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 20,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0001",
+    "description": "Execução completa de infraestrutura ITED – Habitação Nova",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Infraestruturas ITED",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0002",
+    "description": "Execução completa de infraestrutura ITED – Habitação Reabilitação",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Infraestruturas ITED",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 24,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0003",
+    "description": "Execução completa de infraestrutura ITED – Comércio Novo",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Infraestruturas ITED",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0004",
+    "description": "Execução completa de infraestrutura ITED – Comércio Reabilitação",
+    "unit": "m2",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Infraestruturas ITED",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 30,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0010",
+    "description": "Instalação de tomadas ITED (TV/Dados/Telefone)",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Tomadas ITED",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F3.0020",
+    "description": "Instalação de bastidor/armário técnico ITED",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F3",
+    "subgrupo": "Bastidores",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F4.0001",
+    "description": "Execução completa de rede de águas e esgotos – Zonas Húmidas (Cozinha, I.S., Lavandaria) – Habitação Nova",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F4",
+    "subgrupo": "Infraestruturas Hidráulicas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1150,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F4.0002",
+    "description": "Execução completa de rede de águas e esgotos – Zonas Húmidas (Cozinha, I.S., Lavandaria) – Habitação Reabilitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F4",
+    "subgrupo": "Infraestruturas Hidráulicas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1450,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F4.0003",
+    "description": "Execução completa de rede de águas e esgotos – Zona Húmida – Comércio Novo",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F4",
+    "subgrupo": "Infraestruturas Hidráulicas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 2200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F4.0004",
+    "description": "Execução completa de rede de águas e esgotos – Zona Húmida – Comércio Reabilitação",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F4",
+    "subgrupo": "Infraestruturas Hidráulicas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 2800,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F5.0001",
+    "description": "Fornecimento e instalação de louça sanitária completa – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F5",
+    "subgrupo": "Louças Sanitárias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1450,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F5.0002",
+    "description": "Fornecimento e instalação de louça sanitária completa – Comércio",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F5",
+    "subgrupo": "Louças Sanitárias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F5.0010",
+    "description": "Fornecimento e instalação de mobiliário de cozinha com lava-loiça",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F5",
+    "subgrupo": "Cozinhas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F5.0020",
+    "description": "Fornecimento e instalação de termoacumulador / esquentador",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F5",
+    "subgrupo": "Equipamentos Hidráulicos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 950,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F5.0030",
+    "description": "Fornecimento e instalação de bomba elevatória de esgotos",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F5",
+    "subgrupo": "Equipamentos Hidráulicos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 750,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F6.0001",
+    "description": "Execução completa de infraestrutura AVAC – Sistema Split/Multi-Split – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F6",
+    "subgrupo": "Infraestruturas AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F6.0002",
+    "description": "Execução completa de infraestrutura AVAC – Sistema AVAC – Comércio",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F6",
+    "subgrupo": "Infraestruturas AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 2200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F6.0010",
+    "description": "Execução de infraestrutura de ventilação mecânica (WC/Cozinha) – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F6",
+    "subgrupo": "Ventilação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 280,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F6.0011",
+    "description": "Execução de infraestrutura de ventilação mecânica – Comércio",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F6",
+    "subgrupo": "Ventilação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F7.0001",
+    "description": "Fornecimento e instalação de unidade interior AVAC – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F7",
+    "subgrupo": "Equipamentos AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 750,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F7.0002",
+    "description": "Fornecimento e instalação de unidade exterior AVAC – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F7",
+    "subgrupo": "Equipamentos AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1150,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F7.0003",
+    "description": "Fornecimento e instalação de sistema AVAC completo – Comércio",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F7",
+    "subgrupo": "Equipamentos AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 8500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F7.0010",
+    "description": "Fornecimento e instalação de sistema VMC / ventilação mecânica",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F7",
+    "subgrupo": "Ventilação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1400,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F7.0020",
+    "description": "Fornecimento e instalação de recuperador de calor",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F7",
+    "subgrupo": "Ventilação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 2800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F8.0001",
+    "description": "Execução completa de rede de gás – Habitação Nova",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F8",
+    "subgrupo": "Infraestrutura Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1350,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F8.0002",
+    "description": "Execução completa de rede de gás – Habitação Reabilitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F8",
+    "subgrupo": "Infraestrutura Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1650,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F8.0003",
+    "description": "Execução completa de rede de gás – Comércio Novo",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F8",
+    "subgrupo": "Infraestrutura Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 3500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": false,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F8.0004",
+    "description": "Execução completa de rede de gás – Comércio Reabilitação",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F8",
+    "subgrupo": "Infraestrutura Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 4500,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F8.0010",
+    "description": "Fornecimento e instalação de aparelho a gás",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F8",
+    "subgrupo": "Equipamentos Gás",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1250,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0001",
+    "description": "Execução completa de infraestrutura SCIE – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Infraestruturas SCIE",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0002",
+    "description": "Execução completa de infraestrutura SCIE – Comércio",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Infraestruturas SCIE",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 2800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0010",
+    "description": "Fornecimento e instalação de extintor",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Equipamentos SCIE",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0011",
+    "description": "Fornecimento e instalação de sinalética de segurança",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Equipamentos SCIE",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0020",
+    "description": "Fornecimento e instalação de sistema de deteção de incêndio",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Sistemas Automáticos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0030",
+    "description": "Fornecimento e instalação de sistema de intrusão / alarme",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Sistemas Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 950,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0040",
+    "description": "Selagens corta-fogo em atravessamentos técnicos",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Proteção Passiva",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 40,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F9.0050",
+    "description": "Fornecimento e instalação de sistema CCTV",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F9",
+    "subgrupo": "Sistemas Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 2400,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F10.0001",
+    "description": "Execução completa de infraestrutura de domótica – Habitação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F10",
+    "subgrupo": "Infraestrutura Domótica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": false
+    },
+    "ativo": true
+  },
+  {
+    "code": "F10.0002",
+    "description": "Execução completa de infraestrutura de domótica – Comércio",
+    "unit": "vg",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F10",
+    "subgrupo": "Infraestrutura Domótica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "LOTE",
+    "incluiMO": true,
+    "puCusto": 3500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F10.0010",
+    "description": "Fornecimento e instalação de sistema domótico central",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F10",
+    "subgrupo": "Sistemas Domóticos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 2800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F10.0020",
+    "description": "Fornecimento e instalação de sistema de controlo de acessos",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F10",
+    "subgrupo": "Controlo Acessos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1950,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "F10.0030",
+    "description": "Fornecimento e instalação de sistema de automatização de estores / iluminação",
+    "unit": "un",
+    "grandeCapituloCode": "F",
+    "capituloCode": "F10",
+    "subgrupo": "Automatismos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G1.0001",
+    "description": "Execução de sistema completo de impermeabilização em cobertura plana",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G1",
+    "subgrupo": "Impermeabilização",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 60,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G1.0002",
+    "description": "Aplicação de isolamento térmico em cobertura plana",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G1",
+    "subgrupo": "Isolamento",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 28,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G1.0003",
+    "description": "Execução de proteção mecânica em cobertura plana (godo/lajetas)",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G1",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 32,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G1.0004",
+    "description": "Execução de pendentes em cobertura plana",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G1",
+    "subgrupo": "Regularizações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G2.0001",
+    "description": "Execução completa de cobertura inclinada com telha cerâmica",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G2",
+    "subgrupo": "Coberturas Inclinadas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G2.0002",
+    "description": "Execução de subcobertura e impermeabilização em telhado",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G2",
+    "subgrupo": "Impermeabilização",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 24,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G2.0003",
+    "description": "Execução de estrutura de suporte de telhado (madeira/metálica)",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G2",
+    "subgrupo": "Estrutura",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 70,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G2.0004",
+    "description": "Substituição parcial de telhado existente",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G2",
+    "subgrupo": "Reabilitação",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 75,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G3.0001",
+    "description": "Execução de sistema ETICS completo",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G3",
+    "subgrupo": "ETICS",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 70,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G3.0002",
+    "description": "Aplicação de reboco exterior armado",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G3",
+    "subgrupo": "Rebocos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G3.0003",
+    "description": "Aplicação de pintura exterior em fachada",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G3",
+    "subgrupo": "Pinturas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G3.0004",
+    "description": "Aplicação de revestimento cerâmico exterior",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G3",
+    "subgrupo": "Revestimentos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G4.0001",
+    "description": "Reparação de fissuras em fachada",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G4",
+    "subgrupo": "Reparações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 22,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G4.0002",
+    "description": "Tratamento de armaduras expostas e betão degradado",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G4",
+    "subgrupo": "Consolidações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G4.0003",
+    "description": "Consolidação estrutural pontual em fachada",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G4",
+    "subgrupo": "Consolidações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 120,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G4.0004",
+    "description": "Limpeza técnica de fachada (jato de água/areia)",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G4",
+    "subgrupo": "Limpezas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": false,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G5.0001",
+    "description": "Execução de rufos e remates metálicos",
+    "unit": "ml",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G5",
+    "subgrupo": "Remates",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G5.0002",
+    "description": "Execução de caleiras e tubos de queda",
+    "unit": "ml",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G5",
+    "subgrupo": "Drenagens",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G5.0003",
+    "description": "Substituição de peitoris e soleiras",
+    "unit": "un",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G5",
+    "subgrupo": "Elementos Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G5.0004",
+    "description": "Execução de guardas e elementos metálicos exteriores",
+    "unit": "ml",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G5",
+    "subgrupo": "Serralharias",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 130,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G6.0001",
+    "description": "Montagem e desmontagem de andaimes",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G6",
+    "subgrupo": "Acessos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 25,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G6.0002",
+    "description": "Proteções exteriores provisórias",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G6",
+    "subgrupo": "Proteções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 12,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G6.0003",
+    "description": "Execução de impermeabilização de varandas",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G6",
+    "subgrupo": "Varandas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 60,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "G6.0004",
+    "description": "Execução de pavimento exterior técnico",
+    "unit": "m2",
+    "grandeCapituloCode": "G",
+    "capituloCode": "G6",
+    "subgrupo": "Pavimentos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H1.0001",
+    "description": "Execução de regularização e modelação de terreno",
+    "unit": "m3",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H1",
+    "subgrupo": "Movimentos de Terras",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H1.0002",
+    "description": "Execução de camada de forma e compactação",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H1",
+    "subgrupo": "Regularizações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 14,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H1.0003",
+    "description": "Fornecimento e aplicação de tout-venant",
+    "unit": "m3",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H1",
+    "subgrupo": "Bases Granulares",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 45,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H2.0001",
+    "description": "Execução de pavimento exterior em betonilha / betão afagado",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H2",
+    "subgrupo": "Pavimentos Rígidos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 75,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H2.0002",
+    "description": "Execução de pavimento exterior em cubos de granito",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H2",
+    "subgrupo": "Pavimentos Pedra",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H2.0003",
+    "description": "Execução de pavimento exterior cerâmico antiderrapante",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H2",
+    "subgrupo": "Cerâmicos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 60,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H2.0004",
+    "description": "Execução de pavimento drenante",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H2",
+    "subgrupo": "Pavimentos Permeáveis",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 55,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H3.0001",
+    "description": "Execução de muro em betão armado",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H3",
+    "subgrupo": "Muros Estruturais",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 140,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H3.0002",
+    "description": "Execução de muro em alvenaria rebocada",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H3",
+    "subgrupo": "Muros Alvenaria",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 85,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H3.0003",
+    "description": "Execução de elemento de contenção em gabiões",
+    "unit": "m3",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H3",
+    "subgrupo": "Contenções",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "VOLUME",
+    "incluiMO": true,
+    "puCusto": 110,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H4.0001",
+    "description": "Execução de rede de drenagem pluvial exterior",
+    "unit": "ml",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H4",
+    "subgrupo": "Drenagens",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 38,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H4.0002",
+    "description": "Execução de rede de rega automática",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H4",
+    "subgrupo": "Rega",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H4.0003",
+    "description": "Execução de caixas de visita exteriores",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H4",
+    "subgrupo": "Caixas e Acessórios",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H5.0001",
+    "description": "Fornecimento e plantação de relva",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H5",
+    "subgrupo": "Relvados",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 9,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H5.0002",
+    "description": "Fornecimento e plantação de árvores",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H5",
+    "subgrupo": "Arborização",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H5.0003",
+    "description": "Fornecimento e plantação de arbustos",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H5",
+    "subgrupo": "Arbustos",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 35,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H6.0001",
+    "description": "Fornecimento e instalação de mobiliário urbano",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H6",
+    "subgrupo": "Mobiliário",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H6.0002",
+    "description": "Fornecimento e instalação de iluminação exterior",
+    "unit": "un",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H6",
+    "subgrupo": "Iluminação Exterior",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": true,
+    "puCusto": 220,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H6.0003",
+    "description": "Execução de vedação exterior",
+    "unit": "ml",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H6",
+    "subgrupo": "Vedações",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": true,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "H7.0002",
+    "description": "Limpeza final de arranjos exteriores",
+    "unit": "m2",
+    "grandeCapituloCode": "H",
+    "capituloCode": "H7",
+    "subgrupo": "Limpezas",
+    "disciplina": "ARQ",
+    "categoriaCusto": "SUBEMPREITADA",
+    "tipoMedicao": "AREA",
+    "incluiMO": true,
+    "puCusto": 6,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I1.0001",
+    "description": "Fornecimento de mobiliário de cozinha modular",
+    "unit": "ml",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I1",
+    "subgrupo": "Cozinhas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": false,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I1.0002",
+    "description": "Fornecimento de armários e roupeiros embutidos",
+    "unit": "m2",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I1",
+    "subgrupo": "Carpintarias Integradas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "AREA",
+    "incluiMO": false,
+    "puCusto": 280,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I1.0003",
+    "description": "Fornecimento de bancada em pedra natural ou compacta",
+    "unit": "m2",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I1",
+    "subgrupo": "Bancadas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "AREA",
+    "incluiMO": false,
+    "puCusto": 220,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I2.0001",
+    "description": "Fornecimento de conjunto de louça sanitária completa",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I2",
+    "subgrupo": "Louças Sanitárias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 750,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I2.0002",
+    "description": "Fornecimento de torneiras e misturadoras",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I2",
+    "subgrupo": "Torneiras",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I2.0003",
+    "description": "Fornecimento de base de duche ou banheira",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I2",
+    "subgrupo": "Equipamentos Sanitários",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 400,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I3.0001",
+    "description": "Fornecimento de luminária decorativa suspensa",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I3",
+    "subgrupo": "Iluminação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 180,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I3.0002",
+    "description": "Fornecimento de projetor decorativo",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I3",
+    "subgrupo": "Iluminação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I3.0003",
+    "description": "Fornecimento de sistema de iluminação linear LED",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I3",
+    "subgrupo": "Iluminação Linear",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 65,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I4.0001",
+    "description": "Fornecimento de eletrodoméstico encastrável",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I4",
+    "subgrupo": "Eletrodomésticos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I4.0002",
+    "description": "Fornecimento de exaustor ou sistema de extração",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I4",
+    "subgrupo": "Eletrodomésticos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 350,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I4.0003",
+    "description": "Fornecimento de frigorífico ou combinado",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I4",
+    "subgrupo": "Eletrodomésticos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I5.0001",
+    "description": "Fornecimento de unidade interior AVAC",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I5",
+    "subgrupo": "Equipamentos AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I5.0002",
+    "description": "Fornecimento de unidade exterior AVAC",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I5",
+    "subgrupo": "Equipamentos AVAC",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I5.0003",
+    "description": "Fornecimento de recuperador de calor",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I5",
+    "subgrupo": "Ventilação",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I6.0001",
+    "description": "Fornecimento de sistema CCTV",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I6",
+    "subgrupo": "Sistemas Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 750,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I6.0002",
+    "description": "Fornecimento de sistema de controlo de acessos",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I6",
+    "subgrupo": "Controlo Acessos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 950,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": false,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I6.0003",
+    "description": "Fornecimento de carregador de veículo elétrico",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I6",
+    "subgrupo": "Mobilidade Elétrica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I7.0001",
+    "description": "Fornecimento de mobiliário fixo personalizado",
+    "unit": "un",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I7",
+    "subgrupo": "Mobiliário Fixo",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "UNIDADE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "I7.0002",
+    "description": "Fornecimento de painéis decorativos e revestimentos especiais",
+    "unit": "m2",
+    "grandeCapituloCode": "I",
+    "capituloCode": "I7",
+    "subgrupo": "Elementos Decorativos",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "EQUIPAMENTO",
+    "tipoMedicao": "AREA",
+    "incluiMO": false,
+    "puCusto": 95,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J1.0001",
+    "description": "Montagem inicial de estaleiro",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J1",
+    "subgrupo": "Estaleiro",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1800,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J1.0002",
+    "description": "Infraestruturas provisórias de água e eletricidade",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J1",
+    "subgrupo": "Infraestruturas Provisórias",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 650,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J1.0003",
+    "description": "Aluguer de contentor de apoio técnico",
+    "unit": "mês",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J1",
+    "subgrupo": "Estaleiro",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "TEMPO",
+    "incluiMO": false,
+    "puCusto": 250,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J1.0004",
+    "description": "Vedação e sinalização provisória de obra",
+    "unit": "ml",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J1",
+    "subgrupo": "Proteções",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "COMPRIMENTO",
+    "incluiMO": false,
+    "puCusto": 18,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J2.0001",
+    "description": "Direção técnica de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J2",
+    "subgrupo": "Direção Técnica",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 3000,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J2.0002",
+    "description": "Gestão e coordenação de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J2",
+    "subgrupo": "Gestão",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 2500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J2.0003",
+    "description": "Controlo de planeamento e reporting",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J2",
+    "subgrupo": "Gestão",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J3.0001",
+    "description": "Plano de Segurança e Saúde – Implementação",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J3",
+    "subgrupo": "Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 850,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J3.0002",
+    "description": "Coordenação de Segurança em fase de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J3",
+    "subgrupo": "Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1500,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J3.0003",
+    "description": "Sinalização e equipamentos de proteção coletiva",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J3",
+    "subgrupo": "Segurança",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J4.0001",
+    "description": "Limpeza técnica final de obra",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J4",
+    "subgrupo": "Limpezas",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 900,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J4.0002",
+    "description": "Remoção final de entulhos e desmobilização",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J4",
+    "subgrupo": "Entrega Final",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 750,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J5.0001",
+    "description": "Encargos administrativos e financeiros",
+    "unit": "%",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J5",
+    "subgrupo": "Encargos Gerais",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "PERCENTAGEM",
+    "incluiMO": false,
+    "puCusto": 5,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  },
+  {
+    "code": "J5.0002",
+    "description": "Seguro de obra e responsabilidade civil",
+    "unit": "vg",
+    "grandeCapituloCode": "J",
+    "capituloCode": "J5",
+    "subgrupo": "Seguros",
+    "disciplina": "OUTRA",
+    "categoriaCusto": "OUTROS",
+    "tipoMedicao": "LOTE",
+    "incluiMO": false,
+    "puCusto": 1200,
+    "flags": {
+      "nova": true,
+      "reabilitacao": true,
+      "habitacao": true,
+      "comercio": true
+    },
+    "ativo": true
+  }
+]
