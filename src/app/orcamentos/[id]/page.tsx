@@ -163,9 +163,10 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
 export default async function OrcamentoDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const budget = await loadBudget(params.id);
+  const { id } = await params;
+  const budget = await loadBudget(id);
 
   if (!budget) {
     notFound();
