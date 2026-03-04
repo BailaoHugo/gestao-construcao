@@ -1,7 +1,9 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { TopBar } from "@/components/layout/TopBar";
-import type { BudgetMeta } from "@/orcamentos/domain";
+import type { BudgetMeta, SavedBudget } from "@/orcamentos/domain";
 import { pool } from "@/lib/db";
+import { promises as fs } from "fs";
+import path from "node:path";
 import Link from "next/link";
 
 interface ListedBudget {
@@ -13,7 +15,7 @@ interface ListedBudget {
   total: number;
 }
 
-async function loadBudgets(): Promise<ListedBudget[]> {
+async function loadBudgetsFromDb(): Promise<ListedBudget[]> {
   const client = await pool.connect();
   try {
     const result = await client.query<{
@@ -49,6 +51,77 @@ async function loadBudgets(): Promise<ListedBudget[]> {
     }));
   } finally {
     client.release();
+  }
+}
+
+async function walkSavedBudgetsDir(dir: string): Promise<string[]> {
+  const files: string[] = [];
+
+  let names: string[] = [];
+  try {
+    names = await fs.readdir(dir, { withFileTypes: false } as any);
+  } catch {
+    return files;
+  }
+
+  for (const name of names) {
+    const fullPath = path.join(dir, name);
+    if (name.endsWith(".json")) {
+      files.push(fullPath);
+      continue;
+    }
+    try {
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        const child = await walkSavedBudgetsDir(fullPath);
+        files.push(...child);
+      }
+    } catch {
+      // Ignorar erros ao descer subpastas.
+    }
+  }
+
+  return files;
+}
+
+async function loadBudgetsFromFiles(): Promise<ListedBudget[]> {
+  const baseDir = path.join(process.cwd(), "data/orcamentos/saved");
+  const files = await walkSavedBudgetsDir(baseDir);
+  const budgets: ListedBudget[] = [];
+
+  for (const filePath of files) {
+    try {
+      const raw = await fs.readFile(filePath, "utf8");
+      const parsed = JSON.parse(raw) as SavedBudget;
+      const total = parsed.items.reduce(
+        (sum, it) => sum + it.quantity * it.unitPrice,
+        0,
+      );
+      budgets.push({
+        id: parsed.id,
+        createdAt: parsed.createdAt,
+        updatedAt: parsed.updatedAt,
+        meta: parsed.meta,
+        codigoInternoObra: parsed.meta.codigoInternoObra,
+        total,
+      });
+    } catch {
+      // Ignorar ficheiros inválidos/corrompidos.
+    }
+  }
+
+  budgets.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  return budgets;
+}
+
+async function loadBudgets(): Promise<ListedBudget[]> {
+  // Em ambientes com acesso ao Supabase (Vercel), usamos a BD.
+  // Na VM, se não houver saída para a internet, fazemos fallback para os ficheiros JSON locais.
+  try {
+    return await loadBudgetsFromDb();
+  } catch {
+    return await loadBudgetsFromFiles();
   }
 }
 

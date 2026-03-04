@@ -6,11 +6,13 @@ import type {
   SavedBudget,
 } from "@/orcamentos/domain";
 import { pool } from "@/lib/db";
+import { promises as fs } from "fs";
+import path from "node:path";
 import type { QueryResult } from "pg";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-async function loadBudget(id: string): Promise<SavedBudget | null> {
+async function loadBudgetFromDb(id: string): Promise<SavedBudget | null> {
   const client = await pool.connect();
   try {
     const budgetResult = await client.query<{
@@ -96,6 +98,63 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
     return budget;
   } finally {
     client.release();
+  }
+}
+
+async function walkSavedBudgetsDir(dir: string): Promise<string[]> {
+  const entries: string[] = [];
+
+  let names: string[] = [];
+  try {
+    names = await fs.readdir(dir, { withFileTypes: false } as any);
+  } catch {
+    return entries;
+  }
+
+  for (const name of names) {
+    const fullPath = path.join(dir, name);
+    if (name.endsWith(".json")) {
+      entries.push(fullPath);
+      continue;
+    }
+    try {
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        const child = await walkSavedBudgetsDir(fullPath);
+        entries.push(...child);
+      }
+    } catch {
+      // Ignorar entradas que não conseguimos ler.
+    }
+  }
+
+  return entries;
+}
+
+async function loadBudgetFromFiles(id: string): Promise<SavedBudget | null> {
+  const baseDir = path.join(process.cwd(), "data/orcamentos/saved");
+  const files = await walkSavedBudgetsDir(baseDir);
+
+  for (const filePath of files) {
+    try {
+      const raw = await fs.readFile(filePath, "utf8");
+      const parsed = JSON.parse(raw) as SavedBudget;
+      if (parsed.id === id) {
+        return parsed;
+      }
+    } catch {
+      // Ignorar ficheiros inválidos.
+    }
+  }
+
+  return null;
+}
+
+async function loadBudget(id: string): Promise<SavedBudget | null> {
+  try {
+    return await loadBudgetFromDb(id);
+  } catch {
+    return await loadBudgetFromFiles(id);
   }
 }
 
