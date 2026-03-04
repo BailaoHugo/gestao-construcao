@@ -540,7 +540,7 @@ export function OrcamentoBuilder() {
                     let lastGC = "";
                     let lastCap = "";
 
-                    const rows: JSX.Element[] = [];
+                    const rows: React.ReactElement[] = [];
 
                     for (const it of sorted) {
                       const needsGC = it.grandeCapituloCode !== lastGC;
