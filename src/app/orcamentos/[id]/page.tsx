@@ -12,6 +12,8 @@ import type { QueryResult } from "pg";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 async function loadBudgetFromDb(id: string): Promise<SavedBudget | null> {
   const client = await pool.connect();
   try {

@@ -6,6 +6,9 @@ import { promises as fs } from "fs";
 import path from "node:path";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface ListedBudget {
   id: string;
   createdAt: string;
@@ -120,7 +123,9 @@ async function loadBudgets(): Promise<ListedBudget[]> {
   // Na VM, se não houver saída para a internet, fazemos fallback para os ficheiros JSON locais.
   try {
     return await loadBudgetsFromDb();
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[orcamentos/guardados] loadBudgetsFromDb failed, using files:", msg);
     return await loadBudgetsFromFiles();
   }
 }
