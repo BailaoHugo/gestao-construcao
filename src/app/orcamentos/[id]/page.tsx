@@ -6,6 +6,7 @@ import type {
   SavedBudget,
 } from "@/orcamentos/domain";
 import { pool } from "@/lib/db";
+import type { QueryResult } from "pg";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -45,7 +46,7 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
       row_id: string | null;
     };
 
-    const itemsResult = await client.query<ItemRow>(
+    const itemsResult: QueryResult<ItemRow> = await client.query(
       `
         select
           id,
@@ -65,8 +66,7 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
       [id],
     );
 
-    const items: DraftBudgetItem[] = itemsResult.rows.map(
-      (row: ItemRow): DraftBudgetItem => ({
+    const items: DraftBudgetItem[] = itemsResult.rows.map((row) => ({
       rowId: row.row_id ?? row.id,
       code: row.code,
       description: row.description,
@@ -83,8 +83,7 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
         row.k_aplicado !== null ? Number(row.k_aplicado) : undefined,
       grandeCapituloCode: "",
       capituloCode: "",
-    }),
-    );
+    }));
 
     const budget: SavedBudget = {
       id: budgetRow.id,
