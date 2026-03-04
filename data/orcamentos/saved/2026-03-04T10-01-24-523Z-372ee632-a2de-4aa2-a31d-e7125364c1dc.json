@@ -1,0 +1,75 @@
+{
+  "id": "372ee632-a2de-4aa2-a31d-e7125364c1dc",
+  "createdAt": "2026-03-04T10:01:24.523Z",
+  "updatedAt": "2026-03-04T10:01:24.523Z",
+  "items": [
+    {
+      "rowId": "mmbtlohs-l65xkn",
+      "code": "A2.0003",
+      "description": "Pedido de ramal de água",
+      "unit": "vg",
+      "quantity": 1,
+      "unitPrice": 1121,
+      "kAplicado": 1.18,
+      "custoUnitario": 950,
+      "precoVendaUnitario": 1121,
+      "grandeCapituloCode": "A",
+      "capituloCode": "A2"
+    },
+    {
+      "rowId": "mmbtlpmv-efqhlq",
+      "code": "A2.0002",
+      "description": "Pedido de ramal definitivo de eletricidade",
+      "unit": "vg",
+      "quantity": 1,
+      "unitPrice": 2124,
+      "kAplicado": 1.18,
+      "custoUnitario": 1800,
+      "precoVendaUnitario": 2124,
+      "grandeCapituloCode": "A",
+      "capituloCode": "A2"
+    },
+    {
+      "rowId": "mmbtlz8o-anpjzi",
+      "code": "C7.0001",
+      "description": "Rebaixamento pontual de piso interior",
+      "unit": "m2",
+      "quantity": 1,
+      "unitPrice": 68.75,
+      "kAplicado": 1.25,
+      "custoUnitario": 55,
+      "precoVendaUnitario": 68.75,
+      "grandeCapituloCode": "C",
+      "capituloCode": "C7"
+    },
+    {
+      "rowId": "mmbtm3ug-e22ysf",
+      "code": "C6.0001",
+      "description": "Escavação manual em espaço confinado",
+      "unit": "m3",
+      "quantity": 1,
+      "unitPrice": 81.25,
+      "kAplicado": 1.25,
+      "custoUnitario": 65,
+      "precoVendaUnitario": 81.25,
+      "grandeCapituloCode": "C",
+      "capituloCode": "C6"
+    }
+  ],
+  "meta": {
+    "tituloProposta": "Proposta de orçamento",
+    "clienteNome": "",
+    "clienteEntidade": "",
+    "clienteContacto": "",
+    "obraNome": "",
+    "obraEndereco": "",
+    "obraReferencia": "",
+    "dataProposta": "2026-03-04",
+    "validadeDias": 30,
+    "responsavelNome": "",
+    "responsavelFuncao": "",
+    "responsavelEmail": "",
+    "responsavelTelefone": "",
+    "notasResumo": ""
+  }
+}

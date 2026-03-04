@@ -30,3 +30,21 @@ body {
   background: radial-gradient(circle at top left, #f9fafb 0, #e5e7eb 45%, #e5e7eb 100%);
 }
 
+@media print {
+  body {
+    background-color: #ffffff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background-color: #ffffff !important;
+    ring-width: 0 !important;
+  }
+}
+
+

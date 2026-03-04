@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
+import { withTransaction } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,20 +18,56 @@ export async function POST(req: NextRequest) {
     const id = randomUUID();
     const now = new Date().toISOString();
 
-    const payload = {
-      id,
-      createdAt: now,
-      updatedAt: now,
-      items,
-      meta,
-    };
+    const codigoInterno: string =
+      typeof meta?.codigoInternoObra === "string"
+        ? meta.codigoInternoObra
+        : "";
+    const codigoInternoObra = codigoInterno || null;
 
-    const dir = path.join(process.cwd(), "data/orcamentos/saved");
-    await mkdir(dir, { recursive: true });
-    const safeTimestamp = now.replace(/[:.]/g, "-");
-    const filePath = path.join(dir, `${safeTimestamp}-${id}.json`);
+    await withTransaction(async (client) => {
+      await client.query(
+        `
+          insert into budgets (id, created_at, updated_at, codigo_interno_obra, meta)
+          values ($1, $2, $3, $4, $5)
+        `,
+        [id, now, now, codigoInternoObra, meta],
+      );
 
-    await writeFile(filePath, JSON.stringify(payload, null, 2), "utf8");
+      for (const item of items) {
+        const itemId = randomUUID();
+        await client.query(
+          `
+            insert into budget_items (
+              id,
+              budget_id,
+              code,
+              description,
+              unit,
+              quantity,
+              unit_price,
+              custo_unitario,
+              preco_venda_unitario,
+              k_aplicado,
+              row_id
+            )
+            values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          `,
+          [
+            itemId,
+            id,
+            item.code,
+            item.description,
+            item.unit,
+            item.quantity,
+            item.unitPrice,
+            item.custoUnitario ?? null,
+            item.precoVendaUnitario ?? null,
+            item.kAplicado ?? null,
+            item.rowId,
+          ],
+        );
+      }
+    });
 
     return NextResponse.json({ id });
   } catch (err) {

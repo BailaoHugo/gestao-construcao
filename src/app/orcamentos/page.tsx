@@ -24,6 +24,7 @@ export default function OrcamentosPage() {
             description="Cria folha de rosto, lista de artigos, quantidades, preços e margens tudo num só local."
             actionLabel="Abrir"
             href="/orcamentos/novo"
+            icon={<span className="text-lg font-semibold">+</span>}
           />
 
           <ModuleCard
@@ -31,21 +32,24 @@ export default function OrcamentosPage() {
             description="Importa Excel/CSV existente e normaliza para o modelo interno."
             actionLabel="Importar"
             href="/orcamentos"
+            icon={<span className="text-xs font-semibold tracking-tight">XL</span>}
           />
 
           <ModuleCard
             title="Orçamentos guardados"
             description="Consultar orçamentos já gravados e continuar a edição."
             actionLabel="Ver lista"
-            href="/orcamentos"
+            href="/orcamentos/guardados"
+            icon={<span className="text-xs font-semibold tracking-tight">⏱</span>}
           />
 
-        <ModuleCard
-          title="Base de dados"
-          description="Consultar o catálogo normalizado de artigos de construção em formato de tabela."
-          actionLabel="Ver base de dados"
-          href="/orcamentos/base-de-dados"
-        />
+          <ModuleCard
+            title="Base de dados"
+            description="Consultar o catálogo normalizado de artigos de construção em formato de tabela."
+            actionLabel="Ver base de dados"
+            href="/orcamentos/base-de-dados"
+            icon={<span className="text-xs font-semibold tracking-tight">BD</span>}
+          />
         </section>
       </main>
     </MainLayout>

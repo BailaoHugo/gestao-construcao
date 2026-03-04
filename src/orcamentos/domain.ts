@@ -50,6 +50,7 @@ export interface BudgetMeta {
   clienteContacto: string;
   obraNome: string;
   obraEndereco: string;
+  obraNumero: string;
   obraReferencia: string;
   dataProposta: string;
   validadeDias: number;
@@ -58,6 +59,7 @@ export interface BudgetMeta {
   responsavelEmail: string;
   responsavelTelefone: string;
   notasResumo: string;
+  codigoInternoObra?: string;
 }
 
 export type BudgetNodeType =
@@ -102,6 +104,8 @@ export interface DraftBudgetItem {
   unit: string;
   quantity: number;
   unitPrice: number;
+   /** fator K efetivo aplicado a este artigo */
+  kAplicado?: number;
   custoUnitario?: number;
   precoVendaUnitario?: number;
   margemPercent?: number;

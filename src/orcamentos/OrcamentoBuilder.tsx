@@ -48,6 +48,7 @@ export function OrcamentoBuilder() {
     code: true,
     description: true,
     qty: true,
+    kAplicado: true,
     unit: true,
     unitPrice: true,
     total: true,
@@ -132,8 +133,10 @@ export function OrcamentoBuilder() {
       }
     }
 
+    const capitulo = capitulos.find((c) => c.code === artigo.capituloCode);
+    const kDefault = capitulo?.kFactor ?? 1;
     const custoUnitario = artigo.puCusto ?? 0;
-    const precoVendaUnitario = custoUnitario;
+    const precoVendaUnitario = custoUnitario * kDefault;
     const unitPrice = precoVendaUnitario;
     setItems((prev) => [
       ...prev,
@@ -144,6 +147,7 @@ export function OrcamentoBuilder() {
         unit: artigo.unit,
         quantity: qty,
         unitPrice,
+        kAplicado: kDefault,
         custoUnitario,
         precoVendaUnitario,
         grandeCapituloCode: artigo.grandeCapituloCode,
@@ -175,6 +179,80 @@ export function OrcamentoBuilder() {
       const qty = Number(qPart.split("=")[1] ?? "1") || 1;
 
       addArticleByCode(codePart, qty);
+    } else if (lower.startsWith("atualizar")) {
+      const parts = text.split(/\s+/);
+      const codePart = parts.find((p) => /[A-Z]\d+\.\d+/.test(p)) ?? "";
+      if (!codePart) {
+        setStatus("Não consegui identificar o código do artigo a atualizar.");
+        return;
+      }
+
+      const qToken = parts.find((p) => /^q=/i.test(p));
+      const kToken = parts.find((p) => /^k=/i.test(p));
+
+      let newQty: number | undefined;
+      let newK: number | undefined;
+
+      if (qToken) {
+        const raw = qToken.split("=")[1] ?? "";
+        const parsed = Number(raw.replace(",", "."));
+        if (!Number.isNaN(parsed) && parsed >= 0) {
+          newQty = parsed;
+        }
+      }
+
+      if (kToken) {
+        const raw = kToken.split("=")[1] ?? "";
+        const parsed = Number(raw.replace(",", "."));
+        if (!Number.isNaN(parsed) && parsed >= 0) {
+          newK = parsed;
+        }
+      }
+
+      if (newQty === undefined && newK === undefined) {
+        setStatus(
+          'Para atualizar use por exemplo: "atualizar A1.0001 q=5 k=1.15".',
+        );
+        return;
+      }
+
+      let found = false;
+      setItems((prev) =>
+        prev.map((row) => {
+          if (row.code !== codePart) return row;
+          found = true;
+          let updated = { ...row };
+          if (newQty !== undefined) {
+            updated.quantity = newQty;
+          }
+          if (newK !== undefined) {
+            const custo = updated.custoUnitario ?? 0;
+            const precoVendaUnitario =
+              custo > 0 ? custo * newK : updated.unitPrice;
+            updated = {
+              ...updated,
+              kAplicado: newK,
+              precoVendaUnitario,
+              unitPrice: precoVendaUnitario,
+            };
+          }
+          return updated;
+        }),
+      );
+
+      if (!found) {
+        setStatus(`Não encontrei nenhuma linha com o código ${codePart}.`);
+        return;
+      }
+
+      const partesStatus: string[] = [];
+      if (newQty !== undefined) {
+        partesStatus.push(`q=${newQty}`);
+      }
+      if (newK !== undefined) {
+        partesStatus.push(`K=${newK}`);
+      }
+      setStatus(`Atualizado ${codePart}: ${partesStatus.join(", ")}.`);
     } else if (lower.startsWith("limpar")) {
       setItems([]);
       setStatus("Orçamento limpo.");
@@ -375,6 +453,7 @@ export function OrcamentoBuilder() {
                 ["code", "Código"],
                 ["description", "Descrição"],
                 ["qty", "Qtd."],
+                ["kAplicado", "K"],
                 ["unit", "Unid."],
                 ["unitPrice", "PU"],
                 ["total", "Total"],
@@ -413,6 +492,9 @@ export function OrcamentoBuilder() {
                   )}
                   {visibleColumns.qty && (
                     <th className="px-3 py-2 text-right">Qtd.</th>
+                  )}
+                  {visibleColumns.kAplicado && (
+                    <th className="px-3 py-2 text-right">K</th>
                   )}
                   {visibleColumns.unit && (
                     <th className="px-3 py-2">Unid.</th>
@@ -532,9 +614,55 @@ export function OrcamentoBuilder() {
                           )}
                           {visibleColumns.qty && (
                             <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                              {it.quantity.toLocaleString("pt-PT", {
-                                maximumFractionDigits: 2,
-                              })}
+                              <input
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                                value={it.quantity}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(",", ".");
+                                  const q = Number(value);
+                                  if (Number.isNaN(q) || q < 0) return;
+                                  setItems((prev) =>
+                                    prev.map((row) =>
+                                      row.rowId === it.rowId
+                                        ? { ...row, quantity: q }
+                                        : row,
+                                    ),
+                                  );
+                                }}
+                              />
+                            </td>
+                          )}
+                          {visibleColumns.kAplicado && (
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                              <input
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                                value={it.kAplicado ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(",", ".");
+                                  const k = Number(value);
+                                  if (Number.isNaN(k) || k < 0) return;
+                                  setItems((prev) =>
+                                    prev.map((row) => {
+                                      if (row.rowId !== it.rowId) return row;
+                                      const custo = row.custoUnitario ?? 0;
+                                      const precoVendaUnitario =
+                                        custo > 0 ? custo * k : row.unitPrice;
+                                      return {
+                                        ...row,
+                                        kAplicado: k,
+                                        precoVendaUnitario,
+                                        unitPrice: precoVendaUnitario,
+                                      };
+                                    }),
+                                  );
+                                }}
+                              />
                             </td>
                           )}
                           {visibleColumns.unit && (

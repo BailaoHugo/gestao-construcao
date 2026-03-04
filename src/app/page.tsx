@@ -24,6 +24,7 @@ export default function Home() {
             description="Criar, importar e consultar orçamentos de obras com seleção hierárquica."
             actionLabel="Abrir módulo"
             href="/orcamentos"
+            icon={<span className="text-lg font-semibold">€</span>}
           />
 
           <ModuleCard
@@ -31,6 +32,7 @@ export default function Home() {
             description="Planeamento, acompanhamento e controlo de obras (em breve)."
             actionLabel="Em breve"
             disabled
+            icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
           />
 
           <ModuleCard
@@ -38,6 +40,7 @@ export default function Home() {
             description="Gestão de clientes e contactos associados às obras (em breve)."
             actionLabel="Em breve"
             disabled
+            icon={<span className="text-xs font-semibold tracking-tight">CL</span>}
           />
         </section>
       </main>

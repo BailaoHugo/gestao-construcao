@@ -6,6 +6,7 @@ import {
   type ReactNode,
   type SetStateAction,
   useContext,
+  useMemo,
   useState,
 } from "react";
 import type { BudgetMeta, DraftBudgetItem } from "./domain";
@@ -22,6 +23,7 @@ function createDefaultMeta(): BudgetMeta {
     clienteContacto: "",
     obraNome: "",
     obraEndereco: "",
+    obraNumero: "",
     obraReferencia: "",
     dataProposta: iso,
     validadeDias: 30,
@@ -30,7 +32,26 @@ function createDefaultMeta(): BudgetMeta {
     responsavelEmail: "",
     responsavelTelefone: "",
     notasResumo: "",
+    codigoInternoObra: "",
   };
+}
+
+function normalizeForSlug(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildCodigoInterno(meta: BudgetMeta): string {
+  const datePart = (meta.dataProposta || "").replace(/-/g, "");
+  const numero = meta.obraNumero?.trim() || "s-numero";
+  const slugNome = normalizeForSlug(meta.obraNome || "sem-nome");
+  const safeNumero = normalizeForSlug(numero) || "s-numero";
+  return [datePart || "s-data", safeNumero, slugNome].join("-");
 }
 
 interface BudgetDraftContextValue {
@@ -49,7 +70,20 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<DraftItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [lastSavedId, setLastSavedId] = useState<string | undefined>();
-  const [meta, setMeta] = useState<BudgetMeta>(() => createDefaultMeta());
+  const [metaState, setMetaState] = useState<BudgetMeta>(() => createDefaultMeta());
+
+  const meta = useMemo<BudgetMeta>(() => {
+    const codigoInternoObra = buildCodigoInterno(metaState);
+    if (metaState.codigoInternoObra === codigoInternoObra) return metaState;
+    return { ...metaState, codigoInternoObra };
+  }, [metaState]);
+
+  const setMeta: Dispatch<SetStateAction<BudgetMeta>> = (updater) => {
+    setMetaState((current) => {
+      const next = typeof updater === "function" ? (updater as (prev: BudgetMeta) => BudgetMeta)(current) : updater;
+      return next;
+    });
+  };
 
   async function save() {
     if (!items.length || saving) return;

@@ -27,10 +27,18 @@ export function NovoOrcamentoHeader() {
               : "Sem linhas"}
         </button>
         {lastSavedId ? (
-          <span className="text-[11px] text-slate-500">
-            Gravado:{" "}
-            <span className="font-mono text-[10px]">{lastSavedId}</span>
-          </span>
+          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>
+              Gravado:{" "}
+              <span className="font-mono text-[10px]">{lastSavedId}</span>
+            </span>
+            <Link
+              href={`/orcamentos/${lastSavedId}`}
+              className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700 transition hover:bg-emerald-100"
+            >
+              Ver proposta
+            </Link>
+          </div>
         ) : null}
         <Link
           href="/"

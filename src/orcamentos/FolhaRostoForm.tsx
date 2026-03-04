@@ -85,12 +85,22 @@ export function FolhaRostoForm() {
               />
             </label>
             <label className="block text-[11px] font-medium text-slate-700">
-              Referência interna
+              Nº de obra
               <input
                 className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none placeholder:text-slate-400 focus:border-slate-400"
-                value={meta.obraReferencia}
-                onChange={(e) => update("obraReferencia", e.target.value)}
-                placeholder="Código interno da obra (opcional)"
+                value={meta.obraNumero}
+                onChange={(e) => update("obraNumero", e.target.value)}
+                placeholder="Número interno da obra"
+              />
+            </label>
+            <label className="block text-[11px] font-medium text-slate-700">
+              Código interno (gerado automaticamente)
+              <input
+                className="mt-1 w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs shadow-sm outline-none text-slate-700"
+                value={meta.codigoInternoObra ?? ""}
+                readOnly
+                disabled
+                placeholder="Será gerado a partir da data, nº de obra e nome da obra"
               />
             </label>
           </div>
