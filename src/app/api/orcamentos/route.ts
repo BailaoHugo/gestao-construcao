@@ -71,7 +71,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id });
   } catch (err) {
-    console.error("Failed to save orçamento", err);
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[api/orcamentos] Failed to save orçamento:", message, stack);
     return NextResponse.json(
       { error: "Failed to save orçamento" },
       { status: 500 },

@@ -11,17 +11,15 @@ if (!connectionString) {
   );
 }
 
-const isVercel = !!process.env.VERCEL;
+// Supabase exige TLS; usar SSL sempre que a URL for do Supabase
+const useSsl =
+  !!process.env.VERCEL ||
+  (typeof connectionString === "string" &&
+    connectionString.includes("supabase.co"));
 
 export const pool = new Pool({
   connectionString,
-  // Supabase exige TLS; em Vercel garantimos SSL, na VM (onde não há saída)
-  // deixamos sem ssl para não causar erros desnecessários.
-  ssl: isVercel
-    ? {
-        rejectUnauthorized: false,
-      }
-    : undefined,
+  ssl: useSsl ? { rejectUnauthorized: false } : undefined,
 });
 
 export async function withTransaction<T>(
