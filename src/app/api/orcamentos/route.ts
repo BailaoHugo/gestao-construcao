@@ -1,8 +1,39 @@
 import { randomUUID } from "node:crypto";
+import { lookup } from "node:dns/promises";
 import { NextResponse, type NextRequest } from "next/server";
 import { withTransaction } from "@/lib/db";
 
+function getDbHostname(): string | null {
+  const u = process.env.DATABASE_URL;
+  if (!u || typeof u !== "string") return null;
+  try {
+    const url = new URL(u.replace(/^postgresql:\/\//i, "https://"));
+    return url.hostname || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
+  const dbHost = getDbHostname();
+  if (!dbHost) {
+    console.error("[api/orcamentos] DATABASE_URL missing or invalid (no hostname)");
+    return NextResponse.json(
+      { error: "Database not configured" },
+      { status: 503 },
+    );
+  }
+  try {
+    await lookup(dbHost);
+  } catch (dnsErr) {
+    const msg = dnsErr instanceof Error ? dnsErr.message : String(dnsErr);
+    console.error("[api/orcamentos] DNS lookup failed for DB host:", dbHost, msg);
+    return NextResponse.json(
+      { error: "Database unreachable (DNS)" },
+      { status: 503 },
+    );
+  }
+
   try {
     const body = await req.json();
     const items = body.items;

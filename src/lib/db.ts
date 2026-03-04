@@ -1,5 +1,9 @@
 import { Pool } from "pg";
 
+// O código usa apenas process.env.DATABASE_URL (formato postgresql://…).
+// Para Vercel/serverless, usa a connection string do Supabase "Connection Pooler"
+// (Settings → Database → Connection string → URI, modo "Session" ou "Transaction";
+// host tipo aws-0-XX.pooler.supabase.com, porta 6543) para evitar esgotar ligações.
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
