@@ -32,7 +32,7 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
 
     const budgetRow = budgetResult.rows[0];
 
-    const itemsResult = await client.query<{
+    type ItemRow = {
       id: string;
       code: string;
       description: string;
@@ -43,7 +43,9 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
       preco_venda_unitario: string | number | null;
       k_aplicado: string | number | null;
       row_id: string | null;
-    }>(
+    };
+
+    const itemsResult = await client.query<ItemRow>(
       `
         select
           id,
@@ -63,7 +65,8 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
       [id],
     );
 
-    const items: DraftBudgetItem[] = itemsResult.rows.map((row) => ({
+    const items: DraftBudgetItem[] = itemsResult.rows.map(
+      (row: ItemRow): DraftBudgetItem => ({
       rowId: row.row_id ?? row.id,
       code: row.code,
       description: row.description,
@@ -80,7 +83,8 @@ async function loadBudget(id: string): Promise<SavedBudget | null> {
         row.k_aplicado !== null ? Number(row.k_aplicado) : undefined,
       grandeCapituloCode: "",
       capituloCode: "",
-    }));
+    }),
+    );
 
     const budget: SavedBudget = {
       id: budgetRow.id,
