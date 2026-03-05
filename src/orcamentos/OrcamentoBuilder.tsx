@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type {
   ArtigoMaster,
   BudgetMeta,
   Capitulo,
   GrandeCapitulo,
+  DraftBudgetItem,
 } from "./domain";
 import { useBudgetDraft } from "./BudgetDraftContext";
 
@@ -68,6 +69,14 @@ interface BudgetItem {
   unitPrice: number;
   grandeCapituloCode: string;
   capituloCode: string;
+}
+
+interface ResumoCapituloRow {
+  grandeCapituloCode: string;
+  capituloCode: string;
+  qtdTotal: number;
+  custoTotal: number;
+  vendaTotal: number;
 }
 
 export function OrcamentoBuilder() {
@@ -146,17 +155,8 @@ export function OrcamentoBuilder() {
     [items],
   );
 
-  const resumoCapitulos = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        grandeCapituloCode: string;
-        capituloCode: string;
-        qtdTotal: number;
-        custoTotal: number;
-        vendaTotal: number;
-      }
-    >();
+  const resumoCapitulos = useMemo<ResumoCapituloRow[]>(() => {
+    const map = new Map<string, ResumoCapituloRow>();
 
     for (const it of items) {
       const key = it.capituloCode;
@@ -452,8 +452,10 @@ export function OrcamentoBuilder() {
 
   return (
     <div className="space-y-6">
-      {/* Chat de comandos (topo, largura total) */}
-      <section className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+      {/* Zona interactiva (apenas ecrã) */}
+      <div className="space-y-6 no-print">
+        {/* Chat de comandos (topo, largura total) */}
+        <section className="flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900">
           Comandos de criação
         </h2>
@@ -559,10 +561,10 @@ export function OrcamentoBuilder() {
         {status ? (
           <p className="mt-2 text-[11px] text-slate-500">{status}</p>
         ) : null}
-      </section>
+        </section>
 
-      {/* Novo artigo (colapsável) */}
-      <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+        {/* Novo artigo (colapsável) */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
         <button
           type="button"
           onClick={() => setShowNovoArtigoForm((v) => !v)}
@@ -690,10 +692,10 @@ export function OrcamentoBuilder() {
             </button>
           </div>
         )}
-      </section>
+        </section>
 
-      {/* Resumo por capítulos */}
-      <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+        {/* Resumo por capítulos */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900">
           Resumo capítulos
         </h2>
@@ -795,12 +797,12 @@ export function OrcamentoBuilder() {
             </table>
           </div>
         )}
-      </section>
+        </section>
 
-      {/* Catálogo + preview lado a lado */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Árvore de catálogo */}
-        <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+        {/* Catálogo + preview lado a lado */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Árvore de catálogo */}
+          <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">
             Catálogo hierárquico
           </h2>
@@ -845,10 +847,10 @@ export function OrcamentoBuilder() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
 
-        {/* Preview do orçamento */}
-        <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          {/* Preview do orçamento */}
+          <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-slate-900">
               Preview do orçamento
@@ -1162,7 +1164,21 @@ export function OrcamentoBuilder() {
               </tbody>
             </table>
           </div>
-        </section>
+          </section>
+        </div>
+      </div>
+
+      {/* Versão para impressão (3 páginas em sequência) */}
+      <div className="space-y-8 print-only">
+        <PrintFolhaRostoPage meta={meta} total={total} />
+        <PrintResumoCapitulosPage
+          resumoCapitulos={resumoCapitulos}
+          visibleColumns={visibleColumns}
+        />
+        <PrintOrcamentoDetalhadoPage
+          items={items}
+          visibleColumns={visibleColumns}
+        />
       </div>
     </div>
   );
@@ -1219,6 +1235,466 @@ function FolhaRostoResumo({ meta }: { meta: BudgetMeta }) {
         <p className="mt-2 text-[10px] text-slate-600">{meta.notasResumo}</p>
       )}
     </div>
+  );
+}
+
+function PrintFolhaRostoPage({
+  meta,
+  total,
+}: {
+  meta: BudgetMeta;
+  total: number;
+}) {
+  return (
+    <section className="print-section print-break-after rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+      <header className="mb-8 border-b border-slate-200 pb-4">
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+          {meta.tituloProposta || "Proposta de orçamento"}
+        </h1>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+          <div>
+            {meta.dataProposta && (
+              <span className="mr-4">
+                <span className="font-medium">Data proposta: </span>
+                {meta.dataProposta}
+              </span>
+            )}
+            {meta.validadeDias > 0 && (
+              <span>
+                <span className="font-medium">Validade: </span>
+                {meta.validadeDias} dias
+              </span>
+            )}
+          </div>
+          <div className="text-right">
+            <span className="text-[11px] text-slate-500">Valor total estimado</span>
+            <div className="text-sm font-semibold text-slate-900">
+              {total.toLocaleString("pt-PT", {
+                style: "currency",
+                currency: "EUR",
+                minimumFractionDigits: 2,
+              })}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <div className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Cliente
+          </h2>
+          <div className="space-y-1 text-[11px] text-slate-800">
+            {meta.clienteNome && (
+              <div className="flex gap-2">
+                <span className="w-28 font-medium text-slate-600">Nome</span>
+                <span className="flex-1">{meta.clienteNome}</span>
+              </div>
+            )}
+            {meta.clienteEntidade && (
+              <div className="flex gap-2">
+                <span className="w-28 font-medium text-slate-600">Entidade</span>
+                <span className="flex-1">{meta.clienteEntidade}</span>
+              </div>
+            )}
+            {meta.clienteContacto && (
+              <div className="flex gap-2">
+                <span className="w-28 font-medium text-slate-600">Contacto</span>
+                <span className="flex-1">{meta.clienteContacto}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Obra
+          </h2>
+          <div className="space-y-1 text-[11px] text-slate-800">
+            {meta.obraNome && (
+              <div className="flex gap-2">
+                <span className="w-32 font-medium text-slate-600">Nome da obra</span>
+                <span className="flex-1">{meta.obraNome}</span>
+              </div>
+            )}
+            {meta.obraEndereco && (
+              <div className="flex gap-2">
+                <span className="w-32 font-medium text-slate-600">Morada</span>
+                <span className="flex-1">{meta.obraEndereco}</span>
+              </div>
+            )}
+            {meta.obraNumero && (
+              <div className="flex gap-2">
+                <span className="w-32 font-medium text-slate-600">Nº de obra</span>
+                <span className="flex-1">{meta.obraNumero}</span>
+              </div>
+            )}
+            {meta.codigoInternoObra && (
+              <div className="flex gap-2">
+                <span className="w-32 font-medium text-slate-600">
+                  Código interno
+                </span>
+                <span className="flex-1">{meta.codigoInternoObra}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Responsável
+          </h2>
+          <div className="space-y-1 text-[11px] text-slate-800">
+            {meta.responsavelNome && (
+              <div className="flex gap-2">
+                <span className="w-28 font-medium text-slate-600">Nome</span>
+                <span className="flex-1">{meta.responsavelNome}</span>
+              </div>
+            )}
+            {meta.responsavelFuncao && (
+              <div className="flex gap-2">
+                <span className="w-28 font-medium text-slate-600">Função</span>
+                <span className="flex-1">{meta.responsavelFuncao}</span>
+              </div>
+            )}
+            {(meta.responsavelEmail || meta.responsavelTelefone) && (
+              <>
+                {meta.responsavelEmail && (
+                  <div className="flex gap-2">
+                    <span className="w-28 font-medium text-slate-600">Email</span>
+                    <span className="flex-1">{meta.responsavelEmail}</span>
+                  </div>
+                )}
+                {meta.responsavelTelefone && (
+                  <div className="flex gap-2">
+                    <span className="w-28 font-medium text-slate-600">Telefone</span>
+                    <span className="flex-1">{meta.responsavelTelefone}</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {meta.notasResumo && (
+          <div className="space-y-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Resumo / nota inicial
+            </h2>
+            <p className="text-[11px] leading-relaxed text-slate-800">
+              {meta.notasResumo}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PrintResumoCapitulosPage({
+  resumoCapitulos,
+  visibleColumns,
+}: {
+  resumoCapitulos: ResumoCapituloRow[];
+  visibleColumns: Record<string, boolean>;
+}) {
+  if (resumoCapitulos.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="print-section print-break-after rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold text-slate-900">
+        Resumo por capítulos
+      </h2>
+      <p className="mb-4 text-xs text-slate-500">
+        Totais agregados por capítulo, calculados a partir das linhas e das
+        colunas actualmente seleccionadas no preview do orçamento.
+      </p>
+      <div className="max-h-[100%] overflow-visible rounded-lg border border-slate-100">
+        <table className="min-w-full border-collapse text-left text-xs">
+          <thead className="bg-slate-50">
+            <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+              <th className="px-3 py-2">Grande cap.</th>
+              <th className="px-3 py-2">Capítulo</th>
+              {visibleColumns.qty && (
+                <th className="px-3 py-2 text-right">Qtd. total</th>
+              )}
+              {visibleColumns.custoUnitario && (
+                <th className="px-3 py-2 text-right">Custo total</th>
+              )}
+              {(visibleColumns.precoVendaUnitario || visibleColumns.total) && (
+                <th className="px-3 py-2 text-right">Preço venda total</th>
+              )}
+              {visibleColumns.margemPercent && (
+                <th className="px-3 py-2 text-right">Margem %</th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {resumoCapitulos.map((row) => {
+              const gc = grandesCapitulos.find(
+                (g) => g.code === row.grandeCapituloCode,
+              );
+              const cap = capitulos.find((c) => c.code === row.capituloCode);
+              const margemPercent =
+                row.custoTotal > 0
+                  ? ((row.vendaTotal - row.custoTotal) / row.custoTotal) * 100
+                  : undefined;
+
+              return (
+                <tr
+                  key={row.capituloCode}
+                  className="border-b border-slate-100 last:border-0"
+                >
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    {row.grandeCapituloCode} — {gc?.description ?? "—"}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    {row.capituloCode} — {cap?.description ?? "—"}
+                  </td>
+                  {visibleColumns.qty && (
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      {row.qtdTotal.toLocaleString("pt-PT", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </td>
+                  )}
+                  {visibleColumns.custoUnitario && (
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      {row.custoTotal.toLocaleString("pt-PT", {
+                        style: "currency",
+                        currency: "EUR",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                  )}
+                  {(visibleColumns.precoVendaUnitario ||
+                    visibleColumns.total) && (
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      {row.vendaTotal.toLocaleString("pt-PT", {
+                        style: "currency",
+                        currency: "EUR",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                  )}
+                  {visibleColumns.margemPercent && (
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      {margemPercent !== undefined
+                        ? `${margemPercent.toLocaleString("pt-PT", {
+                            maximumFractionDigits: 1,
+                          })} %`
+                        : "—"}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function PrintOrcamentoDetalhadoPage({
+  items,
+  visibleColumns,
+}: {
+  items: DraftBudgetItem[];
+  visibleColumns: Record<string, boolean>;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  const sorted = [...items].sort((a, b) =>
+    `${a.grandeCapituloCode}-${a.capituloCode}-${a.code}`.localeCompare(
+      `${b.grandeCapituloCode}-${b.capituloCode}-${b.code}`,
+    ),
+  );
+
+  let lastGC = "";
+  let lastCap = "";
+
+  const rows: React.ReactElement[] = [];
+
+  for (const it of sorted) {
+    const needsGC = it.grandeCapituloCode !== lastGC;
+    const needsCap = needsGC || it.capituloCode !== lastCap;
+
+    if (needsGC) {
+      lastGC = it.grandeCapituloCode;
+      const gc = grandesCapitulos.find((g) => g.code === it.grandeCapituloCode);
+      rows.push(
+        <tr key={`print-gc-${lastGC}`}>
+          <td
+            colSpan={
+              Object.values(visibleColumns).filter(Boolean).length || 1
+            }
+            className="bg-slate-100 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700"
+          >
+            {lastGC} — {gc?.description ?? "Grande capítulo"}
+          </td>
+        </tr>,
+      );
+    }
+
+    if (needsCap) {
+      lastCap = it.capituloCode;
+      const cap = capitulos.find((c) => c.code === it.capituloCode);
+      rows.push(
+        <tr key={`print-cap-${lastGC}-${lastCap}`}>
+          <td
+            colSpan={
+              Object.values(visibleColumns).filter(Boolean).length || 1
+            }
+            className="bg-slate-50 px-3 py-2 text-[11px] font-medium text-slate-700"
+          >
+            {lastCap} — {cap?.description ?? "Capítulo"}
+          </td>
+        </tr>,
+      );
+    }
+
+    const custoUnit = it.custoUnitario ?? 0;
+    const precoVendaUnit = it.precoVendaUnitario ?? it.unitPrice;
+
+    rows.push(
+      <tr
+        key={`print-row-${it.rowId ?? it.code}`}
+        className="border-b border-slate-100 last:border-0"
+      >
+        {visibleColumns.code && (
+          <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-slate-800">
+            {it.code}
+          </td>
+        )}
+        {visibleColumns.description && (
+          <td className="max-w-xs px-3 py-2 text-[11px] text-slate-800">
+            {it.description}
+          </td>
+        )}
+        {visibleColumns.qty && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {it.quantity.toLocaleString("pt-PT", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </td>
+        )}
+        {visibleColumns.kAplicado && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {it.kAplicado?.toLocaleString("pt-PT", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) ?? "—"}
+          </td>
+        )}
+        {visibleColumns.unit && (
+          <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-700">
+            {it.unit}
+          </td>
+        )}
+        {visibleColumns.unitPrice && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {it.unitPrice.toLocaleString("pt-PT", {
+              style: "currency",
+              currency: "EUR",
+              minimumFractionDigits: 2,
+            })}
+          </td>
+        )}
+        {visibleColumns.total && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {(it.quantity * it.unitPrice).toLocaleString("pt-PT", {
+              style: "currency",
+              currency: "EUR",
+              minimumFractionDigits: 2,
+            })}
+          </td>
+        )}
+        {visibleColumns.custoUnitario && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {custoUnit.toLocaleString("pt-PT", {
+              style: "currency",
+              currency: "EUR",
+              minimumFractionDigits: 2,
+            })}
+          </td>
+        )}
+        {visibleColumns.precoVendaUnitario && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {precoVendaUnit.toLocaleString("pt-PT", {
+              style: "currency",
+              currency: "EUR",
+              minimumFractionDigits: 2,
+            })}
+          </td>
+        )}
+        {visibleColumns.margemPercent && (
+          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+            {custoUnit > 0
+              ? `${(
+                  ((precoVendaUnit - custoUnit) / custoUnit) *
+                  100
+                ).toLocaleString("pt-PT", {
+                  maximumFractionDigits: 1,
+                })} %`
+              : "—"}
+          </td>
+        )}
+      </tr>,
+    );
+  }
+
+  return (
+    <section className="print-section rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold text-slate-900">
+        Orçamento detalhado
+      </h2>
+      <div className="rounded-lg border border-slate-100">
+        <table className="min-w-full border-collapse text-left text-xs">
+          <thead className="bg-slate-50">
+            <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+              {visibleColumns.code && (
+                <th className="px-3 py-2">Código</th>
+              )}
+              {visibleColumns.description && (
+                <th className="px-3 py-2">Descrição</th>
+              )}
+              {visibleColumns.qty && (
+                <th className="px-3 py-2 text-right">Qtd.</th>
+              )}
+              {visibleColumns.kAplicado && (
+                <th className="px-3 py-2 text-right">K</th>
+              )}
+              {visibleColumns.unit && (
+                <th className="px-3 py-2">Unid.</th>
+              )}
+              {visibleColumns.unitPrice && (
+                <th className="px-3 py-2 text-right">PU</th>
+              )}
+              {visibleColumns.total && (
+                <th className="px-3 py-2 text-right">Total</th>
+              )}
+              {visibleColumns.custoUnitario && (
+                <th className="px-3 py-2 text-right">Custo</th>
+              )}
+              {visibleColumns.precoVendaUnitario && (
+                <th className="px-3 py-2 text-right">Preço venda</th>
+              )}
+              {visibleColumns.margemPercent && (
+                <th className="px-3 py-2 text-right">Margem %</th>
+              )}
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

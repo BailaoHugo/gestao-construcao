@@ -30,6 +30,17 @@ body {
   background: radial-gradient(circle at top left, #f9fafb 0, #e5e7eb 45%, #e5e7eb 100%);
 }
 
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
 @media print {
   body {
     background-color: #ffffff;
@@ -44,6 +55,34 @@ body {
     border-radius: 0 !important;
     background-color: #ffffff !important;
     ring-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .print-section {
+    page-break-inside: avoid;
+  }
+
+  .print-break-after {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Tornar inputs/controles mais discretos na impressão */
+  input,
+  textarea,
+  select {
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  button {
+    box-shadow: none !important;
   }
 }
 
