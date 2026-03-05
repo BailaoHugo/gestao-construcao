@@ -563,242 +563,6 @@ export function OrcamentoBuilder() {
         ) : null}
         </section>
 
-        {/* Novo artigo (colapsável) */}
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-        <button
-          type="button"
-          onClick={() => setShowNovoArtigoForm((v) => !v)}
-          className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-900"
-        >
-          Novo artigo
-          <span className="text-slate-400">
-            {showNovoArtigoForm ? "▼" : "▶"}
-          </span>
-        </button>
-        {showNovoArtigoForm && (
-          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Descrição
-              </label>
-              <input
-                type="text"
-                value={novoArtigoDesc}
-                onChange={(e) => setNovoArtigoDesc(e.target.value)}
-                placeholder="Ex.: Serviço sob consulta"
-                className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                  Unidade
-                </label>
-                <select
-                  value={novoArtigoUnit}
-                  onChange={(e) => setNovoArtigoUnit(e.target.value)}
-                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-                >
-                  {UNIT_OPTIONS.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {novoArtigoUnit === "Outro" && (
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                    Outra unidade
-                  </label>
-                  <input
-                    type="text"
-                    value={novoArtigoUnitOther}
-                    onChange={(e) => setNovoArtigoUnitOther(e.target.value)}
-                    placeholder="Ex.: ml"
-                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                  Preço unitário (€)
-                </label>
-                <input
-                  type="text"
-                  value={novoArtigoPreco}
-                  onChange={(e) => setNovoArtigoPreco(e.target.value)}
-                  placeholder="0,00"
-                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                  Grande Capítulo
-                </label>
-                <select
-                  value={novoArtigoGC}
-                  onChange={(e) => {
-                    setNovoArtigoGC(e.target.value);
-                    setNovoArtigoCap("");
-                  }}
-                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-                >
-                  <option value="">— Selecionar —</option>
-                  {grandesCapitulos.map((gc) => (
-                    <option key={gc.code} value={gc.code}>
-                      {gc.code} — {gc.description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                  Capítulo
-                </label>
-                <select
-                  value={novoArtigoCap}
-                  onChange={(e) => setNovoArtigoCap(e.target.value)}
-                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
-                  disabled={!novoArtigoGC}
-                >
-                  <option value="">— Selecionar —</option>
-                  {(capitulosByGC[novoArtigoGC] ?? []).map((cap) => (
-                    <option key={cap.code} value={cap.code}>
-                      {cap.code} — {cap.description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <label className="flex items-center gap-2 text-[11px] text-slate-600">
-              <input
-                type="checkbox"
-                checked={novoArtigoAddToCatalog}
-                onChange={(e) => setNovoArtigoAddToCatalog(e.target.checked)}
-                className="h-3 w-3 rounded border-slate-300 text-slate-900"
-              />
-              Adicionar também ao catálogo para orçamentos futuros
-            </label>
-            <button
-              type="button"
-              onClick={() => addNovoArtigo()}
-              disabled={novoArtigoSubmitting}
-              className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-            >
-              {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
-            </button>
-          </div>
-        )}
-        </section>
-
-        {/* Resumo por capítulos */}
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">
-          Resumo capítulos
-        </h2>
-        <p className="mb-3 text-xs text-slate-500">
-          Totais agregados por capítulo, usando os mesmos cálculos e colunas
-          visíveis do preview.
-        </p>
-
-        {items.length === 0 ? (
-          <p className="text-[11px] text-slate-400">
-            Ainda não há linhas no orçamento para resumir.
-          </p>
-        ) : (
-          <div className="max-h-64 overflow-auto rounded-lg border border-slate-100">
-            <table className="min-w-full border-collapse text-left text-xs">
-              <thead className="bg-slate-50">
-                <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-                  <th className="px-3 py-2">Grande cap.</th>
-                  <th className="px-3 py-2">Capítulo</th>
-                  {visibleColumns.qty && (
-                    <th className="px-3 py-2 text-right">Qtd. total</th>
-                  )}
-                  {visibleColumns.custoUnitario && (
-                    <th className="px-3 py-2 text-right">Custo total</th>
-                  )}
-                  {(visibleColumns.precoVendaUnitario || visibleColumns.total) && (
-                    <th className="px-3 py-2 text-right">Preço venda total</th>
-                  )}
-                  {visibleColumns.margemPercent && (
-                    <th className="px-3 py-2 text-right">Margem %</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {resumoCapitulos.map((row) => {
-                  const gc = grandesCapitulos.find(
-                    (g) => g.code === row.grandeCapituloCode,
-                  );
-                  const cap = capitulos.find(
-                    (c) => c.code === row.capituloCode,
-                  );
-                  const margemPercent =
-                    row.custoTotal > 0
-                      ? ((row.vendaTotal - row.custoTotal) / row.custoTotal) *
-                        100
-                      : undefined;
-
-                  return (
-                    <tr
-                      key={row.capituloCode}
-                      className="border-b border-slate-100 last:border-0"
-                    >
-                      <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
-                        {row.grandeCapituloCode} — {gc?.description ?? "—"}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
-                        {row.capituloCode} — {cap?.description ?? "—"}
-                      </td>
-                      {visibleColumns.qty && (
-                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                          {row.qtdTotal.toLocaleString("pt-PT", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </td>
-                      )}
-                      {visibleColumns.custoUnitario && (
-                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                          {row.custoTotal.toLocaleString("pt-PT", {
-                            style: "currency",
-                            currency: "EUR",
-                            minimumFractionDigits: 2,
-                          })}
-                        </td>
-                      )}
-                      {(visibleColumns.precoVendaUnitario ||
-                        visibleColumns.total) && (
-                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                          {row.vendaTotal.toLocaleString("pt-PT", {
-                            style: "currency",
-                            currency: "EUR",
-                            minimumFractionDigits: 2,
-                          })}
-                        </td>
-                      )}
-                      {visibleColumns.margemPercent && (
-                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                          {margemPercent !== undefined
-                            ? `${margemPercent.toLocaleString("pt-PT", {
-                                maximumFractionDigits: 1,
-                              })} %`
-                            : "—"}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-        </section>
-
         {/* Catálogo + preview lado a lado */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Árvore de catálogo */}
@@ -1166,6 +930,243 @@ export function OrcamentoBuilder() {
           </div>
           </section>
         </div>
+
+        {/* Novo artigo (colapsável) */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setShowNovoArtigoForm((v) => !v)}
+            className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-900"
+          >
+            Novo artigo
+            <span className="text-slate-400">
+              {showNovoArtigoForm ? "▼" : "▶"}
+            </span>
+          </button>
+          {showNovoArtigoForm && (
+            <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                  Descrição
+                </label>
+                <input
+                  type="text"
+                  value={novoArtigoDesc}
+                  onChange={(e) => setNovoArtigoDesc(e.target.value)}
+                  placeholder="Ex.: Serviço sob consulta"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                    Unidade
+                  </label>
+                  <select
+                    value={novoArtigoUnit}
+                    onChange={(e) => setNovoArtigoUnit(e.target.value)}
+                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                  >
+                    {UNIT_OPTIONS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {novoArtigoUnit === "Outro" && (
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                      Outra unidade
+                    </label>
+                    <input
+                      type="text"
+                      value={novoArtigoUnitOther}
+                      onChange={(e) => setNovoArtigoUnitOther(e.target.value)}
+                      placeholder="Ex.: ml"
+                      className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                    Preço unitário (€)
+                  </label>
+                  <input
+                    type="text"
+                    value={novoArtigoPreco}
+                    onChange={(e) => setNovoArtigoPreco(e.target.value)}
+                    placeholder="0,00"
+                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                    Grande Capítulo
+                  </label>
+                  <select
+                    value={novoArtigoGC}
+                    onChange={(e) => {
+                      setNovoArtigoGC(e.target.value);
+                      setNovoArtigoCap("");
+                    }}
+                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                  >
+                    <option value="">— Selecionar —</option>
+                    {grandesCapitulos.map((gc) => (
+                      <option key={gc.code} value={gc.code}>
+                        {gc.code} — {gc.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                    Capítulo
+                  </label>
+                  <select
+                    value={novoArtigoCap}
+                    onChange={(e) => setNovoArtigoCap(e.target.value)}
+                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                    disabled={!novoArtigoGC}
+                  >
+                    <option value="">— Selecionar —</option>
+                    {(capitulosByGC[novoArtigoGC] ?? []).map((cap) => (
+                      <option key={cap.code} value={cap.code}>
+                        {cap.code} — {cap.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-[11px] text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={novoArtigoAddToCatalog}
+                  onChange={(e) => setNovoArtigoAddToCatalog(e.target.checked)}
+                  className="h-3 w-3 rounded border-slate-300 text-slate-900"
+                />
+                Adicionar também ao catálogo para orçamentos futuros
+              </label>
+              <button
+                type="button"
+                onClick={() => addNovoArtigo()}
+                disabled={novoArtigoSubmitting}
+                className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+              >
+                {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Resumo por capítulos */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Resumo capítulos
+          </h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Totais agregados por capítulo, usando os mesmos cálculos e colunas
+            visíveis do preview.
+          </p>
+
+          {items.length === 0 ? (
+            <p className="text-[11px] text-slate-400">
+              Ainda não há linhas no orçamento para resumir.
+            </p>
+          ) : (
+            <div className="max-h-64 overflow-auto rounded-lg border border-slate-100">
+              <table className="min-w-full border-collapse text-left text-xs">
+                <thead className="bg-slate-50">
+                  <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+                    <th className="px-3 py-2">Grande cap.</th>
+                    <th className="px-3 py-2">Capítulo</th>
+                    {visibleColumns.qty && (
+                      <th className="px-3 py-2 text-right">Qtd. total</th>
+                    )}
+                    {visibleColumns.custoUnitario && (
+                      <th className="px-3 py-2 text-right">Custo total</th>
+                    )}
+                    {(visibleColumns.precoVendaUnitario ||
+                      visibleColumns.total) && (
+                      <th className="px-3 py-2 text-right">Preço venda total</th>
+                    )}
+                    {visibleColumns.margemPercent && (
+                      <th className="px-3 py-2 text-right">Margem %</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {resumoCapitulos.map((row) => {
+                    const gc = grandesCapitulos.find(
+                      (g) => g.code === row.grandeCapituloCode,
+                    );
+                    const cap = capitulos.find(
+                      (c) => c.code === row.capituloCode,
+                    );
+                    const margemPercent =
+                      row.custoTotal > 0
+                        ? ((row.vendaTotal - row.custoTotal) / row.custoTotal) *
+                          100
+                        : undefined;
+
+                    return (
+                      <tr
+                        key={row.capituloCode}
+                        className="border-b border-slate-100 last:border-0"
+                      >
+                        <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                          {row.grandeCapituloCode} — {gc?.description ?? "—"}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                          {row.capituloCode} — {cap?.description ?? "—"}
+                        </td>
+                        {visibleColumns.qty && (
+                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                            {row.qtdTotal.toLocaleString("pt-PT", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        )}
+                        {visibleColumns.custoUnitario && (
+                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                            {row.custoTotal.toLocaleString("pt-PT", {
+                              style: "currency",
+                              currency: "EUR",
+                              minimumFractionDigits: 2,
+                            })}
+                          </td>
+                        )}
+                        {(visibleColumns.precoVendaUnitario ||
+                          visibleColumns.total) && (
+                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                            {row.vendaTotal.toLocaleString("pt-PT", {
+                              style: "currency",
+                              currency: "EUR",
+                              minimumFractionDigits: 2,
+                            })}
+                          </td>
+                        )}
+                        {visibleColumns.margemPercent && (
+                          <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                            {margemPercent !== undefined
+                              ? `${margemPercent.toLocaleString("pt-PT", {
+                                  maximumFractionDigits: 1,
+                                })} %`
+                              : "—"}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
 
       {/* Versão para impressão (3 páginas em sequência) */}
