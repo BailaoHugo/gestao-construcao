@@ -218,8 +218,24 @@ export function FolhaRostoForm() {
             <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
               Preview folha de rosto
             </div>
-            <div className="mt-1 text-xs font-semibold text-slate-900">
-              {meta.tituloProposta || "Proposta de orçamento"}
+            <div className="mt-1 flex items-baseline justify-between gap-2">
+              <div className="text-xs font-semibold text-slate-900">
+                {meta.tituloProposta || "Proposta de orçamento"}
+              </div>
+              <div className="text-[10px] text-slate-600">
+                {meta.dataProposta && (
+                  <span className="mr-2">
+                    <span className="font-medium">Data: </span>
+                    {meta.dataProposta}
+                  </span>
+                )}
+                {meta.validadeDias > 0 && (
+                  <span>
+                    <span className="font-medium">Validade: </span>
+                    {meta.validadeDias} dias
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -258,10 +274,7 @@ export function FolhaRostoForm() {
               </div>
             )}
 
-            {(meta.obraNome ||
-              meta.obraEndereco ||
-              meta.obraNumero ||
-              meta.codigoInternoObra) && (
+            {(meta.obraNome || meta.obraEndereco || meta.obraNumero) && (
               <div className="space-y-1">
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   Obra
@@ -291,14 +304,7 @@ export function FolhaRostoForm() {
                       <span>{meta.obraNumero}</span>
                     </div>
                   )}
-                  {meta.codigoInternoObra && (
-                    <div>
-                      <span className="font-medium text-slate-800">
-                        Código interno:{" "}
-                      </span>
-                      <span>{meta.codigoInternoObra}</span>
-                    </div>
-                  )}
+                  {/* Código interno fica apenas no formulário; não aparece em preview */}
                 </div>
               </div>
             )}
