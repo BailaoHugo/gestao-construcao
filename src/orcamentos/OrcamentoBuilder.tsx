@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   ArtigoMaster,
   BudgetMeta,
@@ -8,12 +8,46 @@ import type {
   GrandeCapitulo,
 } from "./domain";
 import { useBudgetDraft } from "./BudgetDraftContext";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const artigos: ArtigoMaster[] = require("../../data/orcamentos/processed/artigos_master.json");
+const staticArtigos: ArtigoMaster[] = require("../../data/orcamentos/processed/artigos_master.json");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const grandesCapitulos: GrandeCapitulo[] = require("../../data/orcamentos/processed/grandes_capitulos.json");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const capitulos: Capitulo[] = require("../../data/orcamentos/processed/capitulos.json");
+
+const UNIT_OPTIONS = ["vg", "m²", "m", "un", "kg", "h", "€", "Outro"];
+
+interface CustomArticleFromApi {
+  id: string;
+  code: string;
+  description: string;
+  unit: string;
+  grande_capitulo_code: string;
+  capitulo_code: string;
+  pu_custo: number | null;
+  pu_venda_fixo: number | null;
+  created_at: string;
+}
+
+function customToMaster(c: CustomArticleFromApi): ArtigoMaster {
+  return {
+    code: c.code,
+    description: c.description,
+    unit: c.unit,
+    grandeCapituloCode: c.grande_capitulo_code,
+    capituloCode: c.capitulo_code,
+    subgrupo: "",
+    disciplina: "OUTRA",
+    categoriaCusto: "OUTROS",
+    tipoMedicao: "LOTE",
+    incluiMO: false,
+    puCusto: c.pu_custo ?? undefined,
+    puVendaFixo: c.pu_venda_fixo ?? undefined,
+    flags: { nova: true, reabilitacao: true, habitacao: true, comercio: true },
+    ativo: true,
+  };
+}
 
 function normalizeText(value: string) {
   return value
@@ -58,6 +92,28 @@ export function OrcamentoBuilder() {
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const [customArticles, setCustomArticles] = useState<CustomArticleFromApi[]>([]);
+  const [showNovoArtigoForm, setShowNovoArtigoForm] = useState(false);
+  const [novoArtigoDesc, setNovoArtigoDesc] = useState("");
+  const [novoArtigoUnit, setNovoArtigoUnit] = useState("vg");
+  const [novoArtigoUnitOther, setNovoArtigoUnitOther] = useState("");
+  const [novoArtigoPreco, setNovoArtigoPreco] = useState("");
+  const [novoArtigoGC, setNovoArtigoGC] = useState("");
+  const [novoArtigoCap, setNovoArtigoCap] = useState("");
+  const [novoArtigoAddToCatalog, setNovoArtigoAddToCatalog] = useState(false);
+  const [novoArtigoSubmitting, setNovoArtigoSubmitting] = useState(false);
+  useEffect(() => {
+    fetch("/api/artigos")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: CustomArticleFromApi[]) => setCustomArticles(rows))
+      .catch(() => setCustomArticles([]));
+  }, []);
+
+  const artigos = useMemo(
+    () => [...staticArtigos, ...customArticles.map(customToMaster)],
+    [customArticles],
+  );
+
   const arvore = useMemo(() => {
     const artsByCapitulo: Record<string, ArtigoMaster[]> = {};
     for (const a of artigos) {
@@ -83,7 +139,7 @@ export function OrcamentoBuilder() {
         artigos: (artsByCapitulo[cap.code] ?? []).slice(0, 50),
       })),
     }));
-  }, []);
+  }, [artigos]);
 
   const total = useMemo(
     () => items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0),
@@ -162,6 +218,92 @@ export function OrcamentoBuilder() {
     setStatus("Artigo removido.");
   }
 
+  const capitulosByGC = useMemo(() => {
+    const m: Record<string, Capitulo[]> = {};
+    for (const c of capitulos) {
+      if (!m[c.grandeCapituloCode]) m[c.grandeCapituloCode] = [];
+      m[c.grandeCapituloCode].push(c);
+    }
+    return m;
+  }, []);
+
+  async function addNovoArtigo() {
+    const description = novoArtigoDesc.trim();
+    const unit = novoArtigoUnit === "Outro" ? novoArtigoUnitOther.trim() : novoArtigoUnit;
+    const precoNum = parseFloat(novoArtigoPreco.replace(",", "."));
+    if (!description || !unit) {
+      setStatus("Preencha descrição e unidade.");
+      return;
+    }
+    if (Number.isNaN(precoNum) || precoNum < 0) {
+      setStatus("Preço unitário inválido.");
+      return;
+    }
+    if (!novoArtigoGC || !novoArtigoCap) {
+      setStatus("Selecione Grande Capítulo e Capítulo.");
+      return;
+    }
+    const capitulo = capitulos.find((c) => c.code === novoArtigoCap);
+    const kDefault = capitulo?.kFactor ?? 1;
+
+    setNovoArtigoSubmitting(true);
+    setStatus(null);
+    try {
+      let code: string;
+      if (novoArtigoAddToCatalog) {
+        const res = await fetch("/api/artigos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description,
+            unit,
+            grandeCapituloCode: novoArtigoGC,
+            capituloCode: novoArtigoCap,
+            puCusto: precoNum,
+            puVendaFixo: precoNum * kDefault,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          setStatus(err.error || "Erro ao gravar no catálogo.");
+          return;
+        }
+        const row = (await res.json()) as CustomArticleFromApi;
+        code = row.code;
+        setCustomArticles((prev) => [...prev, row]);
+      } else {
+        code = `${novoArtigoCap}.C-LOCAL-${Date.now().toString(36)}`;
+      }
+      const unitPrice = precoNum * kDefault;
+      setItems((prev) => [
+        ...prev,
+        {
+          rowId: createRowId(),
+          code,
+          description,
+          unit,
+          quantity: 1,
+          unitPrice,
+          kAplicado: kDefault,
+          custoUnitario: precoNum,
+          precoVendaUnitario: unitPrice,
+          grandeCapituloCode: novoArtigoGC,
+          capituloCode: novoArtigoCap,
+        },
+      ]);
+      setStatus(
+        novoArtigoAddToCatalog
+          ? `Artigo ${code} adicionado ao orçamento e ao catálogo.`
+          : `Artigo ${code} adicionado ao orçamento.`,
+      );
+      setNovoArtigoDesc("");
+      setNovoArtigoPreco("");
+      setNovoArtigoUnitOther("");
+    } finally {
+      setNovoArtigoSubmitting(false);
+    }
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -173,7 +315,7 @@ export function OrcamentoBuilder() {
     const lower = text.toLowerCase();
     if (lower.startsWith("adicionar") || lower.startsWith("add")) {
       const parts = text.split(/\s+/);
-      const codePart = parts.find((p) => /[A-Z]\d+\.\d+/.test(p)) ?? "";
+      const codePart = parts.find((p) => /[A-Z]\d+\.[A-Z0-9]+/.test(p)) ?? "";
       const qPart =
         parts.find((p) => p.toLowerCase().startsWith("q=")) ?? "q=1";
       const qty = Number(qPart.split("=")[1] ?? "1") || 1;
@@ -181,7 +323,7 @@ export function OrcamentoBuilder() {
       addArticleByCode(codePart, qty);
     } else if (lower.startsWith("atualizar")) {
       const parts = text.split(/\s+/);
-      const codePart = parts.find((p) => /[A-Z]\d+\.\d+/.test(p)) ?? "";
+      const codePart = parts.find((p) => /[A-Z]\d+\.[A-Z0-9]+/.test(p)) ?? "";
       if (!codePart) {
         setStatus("Não consegui identificar o código do artigo a atualizar.");
         return;
@@ -372,6 +514,137 @@ export function OrcamentoBuilder() {
         {status ? (
           <p className="mt-2 text-[11px] text-slate-500">{status}</p>
         ) : null}
+      </section>
+
+      {/* Novo artigo (colapsável) */}
+      <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowNovoArtigoForm((v) => !v)}
+          className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-900"
+        >
+          Novo artigo
+          <span className="text-slate-400">
+            {showNovoArtigoForm ? "▼" : "▶"}
+          </span>
+        </button>
+        {showNovoArtigoForm && (
+          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+            <div>
+              <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                Descrição
+              </label>
+              <input
+                type="text"
+                value={novoArtigoDesc}
+                onChange={(e) => setNovoArtigoDesc(e.target.value)}
+                placeholder="Ex.: Serviço sob consulta"
+                className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                  Unidade
+                </label>
+                <select
+                  value={novoArtigoUnit}
+                  onChange={(e) => setNovoArtigoUnit(e.target.value)}
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                >
+                  {UNIT_OPTIONS.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {novoArtigoUnit === "Outro" && (
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                    Outra unidade
+                  </label>
+                  <input
+                    type="text"
+                    value={novoArtigoUnitOther}
+                    onChange={(e) => setNovoArtigoUnitOther(e.target.value)}
+                    placeholder="Ex.: ml"
+                    className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                  Preço unitário (€)
+                </label>
+                <input
+                  type="text"
+                  value={novoArtigoPreco}
+                  onChange={(e) => setNovoArtigoPreco(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                  Grande Capítulo
+                </label>
+                <select
+                  value={novoArtigoGC}
+                  onChange={(e) => {
+                    setNovoArtigoGC(e.target.value);
+                    setNovoArtigoCap("");
+                  }}
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                >
+                  <option value="">— Selecionar —</option>
+                  {grandesCapitulos.map((gc) => (
+                    <option key={gc.code} value={gc.code}>
+                      {gc.code} — {gc.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">
+                  Capítulo
+                </label>
+                <select
+                  value={novoArtigoCap}
+                  onChange={(e) => setNovoArtigoCap(e.target.value)}
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800"
+                  disabled={!novoArtigoGC}
+                >
+                  <option value="">— Selecionar —</option>
+                  {(capitulosByGC[novoArtigoGC] ?? []).map((cap) => (
+                    <option key={cap.code} value={cap.code}>
+                      {cap.code} — {cap.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-[11px] text-slate-600">
+              <input
+                type="checkbox"
+                checked={novoArtigoAddToCatalog}
+                onChange={(e) => setNovoArtigoAddToCatalog(e.target.checked)}
+                className="h-3 w-3 rounded border-slate-300 text-slate-900"
+              />
+              Adicionar também ao catálogo para orçamentos futuros
+            </label>
+            <button
+              type="button"
+              onClick={() => addNovoArtigo()}
+              disabled={novoArtigoSubmitting}
+              className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+            >
+              {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Catálogo + preview lado a lado */}

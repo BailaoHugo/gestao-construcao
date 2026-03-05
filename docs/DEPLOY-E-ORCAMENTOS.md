@@ -22,6 +22,7 @@
 ## Base de dados (Supabase)
 
 - Tabelas: `budgets` (cabeçalho + meta) e `budget_items` (linhas), com relação por `budget_id`.
+- Tabela **`custom_articles`**: artigos criados pelo utilizador em "Novo orçamento" quando marca "Adicionar também ao catálogo". Para criar a tabela, executar o SQL em `supabase/migrations/20260304000000_create_custom_articles.sql` no Supabase (SQL Editor).
 - O código usa apenas `process.env.DATABASE_URL` (ficheiro `src/lib/db.ts`).
 
 ## Correções feitas (resumo técnico)
@@ -39,6 +40,8 @@
 | Gravar orçamento (POST) | `src/app/api/orcamentos/route.ts` |
 | Lista de orçamentos guardados | `src/app/orcamentos/guardados/page.tsx` |
 | Detalhe de um orçamento | `src/app/orcamentos/[id]/page.tsx` |
+| Artigos custom (GET/POST) | `src/app/api/artigos/route.ts` |
+| Form "Novo artigo" e catálogo merge | `src/orcamentos/OrcamentoBuilder.tsx` |
 
 ## Fallback para ficheiros (VM / sem internet)
 
