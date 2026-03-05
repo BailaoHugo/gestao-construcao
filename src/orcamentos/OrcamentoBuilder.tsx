@@ -146,6 +146,51 @@ export function OrcamentoBuilder() {
     [items],
   );
 
+  const resumoCapitulos = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        grandeCapituloCode: string;
+        capituloCode: string;
+        qtdTotal: number;
+        custoTotal: number;
+        vendaTotal: number;
+      }
+    >();
+
+    for (const it of items) {
+      const key = it.capituloCode;
+      const custoUnit = it.custoUnitario ?? 0;
+      const vendaUnit = it.precoVendaUnitario ?? it.unitPrice;
+      const qtd = it.quantity;
+      const custoLinha = custoUnit * qtd;
+      const vendaLinha = vendaUnit * qtd;
+
+      const current = map.get(key);
+      if (current) {
+        current.qtdTotal += qtd;
+        current.custoTotal += custoLinha;
+        current.vendaTotal += vendaLinha;
+      } else {
+        map.set(key, {
+          grandeCapituloCode: it.grandeCapituloCode,
+          capituloCode: it.capituloCode,
+          qtdTotal: qtd,
+          custoTotal: custoLinha,
+          vendaTotal: vendaLinha,
+        });
+      }
+    }
+
+    const rows = Array.from(map.values());
+    rows.sort((a, b) =>
+      `${a.grandeCapituloCode}-${a.capituloCode}`.localeCompare(
+        `${b.grandeCapituloCode}-${b.capituloCode}`,
+      ),
+    );
+    return rows;
+  }, [items]);
+
   const suggestions = useMemo(() => {
     const q = input.trim();
 
@@ -643,6 +688,111 @@ export function OrcamentoBuilder() {
             >
               {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
             </button>
+          </div>
+        )}
+      </section>
+
+      {/* Resumo por capítulos */}
+      <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Resumo capítulos
+        </h2>
+        <p className="mb-3 text-xs text-slate-500">
+          Totais agregados por capítulo, usando os mesmos cálculos e colunas
+          visíveis do preview.
+        </p>
+
+        {items.length === 0 ? (
+          <p className="text-[11px] text-slate-400">
+            Ainda não há linhas no orçamento para resumir.
+          </p>
+        ) : (
+          <div className="max-h-64 overflow-auto rounded-lg border border-slate-100">
+            <table className="min-w-full border-collapse text-left text-xs">
+              <thead className="bg-slate-50">
+                <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+                  <th className="px-3 py-2">Grande cap.</th>
+                  <th className="px-3 py-2">Capítulo</th>
+                  {visibleColumns.qty && (
+                    <th className="px-3 py-2 text-right">Qtd. total</th>
+                  )}
+                  {visibleColumns.custoUnitario && (
+                    <th className="px-3 py-2 text-right">Custo total</th>
+                  )}
+                  {(visibleColumns.precoVendaUnitario || visibleColumns.total) && (
+                    <th className="px-3 py-2 text-right">Preço venda total</th>
+                  )}
+                  {visibleColumns.margemPercent && (
+                    <th className="px-3 py-2 text-right">Margem %</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {resumoCapitulos.map((row) => {
+                  const gc = grandesCapitulos.find(
+                    (g) => g.code === row.grandeCapituloCode,
+                  );
+                  const cap = capitulos.find(
+                    (c) => c.code === row.capituloCode,
+                  );
+                  const margemPercent =
+                    row.custoTotal > 0
+                      ? ((row.vendaTotal - row.custoTotal) / row.custoTotal) *
+                        100
+                      : undefined;
+
+                  return (
+                    <tr
+                      key={row.capituloCode}
+                      className="border-b border-slate-100 last:border-0"
+                    >
+                      <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                        {row.grandeCapituloCode} — {gc?.description ?? "—"}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                        {row.capituloCode} — {cap?.description ?? "—"}
+                      </td>
+                      {visibleColumns.qty && (
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                          {row.qtdTotal.toLocaleString("pt-PT", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+                      )}
+                      {visibleColumns.custoUnitario && (
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                          {row.custoTotal.toLocaleString("pt-PT", {
+                            style: "currency",
+                            currency: "EUR",
+                            minimumFractionDigits: 2,
+                          })}
+                        </td>
+                      )}
+                      {(visibleColumns.precoVendaUnitario ||
+                        visibleColumns.total) && (
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                          {row.vendaTotal.toLocaleString("pt-PT", {
+                            style: "currency",
+                            currency: "EUR",
+                            minimumFractionDigits: 2,
+                          })}
+                        </td>
+                      )}
+                      {visibleColumns.margemPercent && (
+                        <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                          {margemPercent !== undefined
+                            ? `${margemPercent.toLocaleString("pt-PT", {
+                                maximumFractionDigits: 1,
+                              })} %`
+                            : "—"}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
