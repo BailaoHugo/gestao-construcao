@@ -99,6 +99,8 @@ export function OrcamentoBuilder() {
     precoVendaUnitario: false,
     margemPercent: false,
   });
+  const [showCatalog, setShowCatalog] = useState(true);
+  const [showFolhaPreview, setShowFolhaPreview] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [customArticles, setCustomArticles] = useState<CustomArticleFromApi[]>([]);
@@ -564,74 +566,120 @@ export function OrcamentoBuilder() {
         </section>
 
         {/* Catálogo + preview lado a lado */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Árvore de catálogo */}
-          <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Catálogo hierárquico
-          </h2>
-          <p className="text-xs text-slate-500">
-            Grande Capítulo → Capítulo → primeiros artigos (exemplo). No futuro
-            vamos permitir seleção direta daqui.
-          </p>
-          <div className="max-h-[28rem] space-y-3 overflow-auto pr-1 text-xs">
-            {arvore.map(({ gc, capitulos }) => (
-              <div key={gc.code} className="space-y-1">
-                <div className="font-semibold text-slate-800">
-                  {gc.code} — {gc.description}
-                </div>
-                <div className="space-y-1 pl-3">
-                  {capitulos.map(({ cap, artigos: arts }) => (
-                    <div key={cap.code} className="space-y-0.5">
-                      <div className="font-medium text-slate-700">
-                        {cap.code} — {cap.description}
-                      </div>
-                      <ul className="space-y-0.5 pl-3 text-slate-600">
-                        {arts.slice(0, 5).map((a) => (
-                          <li key={a.code}>
-                            <button
-                              type="button"
-                              className="inline-flex max-w-full items-baseline gap-1 rounded-full px-2 py-1 text-left hover:bg-slate-100"
-                              onClick={() => addArticleByCode(a.code, 1)}
-                            >
-                              <span className="font-mono text-[11px] text-slate-900">
-                                {a.code}
-                              </span>
-                              <span className="truncate text-[11px] text-slate-700">
-                                {" — "}
-                                {a.description}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+        <div
+          className={
+            showCatalog ? "grid gap-6 lg:grid-cols-2" : "grid gap-6 lg:grid-cols-1"
+          }
+        >
+          {showCatalog && (
+            /* Árvore de catálogo */
+            <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Catálogo hierárquico
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowCatalog(false)}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 text-[10px] text-slate-500 hover:bg-slate-50"
+                  aria-label="Ocultar catálogo"
+                >
+                  ⤢
+                </button>
               </div>
-            ))}
-          </div>
-          </section>
+              <p className="text-xs text-slate-500">
+                Grande Capítulo → Capítulo → primeiros artigos (exemplo). No
+                futuro vamos permitir seleção direta daqui.
+              </p>
+              <div className="max-h-[28rem] space-y-3 overflow-auto pr-1 text-xs">
+                {arvore.map(({ gc, capitulos }) => (
+                  <div key={gc.code} className="space-y-1">
+                    <div className="font-semibold text-slate-800">
+                      {gc.code} — {gc.description}
+                    </div>
+                    <div className="space-y-1 pl-3">
+                      {capitulos.map(({ cap, artigos: arts }) => (
+                        <div key={cap.code} className="space-y-0.5">
+                          <div className="font-medium text-slate-700">
+                            {cap.code} — {cap.description}
+                          </div>
+                          <ul className="space-y-0.5 pl-3 text-slate-600">
+                            {arts.slice(0, 5).map((a) => (
+                              <li key={a.code}>
+                                <button
+                                  type="button"
+                                  className="inline-flex max-w-full items-baseline gap-1 rounded-full px-2 py-1 text-left hover:bg-slate-100"
+                                  onClick={() => addArticleByCode(a.code, 1)}
+                                >
+                                  <span className="font-mono text-[11px] text-slate-900">
+                                    {a.code}
+                                  </span>
+                                  <span className="truncate text-[11px] text-slate-700">
+                                    {" — "}
+                                    {a.description}
+                                  </span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Preview do orçamento */}
           <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Preview do orçamento
-            </h2>
-            <p className="text-xs text-slate-500">
-              Total:{" "}
-              <span className="font-semibold text-slate-900">
-                {total.toLocaleString("pt-PT", {
-                  style: "currency",
-                  currency: "EUR",
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </p>
-          </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Preview do orçamento
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowCatalog((v) => !v)}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 text-[10px] text-slate-500 hover:bg-slate-50"
+                  aria-label={
+                    showCatalog ? "Ocultar catálogo" : "Mostrar catálogo"
+                  }
+                >
+                  {showCatalog ? "⤢" : "☰"}
+                </button>
+              </div>
+              <p className="text-xs text-slate-500">
+                Total:{" "}
+                <span className="font-semibold text-slate-900">
+                  {total.toLocaleString("pt-PT", {
+                    style: "currency",
+                    currency: "EUR",
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
+              </p>
+            </div>
 
-          <FolhaRostoResumo meta={meta} />
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-medium text-slate-700">
+                Folha de rosto (preview)
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowFolhaPreview((v) => !v)}
+                className="inline-flex h-6 px-2 items-center justify-center rounded-full border border-slate-200 text-[10px] text-slate-500 hover:bg-slate-50"
+                aria-label={
+                  showFolhaPreview
+                    ? "Ocultar preview da folha de rosto"
+                    : "Mostrar preview da folha de rosto"
+                }
+              >
+                {showFolhaPreview ? "Ocultar" : "Mostrar"}
+              </button>
+            </div>
+
+            {showFolhaPreview && <FolhaRostoResumo meta={meta} />}
 
           <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
             <span className="font-medium text-slate-600">
