@@ -967,7 +967,7 @@ export function OrcamentoBuilder() {
             onClick={() => setShowNovoArtigoForm((v) => !v)}
             className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-900"
           >
-            Novo artigo
+            Criar um novo artigo
             <span className="text-slate-400">
               {showNovoArtigoForm ? "▼" : "▶"}
             </span>
