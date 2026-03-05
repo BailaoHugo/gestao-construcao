@@ -7,8 +7,14 @@ export function NovoOrcamentoHeader() {
   const { items, save, saving, lastSavedId } = useBudgetDraft();
   const hasItems = items.length > 0;
 
+  function handlePrint() {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
+  }
+
   return (
-    <header className="sticky top-4 z-20 flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
+    <header className="sticky top-4 z-20 flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100 no-print">
       <div className="text-sm font-semibold tracking-wide text-slate-800">
         Novo orçamento
       </div>
@@ -40,6 +46,13 @@ export function NovoOrcamentoHeader() {
             </Link>
           </div>
         ) : null}
+        <button
+          type="button"
+          onClick={handlePrint}
+          className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-100"
+        >
+          Imprimir / Exportar PDF
+        </button>
         <Link
           href="/"
           className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"

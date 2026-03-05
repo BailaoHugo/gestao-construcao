@@ -10,7 +10,7 @@ export default function NovoOrcamentoPage() {
       <BudgetDraftProvider>
         <NovoOrcamentoHeader />
 
-        <main className="mt-6 rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
+        <main className="mt-6 rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100 print-page">
           <header className="mb-6 space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
               Novo orçamento
