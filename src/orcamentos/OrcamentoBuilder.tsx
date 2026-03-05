@@ -100,7 +100,6 @@ export function OrcamentoBuilder() {
     margemPercent: false,
   });
   const [showCatalog, setShowCatalog] = useState(true);
-  const [showFolhaPreview, setShowFolhaPreview] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [customArticles, setCustomArticles] = useState<CustomArticleFromApi[]>([]);
@@ -661,25 +660,7 @@ export function OrcamentoBuilder() {
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium text-slate-700">
-                Folha de rosto (preview)
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowFolhaPreview((v) => !v)}
-                className="inline-flex h-6 px-2 items-center justify-center rounded-full border border-slate-200 text-[10px] text-slate-500 hover:bg-slate-50"
-                aria-label={
-                  showFolhaPreview
-                    ? "Ocultar preview da folha de rosto"
-                    : "Mostrar preview da folha de rosto"
-                }
-              >
-                {showFolhaPreview ? "Ocultar" : "Mostrar"}
-              </button>
-            </div>
-
-            {showFolhaPreview && <FolhaRostoResumo meta={meta} />}
+            <FolhaRostoResumo meta={meta} />
 
           <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
             <span className="font-medium text-slate-600">
