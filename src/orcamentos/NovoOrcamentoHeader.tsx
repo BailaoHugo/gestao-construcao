@@ -4,8 +4,15 @@ import Link from "next/link";
 import { useBudgetDraft } from "./BudgetDraftContext";
 
 export function NovoOrcamentoHeader() {
-  const { items, save, saving, lastSavedId } = useBudgetDraft();
+  const { items, save, saving, lastSavedId, meta } = useBudgetDraft();
   const hasItems = items.length > 0;
+
+  const hasRequiredMeta =
+    meta.obraNome.trim().length > 0 &&
+    meta.obraNumero.trim().length > 0 &&
+    meta.dataProposta.trim().length > 0;
+
+  const canSave = hasItems && hasRequiredMeta;
 
   function handlePrint() {
     if (typeof window !== "undefined") {
@@ -23,7 +30,12 @@ export function NovoOrcamentoHeader() {
         <button
           type="button"
           onClick={save}
-          disabled={!hasItems || saving}
+          disabled={!canSave || saving}
+          title={
+            !hasRequiredMeta
+              ? "Preencha Nome da obra, Nº de obra e Data da proposta para gravar."
+              : undefined
+          }
           className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
         >
           {saving

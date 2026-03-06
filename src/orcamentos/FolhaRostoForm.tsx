@@ -70,12 +70,13 @@ export function FolhaRostoForm() {
               </h3>
               <div className="space-y-2">
                 <label className="block text-[11px] font-medium text-slate-700">
-                  Nome da obra
+                  Nome da obra *
                   <input
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none placeholder:text-slate-400 focus:border-slate-400"
                     value={meta.obraNome}
                     onChange={(e) => update("obraNome", e.target.value)}
                     placeholder="Ex.: Remodelação T3 Rua X"
+                    required
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
@@ -94,6 +95,7 @@ export function FolhaRostoForm() {
                     value={meta.obraNumero}
                     onChange={(e) => update("obraNumero", e.target.value)}
                     placeholder="Número interno da obra"
+                    required
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
@@ -124,12 +126,13 @@ export function FolhaRostoForm() {
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
-                  Data da proposta
+                  Data da proposta *
                   <input
                     type="date"
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none focus:border-slate-400"
                     value={meta.dataProposta}
                     onChange={(e) => update("dataProposta", e.target.value)}
+                    required
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
