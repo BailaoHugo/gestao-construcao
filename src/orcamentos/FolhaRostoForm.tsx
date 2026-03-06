@@ -70,7 +70,10 @@ export function FolhaRostoForm() {
               </h3>
               <div className="space-y-2">
                 <label className="block text-[11px] font-medium text-slate-700">
-                  Nome da obra *
+                  <span>Nome da obra</span>
+                  <span className="ml-0.5 text-[11px] font-semibold text-red-600">
+                    *
+                  </span>
                   <input
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none placeholder:text-slate-400 focus:border-slate-400"
                     value={meta.obraNome}
@@ -89,7 +92,10 @@ export function FolhaRostoForm() {
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
-                  Nº de obra
+                  <span>Nº de obra</span>
+                  <span className="ml-0.5 text-[11px] font-semibold text-red-600">
+                    *
+                  </span>
                   <input
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none placeholder:text-slate-400 focus:border-slate-400"
                     value={meta.obraNumero}
@@ -126,7 +132,10 @@ export function FolhaRostoForm() {
                   />
                 </label>
                 <label className="block text-[11px] font-medium text-slate-700">
-                  Data da proposta *
+                  <span>Data da proposta</span>
+                  <span className="ml-0.5 text-[11px] font-semibold text-red-600">
+                    *
+                  </span>
                   <input
                     type="date"
                     className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs shadow-sm outline-none focus:border-slate-400"
