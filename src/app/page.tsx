@@ -25,6 +25,7 @@ export default function Home() {
             actionLabel="Abrir módulo"
             href="/orcamentos"
             icon={<span className="text-lg font-semibold">€</span>}
+            iconVariant="emerald"
           />
 
           <ModuleCard
@@ -33,6 +34,7 @@ export default function Home() {
             actionLabel="Em breve"
             disabled
             icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
+            iconVariant="amber"
           />
 
           <ModuleCard
@@ -41,6 +43,7 @@ export default function Home() {
             actionLabel="Em breve"
             disabled
             icon={<span className="text-xs font-semibold tracking-tight">CL</span>}
+            iconVariant="violet"
           />
         </section>
       </main>
