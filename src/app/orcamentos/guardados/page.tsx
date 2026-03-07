@@ -1,6 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { TopBar } from "@/components/layout/TopBar";
-import type { BudgetMeta, SavedBudget } from "@/orcamentos/domain";
+import type { BudgetMeta, BudgetStatus, SavedBudget } from "@/orcamentos/domain";
+import { getStatusClasses, getStatusLabel } from "@/orcamentos/status";
 import { pool } from "@/lib/db";
 import { promises as fs } from "fs";
 import path from "node:path";
@@ -9,6 +10,8 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const DEFAULT_STATUS: BudgetStatus = "EM_EXECUCAO";
+
 interface ListedBudget {
   id: string;
   createdAt: string;
@@ -16,6 +19,7 @@ interface ListedBudget {
   meta: BudgetMeta;
   codigoInternoObra?: string;
   total: number;
+  status?: BudgetStatus;
 }
 
 async function loadBudgetsFromDb(): Promise<ListedBudget[]> {
@@ -28,6 +32,7 @@ async function loadBudgetsFromDb(): Promise<ListedBudget[]> {
       codigo_interno_obra: string | null;
       meta: BudgetMeta;
       total: string | number | null;
+      status: string | null;
     }>(
       `
         select
@@ -36,7 +41,8 @@ async function loadBudgetsFromDb(): Promise<ListedBudget[]> {
           b.updated_at,
           b.codigo_interno_obra,
           b.meta,
-          coalesce(sum(i.quantity * i.unit_price), 0) as total
+          coalesce(sum(i.quantity * i.unit_price), 0) as total,
+          b.status
         from budgets b
         left join budget_items i on i.budget_id = b.id
         group by b.id
@@ -51,6 +57,7 @@ async function loadBudgetsFromDb(): Promise<ListedBudget[]> {
       meta: row.meta,
       codigoInternoObra: row.codigo_interno_obra ?? undefined,
       total: Number(row.total ?? 0),
+      status: (row.status as BudgetStatus) ?? DEFAULT_STATUS,
     }));
   } finally {
     client.release();
@@ -107,6 +114,7 @@ async function loadBudgetsFromFiles(): Promise<ListedBudget[]> {
         meta: parsed.meta,
         codigoInternoObra: parsed.meta.codigoInternoObra,
         total,
+        status: parsed.status ?? DEFAULT_STATUS,
       });
     } catch {
       // Ignorar ficheiros inválidos/corrompidos.
@@ -177,6 +185,9 @@ export default async function OrcamentosGuardadosPage() {
                   <th className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 px-3 py-2">
                     Criado em
                   </th>
+                  <th className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 px-3 py-2">
+                    Estado
+                  </th>
                   <th className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 px-3 py-2 text-right">
                     Total
                   </th>
@@ -189,7 +200,7 @@ export default async function OrcamentosGuardadosPage() {
                 {budgets.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-3 py-6 text-center text-[11px] text-slate-400"
                     >
                       Ainda não existem orçamentos gravados. Crie um novo
@@ -216,6 +227,11 @@ export default async function OrcamentosGuardadosPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-500">
                         {new Date(b.createdAt).toLocaleDateString("pt-PT")}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={getStatusClasses(b.status)}>
+                          {getStatusLabel(b.status)}
+                        </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                         {b.total.toLocaleString("pt-PT", {

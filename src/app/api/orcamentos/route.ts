@@ -1,7 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { lookup } from "node:dns/promises";
 import { NextResponse, type NextRequest } from "next/server";
+import type { BudgetStatus } from "@/orcamentos/domain";
 import { withTransaction } from "@/lib/db";
+
+const VALID_STATUSES: BudgetStatus[] = ["EM_EXECUCAO", "EM_ANALISE", "APROVADO"];
+
+function parseStatus(value: unknown): BudgetStatus {
+  if (typeof value === "string" && VALID_STATUSES.includes(value as BudgetStatus)) {
+    return value as BudgetStatus;
+  }
+  return "EM_EXECUCAO";
+}
 
 function getDbHostname(): string | null {
   const u = process.env.DATABASE_URL;
@@ -54,14 +64,15 @@ export async function POST(req: NextRequest) {
         ? meta.codigoInternoObra
         : "";
     const codigoInternoObra = codigoInterno || null;
+    const status = parseStatus(body.status);
 
     await withTransaction(async (client) => {
       await client.query(
         `
-          insert into budgets (id, created_at, updated_at, codigo_interno_obra, meta)
-          values ($1, $2, $3, $4, $5)
+          insert into budgets (id, created_at, updated_at, codigo_interno_obra, meta, status)
+          values ($1, $2, $3, $4, $5, $6)
         `,
-        [id, now, now, codigoInternoObra, meta],
+        [id, now, now, codigoInternoObra, meta, status],
       );
 
       for (const item of items) {

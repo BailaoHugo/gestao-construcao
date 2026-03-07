@@ -68,6 +68,9 @@ export type BudgetNodeType =
   | "SUBGRUPO"
   | "ARTIGO";
 
+/** Estados do orçamento para listagem e filtros. */
+export type BudgetStatus = "EM_EXECUCAO" | "EM_ANALISE" | "APROVADO";
+
 export interface Budget {
   id: string;
   name: string;
@@ -76,6 +79,7 @@ export interface Budget {
   createdAt: string;
   updatedAt: string;
   meta?: BudgetMeta;
+  status?: BudgetStatus;
 }
 
 export interface BudgetNode {
@@ -119,6 +123,7 @@ export interface SavedBudget {
   updatedAt: string;
   items: DraftBudgetItem[];
   meta: BudgetMeta;
+  status?: BudgetStatus;
 }
 
 

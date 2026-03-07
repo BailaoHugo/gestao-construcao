@@ -1,7 +1,9 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { BudgetStatusSelect } from "@/components/orcamentos/BudgetStatusSelect";
 import { PrintButton } from "@/components/PrintButton";
 import type {
   BudgetMeta,
+  BudgetStatus,
   DraftBudgetItem,
   SavedBudget,
 } from "@/orcamentos/domain";
@@ -22,9 +24,10 @@ async function loadBudgetFromDb(id: string): Promise<SavedBudget | null> {
       created_at: string;
       updated_at: string;
       meta: BudgetMeta;
+      status: string | null;
     }>(
       `
-        select id, created_at, updated_at, meta
+        select id, created_at, updated_at, meta, status
         from budgets
         where id = $1
       `,
@@ -95,6 +98,7 @@ async function loadBudgetFromDb(id: string): Promise<SavedBudget | null> {
       updatedAt: budgetRow.updated_at,
       items,
       meta: budgetRow.meta,
+      status: (budgetRow.status as BudgetStatus) ?? "EM_EXECUCAO",
     };
 
     return budget;
@@ -142,7 +146,10 @@ async function loadBudgetFromFiles(id: string): Promise<SavedBudget | null> {
       const raw = await fs.readFile(filePath, "utf8");
       const parsed = JSON.parse(raw) as SavedBudget;
       if (parsed.id === id) {
-        return parsed;
+        return {
+          ...parsed,
+          status: parsed.status ?? "EM_EXECUCAO",
+        };
       }
     } catch {
       // Ignorar ficheiros inválidos.
@@ -192,7 +199,11 @@ export default async function OrcamentoDetailPage({
               {new Date(budget.createdAt).toLocaleString("pt-PT")}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <BudgetStatusSelect
+              budgetId={budget.id}
+              initialStatus={budget.status}
+            />
             <Link
               href="/orcamentos/guardados"
               className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
