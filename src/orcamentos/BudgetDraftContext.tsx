@@ -105,13 +105,14 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         const text = await res.text();
-        console.error("Failed to save orçamento", text);
+        console.error("Failed to save orçamento", res.status, text);
         let message = "Erro ao gravar. Tente novamente.";
         try {
           const json = JSON.parse(text) as { error?: string };
           if (json.error) message = json.error;
         } catch {
           if (res.status === 503) message = "Base de dados indisponível. Verifique DATABASE_URL (ex.: na Vercel).";
+          else message = `Erro ${res.status}. ${text.slice(0, 120)}${text.length > 120 ? "…" : ""}`;
         }
         setSaveError(message);
         return;
