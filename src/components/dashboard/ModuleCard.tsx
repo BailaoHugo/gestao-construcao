@@ -1,12 +1,21 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+const ICON_VARIANTS = {
+  emerald: "bg-emerald-50 text-emerald-600",
+  blue: "bg-blue-50 text-blue-600",
+  violet: "bg-violet-50 text-violet-600",
+  amber: "bg-amber-50 text-amber-600",
+} as const;
+
 type ModuleCardProps = {
   title: string;
   description: string;
   actionLabel: string;
   href?: string;
   icon?: ReactNode;
+  /** Cor do ícone por módulo (emerald, blue, violet, amber) */
+  iconVariant?: keyof typeof ICON_VARIANTS;
   disabled?: boolean;
 };
 
@@ -16,12 +25,16 @@ export function ModuleCard({
   actionLabel,
   href,
   icon,
+  iconVariant = "emerald",
   disabled,
 }: ModuleCardProps) {
+  const iconClasses = ICON_VARIANTS[iconVariant];
   const content = (
     <div className="flex h-full flex-col justify-between rounded-2xl border border-slate-100 bg-white px-6 py-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconClasses}`}
+        >
           {icon ?? <span className="text-xl">+</span>}
         </div>
         <div className="space-y-1">

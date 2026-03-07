@@ -51,6 +51,8 @@
 |----------------|------------------|
 | `DATABASE_URL` | Existe e está definida para **Production** (e Preview se usares previews). Valor = connection string do Supabase (Transaction pooler, porta 6543). Após alterar, fazer **Redeploy**. |
 
+**Importante:** Esta app **não usa** o cliente Supabase (REST/JS). Não é necessário criar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` nem `SUPABASE_SERVICE_ROLE_KEY`. A ligação à base de dados faz-se **apenas** via `DATABASE_URL` (PostgreSQL direto, pacote `pg`).
+
 **Supabase** (Dashboard do projeto):
 
 1. **Settings → Database → Connection string**  

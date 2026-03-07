@@ -25,14 +25,16 @@ export default function OrcamentosPage() {
             actionLabel="Abrir"
             href="/orcamentos/novo"
             icon={<span className="text-lg font-semibold">+</span>}
+            iconVariant="emerald"
           />
 
           <ModuleCard
             title="Importar orçamento"
             description="Importa Excel/CSV existente e normaliza para o modelo interno."
             actionLabel="Importar"
-            href="/orcamentos"
+            href="/orcamentos/importar"
             icon={<span className="text-xs font-semibold tracking-tight">XL</span>}
+            iconVariant="amber"
           />
 
           <ModuleCard
@@ -41,6 +43,7 @@ export default function OrcamentosPage() {
             actionLabel="Ver lista"
             href="/orcamentos/guardados"
             icon={<span className="text-xs font-semibold tracking-tight">⏱</span>}
+            iconVariant="violet"
           />
 
           <ModuleCard
@@ -49,6 +52,7 @@ export default function OrcamentosPage() {
             actionLabel="Ver base de dados"
             href="/orcamentos/base-de-dados"
             icon={<span className="text-xs font-semibold tracking-tight">BD</span>}
+            iconVariant="blue"
           />
         </section>
       </main>

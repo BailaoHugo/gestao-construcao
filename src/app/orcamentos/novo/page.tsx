@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { BudgetDraftProvider } from "@/orcamentos/BudgetDraftContext";
 import { FolhaRostoForm } from "@/orcamentos/FolhaRostoForm";
+import { ImportHydrator } from "@/orcamentos/NovoOrcamentoWithImport";
 import { NovoOrcamentoHeader } from "@/orcamentos/NovoOrcamentoHeader";
 import { OrcamentoBuilder } from "@/orcamentos/OrcamentoBuilder";
 
@@ -8,6 +10,9 @@ export default function NovoOrcamentoPage() {
   return (
     <MainLayout>
       <BudgetDraftProvider>
+        <Suspense fallback={null}>
+          <ImportHydrator />
+        </Suspense>
         <NovoOrcamentoHeader />
 
         <main className="mt-6 rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100 print-page">
