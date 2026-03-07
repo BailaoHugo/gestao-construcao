@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { BudgetStatusSelect } from "@/components/orcamentos/BudgetStatusSelect";
 import { TopBar } from "@/components/layout/TopBar";
 import type { BudgetMeta, BudgetStatus, SavedBudget } from "@/orcamentos/domain";
-import { getStatusClasses, getStatusLabel } from "@/orcamentos/status";
 import { pool } from "@/lib/db";
 import { promises as fs } from "fs";
 import path from "node:path";
@@ -229,9 +229,10 @@ export default async function OrcamentosGuardadosPage() {
                         {new Date(b.createdAt).toLocaleDateString("pt-PT")}
                       </td>
                       <td className="px-3 py-2">
-                        <span className={getStatusClasses(b.status)}>
-                          {getStatusLabel(b.status)}
-                        </span>
+                        <BudgetStatusSelect
+                          budgetId={b.id}
+                          initialStatus={b.status}
+                        />
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                         {b.total.toLocaleString("pt-PT", {
