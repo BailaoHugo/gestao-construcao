@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useBudgetDraft } from "./BudgetDraftContext";
 
 export function NovoOrcamentoHeader() {
-  const { items, save, saving, lastSavedId, meta } = useBudgetDraft();
+  const { items, save, saving, lastSavedId, saveError, meta } = useBudgetDraft();
   const hasItems = items.length > 0;
 
   const hasRequiredMeta =
@@ -44,6 +44,11 @@ export function NovoOrcamentoHeader() {
               ? "Gravar orçamento"
               : "Sem linhas"}
         </button>
+        {saveError ? (
+          <span className="text-[11px] text-amber-600" title={saveError}>
+            {saveError}
+          </span>
+        ) : null}
         {lastSavedId ? (
           <div className="flex items-center gap-2 text-[11px] text-slate-500">
             <span>
@@ -55,6 +60,12 @@ export function NovoOrcamentoHeader() {
               className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700 transition hover:bg-emerald-100"
             >
               Ver proposta
+            </Link>
+            <Link
+              href="/orcamentos/guardados"
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600 transition hover:bg-slate-100"
+            >
+              Ver lista
             </Link>
           </div>
         ) : null}

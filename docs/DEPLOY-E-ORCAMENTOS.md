@@ -1,4 +1,4 @@
-# Deploy e orçamentos (registo até 2026-03-04)
+# Deploy e orçamentos (registo até 2026-03-06)
 
 ## Resumo
 
@@ -42,6 +42,30 @@
 | Detalhe de um orçamento | `src/app/orcamentos/[id]/page.tsx` |
 | Artigos custom (GET/POST) | `src/app/api/artigos/route.ts` |
 | Form "Novo artigo" e catálogo merge | `src/orcamentos/OrcamentoBuilder.tsx` |
+
+## Checklist: verificar na Vercel e no Supabase
+
+**Vercel** (Dashboard do projeto → Settings → Environment Variables):
+
+| Variável       | O que verificar |
+|----------------|------------------|
+| `DATABASE_URL` | Existe e está definida para **Production** (e Preview se usares previews). Valor = connection string do Supabase (Transaction pooler, porta 6543). Após alterar, fazer **Redeploy**. |
+
+**Supabase** (Dashboard do projeto):
+
+1. **Settings → Database → Connection string**  
+   Copiar a URI em modo **Transaction pooler** (host `*.pooler.supabase.com`, porta **6543**) para colar na Vercel em `DATABASE_URL`.
+
+2. **SQL Editor**  
+   Garantir que as migrações foram executadas:
+   - `supabase/migrations/20260304000000_create_custom_articles.sql` (tabela `custom_articles`)
+   - Tabelas `budgets` e `budget_items` (criação inicial do projeto)
+   - `supabase/migrations/20260306120000_add_status_to_budgets.sql` (coluna `status` em `budgets`)
+
+3. **Table Editor**  
+   Opcional: confirmar que a tabela `budgets` tem a coluna `status` (tipo text, default `EM_EXECUCAO`).
+
+Se os orçamentos gravados não aparecerem na lista: a lista usa apenas a BD quando `DATABASE_URL` está definido; se a ligação falhar, aparece um aviso amarelo em vez de dados antigos. Verificar a variável na Vercel e o Redeploy.
 
 ## Fallback para ficheiros (VM / sem internet)
 

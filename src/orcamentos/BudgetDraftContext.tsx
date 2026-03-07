@@ -61,6 +61,7 @@ interface BudgetDraftContextValue {
   setMeta: Dispatch<SetStateAction<BudgetMeta>>;
   saving: boolean;
   lastSavedId?: string;
+  saveError?: string;
   save: () => Promise<void>;
 }
 
@@ -70,6 +71,7 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<DraftItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [lastSavedId, setLastSavedId] = useState<string | undefined>();
+  const [saveError, setSaveError] = useState<string | undefined>();
   const [metaState, setMetaState] = useState<BudgetMeta>(() => createDefaultMeta());
 
   const meta = useMemo<BudgetMeta>(() => {
@@ -88,6 +90,7 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
   async function save() {
     if (!items.length || saving) return;
     setSaving(true);
+    setSaveError(undefined);
     try {
       const res = await fetch("/api/orcamentos", {
         method: "POST",
@@ -101,7 +104,16 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        console.error("Failed to save orçamento", await res.text());
+        const text = await res.text();
+        console.error("Failed to save orçamento", text);
+        let message = "Erro ao gravar. Tente novamente.";
+        try {
+          const json = JSON.parse(text) as { error?: string };
+          if (json.error) message = json.error;
+        } catch {
+          if (res.status === 503) message = "Base de dados indisponível. Verifique DATABASE_URL (ex.: na Vercel).";
+        }
+        setSaveError(message);
         return;
       }
 
@@ -111,6 +123,7 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("Error saving orçamento", err);
+      setSaveError("Erro de rede ao gravar. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -125,6 +138,7 @@ export function BudgetDraftProvider({ children }: { children: ReactNode }) {
         setMeta,
         saving,
         lastSavedId,
+        saveError,
         save,
       }}
     >

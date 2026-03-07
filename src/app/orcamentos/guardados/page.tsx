@@ -126,20 +126,36 @@ async function loadBudgetsFromFiles(): Promise<ListedBudget[]> {
   return budgets;
 }
 
-async function loadBudgets(): Promise<ListedBudget[]> {
-  // Em ambientes com acesso ao Supabase (Vercel), usamos a BD.
-  // Na VM, se não houver saída para a internet, fazemos fallback para os ficheiros JSON locais.
+const hasDatabaseUrl = (): boolean =>
+  typeof process.env.DATABASE_URL === "string" && process.env.DATABASE_URL.length > 0;
+
+async function loadBudgets(): Promise<{
+  budgets: ListedBudget[];
+  error?: string;
+  source: "db" | "files";
+}> {
   try {
-    return await loadBudgetsFromDb();
+    const fromDb = await loadBudgetsFromDb();
+    return { budgets: fromDb, source: "db" };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.warn("[orcamentos/guardados] loadBudgetsFromDb failed, using files:", msg);
-    return await loadBudgetsFromFiles();
+    console.warn("[orcamentos/guardados] loadBudgetsFromDb failed:", msg);
+    // Se a BD está configurada (ex.: Vercel, produção), não usar ficheiros:
+    // os orçamentos gravados vão para a BD e têm de aparecer a partir daí.
+    if (hasDatabaseUrl()) {
+      return {
+        budgets: [],
+        source: "db",
+        error: "Não foi possível ligar à base de dados. Os orçamentos gravados ficam na BD; recarregue a página ou verifique a ligação.",
+      };
+    }
+    const fromFiles = await loadBudgetsFromFiles();
+    return { budgets: fromFiles, source: "files" };
   }
 }
 
 export default async function OrcamentosGuardadosPage() {
-  const budgets = await loadBudgets();
+  const { budgets, error, source } = await loadBudgets();
 
   return (
     <MainLayout>
@@ -155,6 +171,15 @@ export default async function OrcamentosGuardadosPage() {
           </p>
         </header>
 
+        {error && (
+          <div
+            className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+
         <section className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-4 text-xs text-slate-500">
             <span>
@@ -162,7 +187,9 @@ export default async function OrcamentosGuardadosPage() {
               <span className="font-medium text-slate-700">
                 {budgets.length}
               </span>{" "}
-              orçamentos.
+              orçamentos
+              {source === "files" && " (ficheiros locais)"}.
+              {source === "db" && !error && "."}
             </span>
           </div>
 
@@ -200,11 +227,12 @@ export default async function OrcamentosGuardadosPage() {
                 {budgets.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-3 py-6 text-center text-[11px] text-slate-400"
                     >
-                      Ainda não existem orçamentos gravados. Crie um novo
-                      orçamento e utilize o botão &quot;Gravar orçamento&quot;.
+                      {error
+                        ? "Lista indisponível (ver aviso acima)."
+                        : "Ainda não existem orçamentos gravados. Crie um novo orçamento e utilize o botão \"Gravar orçamento\"."}
                     </td>
                   </tr>
                 ) : (
