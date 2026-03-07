@@ -102,6 +102,80 @@ function parseCsv(text: string): Record<string, string>[] {
   return rows;
 }
 
+/** Extrai linhas de texto de um PDF (client-side). */
+async function extractLinesFromPdf(arrayBuffer: ArrayBuffer): Promise<string[]> {
+  const pdfjs = await import("pdfjs-dist");
+  if (typeof window !== "undefined") {
+    (pdfjs as unknown as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc =
+      "/pdf.worker.min.mjs";
+  }
+  const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const allLines: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const items = content.items as { str: string; transform: number[] }[];
+    if (items.length === 0) continue;
+    type Item = { str: string; y: number; x: number };
+    const withPos: Item[] = items.map((it) => ({
+      str: it.str,
+      y: it.transform[5] ?? 0,
+      x: it.transform[4] ?? 0,
+    }));
+    withPos.sort((a, b) => {
+      const dy = b.y - a.y;
+      if (Math.abs(dy) > 2) return dy;
+      return a.x - b.x;
+    });
+    const lineThreshold = 3;
+    let currentY = withPos[0]?.y ?? 0;
+    let currentLine: string[] = [];
+    for (const it of withPos) {
+      if (Math.abs(it.y - currentY) > lineThreshold) {
+        if (currentLine.length) {
+          allLines.push(currentLine.join(" ").trim());
+          currentLine = [];
+        }
+        currentY = it.y;
+      }
+      currentLine.push(it.str);
+    }
+    if (currentLine.length) allLines.push(currentLine.join(" ").trim());
+  }
+  return allLines.filter((l) => l.length > 0);
+}
+
+const PDF_ROW_KEYS = ["Código", "Descrição", "Quantidade", "Unidade", "Preço"] as const;
+
+/** Converte linhas de texto (ex.: extraídas de PDF) em linhas com colunas para o importador. */
+function pdfLinesToRows(lines: string[]): Record<string, string>[] {
+  return lines.map((line) => {
+    const trimmed = line.trim();
+    const parts = trimmed.split(/\s{2,}|\t/).filter(Boolean);
+    if (parts.length >= 4) {
+      const qtd = parts[parts.length - 3] ?? "0";
+      const unit = parts[parts.length - 2] ?? "un";
+      const price = (parts[parts.length - 1] ?? "0").replace(/\s/g, "").replace(",", ".");
+      const code = parts[0] ?? "";
+      const desc = parts.slice(1, -3).join(" ").trim();
+      return {
+        [PDF_ROW_KEYS[0]]: code,
+        [PDF_ROW_KEYS[1]]: desc,
+        [PDF_ROW_KEYS[2]]: qtd,
+        [PDF_ROW_KEYS[3]]: unit,
+        [PDF_ROW_KEYS[4]]: price,
+      };
+    }
+    return {
+      [PDF_ROW_KEYS[0]]: "",
+      [PDF_ROW_KEYS[1]]: trimmed,
+      [PDF_ROW_KEYS[2]]: "0",
+      [PDF_ROW_KEYS[3]]: "un",
+      [PDF_ROW_KEYS[4]]: "0",
+    };
+  });
+}
+
 function mapRowToItem(
   row: Record<string, string>,
   codeIdx: number,
@@ -373,8 +447,16 @@ export default function ImportarOrcamentoPage() {
           setItems(parsed);
           setFileName(file.name);
           if (parsed.length === 0) setError("Nenhuma linha válida. Colunas esperadas: código, descrição, quantidade, unidade, preço.");
+        } else if (name.endsWith(".pdf")) {
+          const buf = await file.arrayBuffer();
+          const lines = await extractLinesFromPdf(buf);
+          const rows = pdfLinesToRows(lines);
+          const parsed = parseFileToItems(rows);
+          setItems(parsed);
+          setFileName(file.name);
+          if (parsed.length === 0) setError("Nenhum texto extraído do PDF ou linhas não reconhecidas. PDFs digitalizados (imagem) não são suportados.");
         } else {
-          setError("Formato não suportado. Use .csv, .xlsx ou .xls");
+          setError("Formato não suportado. Use .csv, .xlsx, .xls ou .pdf");
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -487,10 +569,10 @@ export default function ImportarOrcamentoPage() {
             Importar orçamento
           </h1>
           <p className="max-w-2xl text-sm text-slate-500">
-            Importe um orçamento já feito em Excel ou CSV. Os dados são
+            Importe um orçamento em Excel, CSV ou PDF. Os dados são
             transformados no nosso modelo e gravados em &quot;Orçamentos
-            guardados&quot;, ficando 100% compatíveis com o resto da app (editar,
-            imprimir, alterar estado). Para PDF, exporte primeiro para Excel.
+            guardados&quot;, ficando compatíveis com o resto da app (editar,
+            imprimir, alterar estado). PDFs com texto seleccionável são suportados; digitalizações (imagem) não.
           </p>
         </header>
 
@@ -498,11 +580,11 @@ export default function ImportarOrcamentoPage() {
           <div className="flex flex-wrap items-center gap-4">
             <label className="cursor-pointer">
               <span className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
-                Escolher ficheiro (Excel / CSV)
+                Escolher ficheiro (Excel / CSV / PDF)
               </span>
               <input
                 type="file"
-                accept=".csv,.xlsx,.xls"
+                accept=".csv,.xlsx,.xls,.pdf"
                 className="sr-only"
                 onChange={handleFile}
                 disabled={loading}
