@@ -45,7 +45,10 @@ export function NovoOrcamentoHeader() {
               : "Sem linhas"}
         </button>
         {saveError ? (
-          <span className="text-[11px] text-amber-600" title={saveError}>
+          <span
+            className="max-w-md break-words text-xs font-medium text-amber-700"
+            title={saveError}
+          >
             {saveError}
           </span>
         ) : null}
