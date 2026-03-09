@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBudgetDraft } from "./BudgetDraftContext";
 import type { BudgetMeta, DraftBudgetItem, SavedBudget } from "./domain";
 
@@ -37,8 +37,10 @@ export function ImportHydrator() {
 export function EditHydrator() {
   const searchParams = useSearchParams();
   const { setItems, setMeta } = useBudgetDraft();
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
+    if (hasHydrated) return;
     const id = searchParams.get("editBudgetId");
     if (!id) return;
 
@@ -74,11 +76,12 @@ export function EditHydrator() {
     }
 
     void load();
+    setHasHydrated(true);
 
     return () => {
       cancelled = true;
     };
-  }, [searchParams, setItems, setMeta]);
+  }, [searchParams, setItems, setMeta, hasHydrated]);
 
   return null;
 }
