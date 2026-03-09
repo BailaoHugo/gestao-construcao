@@ -305,8 +305,18 @@ export function OrcamentoBuilder() {
     setNovoArtigoSubmitting(true);
     setStatus(null);
     try {
-      // Código base local; se o catálogo gerar um código, substituímos este
-      let code = `${capCode}.C-LOCAL-${Date.now().toString(36)}`;
+      // Código base local sequencial no capítulo, ex.: J2.0004
+      let nextNumber = 0;
+      for (const a of artigos) {
+        if (!a.code.startsWith(`${capCode}.`)) continue;
+        const suffix = a.code.slice(capCode.length + 1);
+        const num = parseInt(suffix.replace(/\D/g, ""), 10);
+        if (!Number.isNaN(num) && num > nextNumber) {
+          nextNumber = num;
+        }
+      }
+      const localCodeNumber = nextNumber + 1;
+      let code = `${capCode}.${String(localCodeNumber).padStart(4, "0")}`;
 
       if (novoArtigoAddToCatalog) {
         try {
