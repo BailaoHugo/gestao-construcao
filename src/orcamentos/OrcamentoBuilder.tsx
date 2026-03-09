@@ -291,10 +291,18 @@ export function OrcamentoBuilder() {
     const kDefault = capitulo?.kFactor ?? 1;
 
     // Gerar código sequencial local no capítulo, ex.: J2.0004
+    const existingCodes = new Set<string>();
+    for (const a of artigos) existingCodes.add(a.code);
+    for (const it of items) existingCodes.add(it.code);
+    for (const d of novoArtigosPendentes) {
+      // pendentes ainda não têm código, ignoramos
+      void d;
+    }
+
     let nextNumber = 0;
-    for (const a of artigos) {
-      if (!a.code.startsWith(`${capituloCode}.`)) continue;
-      const suffix = a.code.slice(capituloCode.length + 1);
+    for (const code of existingCodes) {
+      if (!code.startsWith(`${capituloCode}.`)) continue;
+      const suffix = code.slice(capituloCode.length + 1);
       const num = parseInt(suffix.replace(/\D/g, ""), 10);
       if (!Number.isNaN(num) && num > nextNumber) {
         nextNumber = num;

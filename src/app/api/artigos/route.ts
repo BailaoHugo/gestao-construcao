@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
     const capituloCode = typeof body.capituloCode === "string" ? body.capituloCode.trim() : "";
     const puCusto = typeof body.puCusto === "number" && !Number.isNaN(body.puCusto) ? body.puCusto : null;
     const puVendaFixo = typeof body.puVendaFixo === "number" && !Number.isNaN(body.puVendaFixo) ? body.puVendaFixo : null;
+    const codeFromBody = typeof body.code === "string" ? body.code.trim() : "";
 
     if (!description || !unit || !grandeCapituloCode || !capituloCode) {
       return NextResponse.json(
@@ -52,12 +53,15 @@ export async function POST(req: NextRequest) {
 
     const client = await pool.connect();
     try {
-      const countResult = await client.query<{ n: string }>(
-        `select count(*)::text as n from custom_articles where capitulo_code = $1`,
-        [capituloCode],
-      );
-      const n = parseInt(countResult.rows[0]?.n ?? "0", 10) + 1;
-      const code = `${capituloCode}.C${String(n).padStart(3, "0")}`;
+      let code = codeFromBody;
+      if (!code) {
+        const countResult = await client.query<{ n: string }>(
+          `select count(*)::text as n from custom_articles where capitulo_code = $1`,
+          [capituloCode],
+        );
+        const n = parseInt(countResult.rows[0]?.n ?? "0", 10) + 1;
+        code = `${capituloCode}.C${String(n).padStart(3, "0")}`;
+      }
 
       const insertResult = await client.query<CustomArticleRow>(
         `insert into custom_articles (code, description, unit, grande_capitulo_code, capitulo_code, pu_custo, pu_venda_fixo)
