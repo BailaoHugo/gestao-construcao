@@ -305,31 +305,43 @@ export function OrcamentoBuilder() {
     setNovoArtigoSubmitting(true);
     setStatus(null);
     try {
-      let code: string;
+      // Código base local; se o catálogo gerar um código, substituímos este
+      let code = `${capCode}.C-LOCAL-${Date.now().toString(36)}`;
+
       if (novoArtigoAddToCatalog) {
-        const res = await fetch("/api/artigos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            description,
-            unit,
-            grandeCapituloCode: gcCode,
-            capituloCode: capCode,
-            puCusto: precoNum,
-            puVendaFixo: precoNum * kDefault,
-          }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          setStatus(err.error || "Erro ao gravar no catálogo.");
-          return;
+        try {
+          const res = await fetch("/api/artigos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              description,
+              unit,
+              grandeCapituloCode: gcCode,
+              capituloCode: capCode,
+              puCusto: precoNum,
+              puVendaFixo: precoNum * kDefault,
+            }),
+          });
+          if (res.ok) {
+            const row = (await res.json()) as CustomArticleFromApi;
+            code = row.code;
+            setCustomArticles((prev) => [...prev, row]);
+          } else {
+            const err = (await res.json().catch(() => ({}))) as {
+              error?: string;
+            };
+            setStatus(
+              err.error ||
+                "Não foi possível adicionar ao catálogo, mas o artigo foi adicionado ao orçamento.",
+            );
+          }
+        } catch {
+          setStatus(
+            "Erro ao ligar ao catálogo. O artigo foi adicionado apenas a este orçamento.",
+          );
         }
-        const row = (await res.json()) as CustomArticleFromApi;
-        code = row.code;
-        setCustomArticles((prev) => [...prev, row]);
-      } else {
-        code = `${novoArtigoCap}.C-LOCAL-${Date.now().toString(36)}`;
       }
+
       const unitPrice = precoNum * kDefault;
       setItems((prev) => [
         ...prev,
@@ -343,13 +355,13 @@ export function OrcamentoBuilder() {
           kAplicado: kDefault,
           custoUnitario: precoNum,
           precoVendaUnitario: unitPrice,
-          grandeCapituloCode: novoArtigoGC,
-          capituloCode: novoArtigoCap,
+          grandeCapituloCode: gcCode,
+          capituloCode: capCode,
         },
       ]);
       setStatus(
         novoArtigoAddToCatalog
-          ? `Artigo ${code} adicionado ao orçamento e ao catálogo.`
+          ? `Artigo ${code} adicionado ao orçamento e ao catálogo (ou apenas local se o catálogo falhou).`
           : `Artigo ${code} adicionado ao orçamento.`,
       );
       setNovoArtigoDesc("");
