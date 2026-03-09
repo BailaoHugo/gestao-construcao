@@ -271,7 +271,11 @@ export default async function OrcamentosGuardadosPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-right text-[11px]">
                         <Link
-                          href={`/orcamentos/${b.id}`}
+                          href={
+                            b.status === "EM_EXECUCAO"
+                              ? `/orcamentos/novo?editBudgetId=${b.id}`
+                              : `/orcamentos/${b.id}`
+                          }
                           className="rounded-full border border-slate-200 px-3 py-1 text-[11px] font-medium text-slate-700 transition hover:bg-slate-100"
                         >
                           Abrir

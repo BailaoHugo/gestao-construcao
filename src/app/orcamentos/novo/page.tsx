@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { BudgetDraftProvider } from "@/orcamentos/BudgetDraftContext";
 import { FolhaRostoForm } from "@/orcamentos/FolhaRostoForm";
-import { ImportHydrator } from "@/orcamentos/NovoOrcamentoWithImport";
+import { ImportHydrator, EditHydrator } from "@/orcamentos/NovoOrcamentoWithImport";
 import { NovoOrcamentoHeader } from "@/orcamentos/NovoOrcamentoHeader";
 import { OrcamentoBuilder } from "@/orcamentos/OrcamentoBuilder";
 
@@ -12,6 +12,7 @@ export default function NovoOrcamentoPage() {
       <BudgetDraftProvider>
         <Suspense fallback={null}>
           <ImportHydrator />
+          <EditHydrator />
         </Suspense>
         <NovoOrcamentoHeader />
 
