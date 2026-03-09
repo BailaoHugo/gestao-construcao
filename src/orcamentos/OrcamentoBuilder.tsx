@@ -9,6 +9,8 @@ import type {
   DraftBudgetItem,
 } from "./domain";
 import { useBudgetDraft } from "./BudgetDraftContext";
+import { generateNextCodeForCap } from "./codeUtils";
+import { ExcelLikeImportGrid } from "./ExcelLikeImportGrid";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const staticArtigos: ArtigoMaster[] = require("../../data/orcamentos/processed/artigos_master.json");
@@ -59,21 +61,6 @@ function normalizeText(value: string) {
 
 function createRowId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function generateNextCodeForCap(
-  capituloCode: string,
-  usedCodes: Set<string>,
-): string {
-  let max = 0;
-  for (const code of usedCodes) {
-    if (!code.startsWith(`${capituloCode}.`)) continue;
-    const suffix = code.slice(capituloCode.length + 1);
-    const num = parseInt(suffix.replace(/\D/g, ""), 10);
-    if (!Number.isNaN(num) && num > max) max = num;
-  }
-  const next = max + 1;
-  return `${capituloCode}.${String(next).padStart(4, "0")}`;
 }
 
 interface BudgetItem {
@@ -1500,10 +1487,41 @@ export function OrcamentoBuilder() {
               Adicionar ao orçamento
             </button>
             <p className="text-[10px] text-slate-500">
-              Linhas vazias são ignoradas. Pode ajustar quantidades, K e preços diretamente
-              no preview após a importação.
+              Linhas vazias são ignoradas. Pode ajustar quantidades, K e preços
+              diretamente no preview após a importação.
             </p>
           </div>
+        </section>
+
+        {/* Tabela tipo Excel para importar artigos */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Tabela tipo Excel para importar artigos
+          </h2>
+          <p className="mb-3 text-[10px] text-slate-500">
+            Edite diretamente numa grelha tipo Excel ou cole um bloco inteiro
+            vindo do Excel/Sheets. Cada linha será convertida em artigo do
+            orçamento com códigos sequenciais únicos.
+          </p>
+          <ExcelLikeImportGrid
+            artigos={artigos}
+            capitulos={capitulos}
+            grandesCapitulos={grandesCapitulos}
+            existingItems={items}
+            onAddToBudget={(novos) => {
+              if (!novos.length) {
+                setStatus("Nenhuma linha válida encontrada na tabela Excel.");
+                return;
+              }
+              setItems((prev) => [...prev, ...novos]);
+              setStatus(
+                `${novos.length} artigo${
+                  novos.length > 1 ? "s" : ""
+                } adicionados ao orçamento a partir da tabela Excel.`,
+              );
+            }}
+            onStatusChange={(message) => setStatus(message)}
+          />
         </section>
 
         {/* Resumo por capítulos */}
