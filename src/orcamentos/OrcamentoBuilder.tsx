@@ -87,6 +87,7 @@ type NovoArtigoDraft = {
   grandeCapituloCode: string;
   capituloCode: string;
   addToCatalog: boolean;
+  code?: string;
 };
 
 export function OrcamentoBuilder() {
@@ -285,31 +286,30 @@ export function OrcamentoBuilder() {
   }, []);
 
   async function inserirNovoArtigoDraft(draft: NovoArtigoDraft) {
-    const { description, unit, precoNum, grandeCapituloCode, capituloCode, addToCatalog } =
+    const { description, unit, precoNum, grandeCapituloCode, capituloCode, addToCatalog, code: draftCode } =
       draft;
     const capitulo = capitulos.find((c) => c.code === capituloCode);
     const kDefault = capitulo?.kFactor ?? 1;
 
     // Gerar código sequencial local no capítulo, ex.: J2.0004
-    const existingCodes = new Set<string>();
-    for (const a of artigos) existingCodes.add(a.code);
-    for (const it of items) existingCodes.add(it.code);
-    for (const d of novoArtigosPendentes) {
-      // pendentes ainda não têm código, ignoramos
-      void d;
-    }
+    let code = draftCode ?? "";
+    if (!code) {
+      const existingCodes = new Set<string>();
+      for (const a of artigos) existingCodes.add(a.code);
+      for (const it of items) existingCodes.add(it.code);
 
-    let nextNumber = 0;
-    for (const code of existingCodes) {
-      if (!code.startsWith(`${capituloCode}.`)) continue;
-      const suffix = code.slice(capituloCode.length + 1);
-      const num = parseInt(suffix.replace(/\D/g, ""), 10);
-      if (!Number.isNaN(num) && num > nextNumber) {
-        nextNumber = num;
+      let nextNumber = 0;
+      for (const c of existingCodes) {
+        if (!c.startsWith(`${capituloCode}.`)) continue;
+        const suffix = c.slice(capituloCode.length + 1);
+        const num = parseInt(suffix.replace(/\D/g, ""), 10);
+        if (!Number.isNaN(num) && num > nextNumber) {
+          nextNumber = num;
+        }
       }
+      const localCodeNumber = nextNumber + 1;
+      code = `${capituloCode}.${String(localCodeNumber).padStart(4, "0")}`;
     }
-    const localCodeNumber = nextNumber + 1;
-    let code = `${capituloCode}.${String(localCodeNumber).padStart(4, "0")}`;
 
     if (addToCatalog) {
       try {
@@ -1218,9 +1218,30 @@ export function OrcamentoBuilder() {
                         if (!novoArtigosPendentes.length) return;
                         setNovoArtigoSubmitting(true);
                         try {
+                          // Construir conjunto de códigos atualmente usados
+                          const usedCodes = new Set<string>();
+                          for (const a of artigos) usedCodes.add(a.code);
+                          for (const it of items) usedCodes.add(it.code);
+
                           for (const draft of novoArtigosPendentes) {
+                            // Gerar código único para este draft com base nos usados
+                            let nextNumber = 0;
+                            for (const c of usedCodes) {
+                              if (!c.startsWith(`${draft.capituloCode}.`)) continue;
+                              const suffix = c.slice(draft.capituloCode.length + 1);
+                              const num = parseInt(suffix.replace(/\D/g, ""), 10);
+                              if (!Number.isNaN(num) && num > nextNumber) {
+                                nextNumber = num;
+                              }
+                            }
+                            const localCodeNumber = nextNumber + 1;
+                            const code = `${draft.capituloCode}.${String(
+                              localCodeNumber,
+                            ).padStart(4, "0")}`;
+                            usedCodes.add(code);
+
                             // eslint-disable-next-line no-await-in-loop
-                            await inserirNovoArtigoDraft(draft);
+                            await inserirNovoArtigoDraft({ ...draft, code });
                           }
                           setNovoArtigosPendentes([]);
                           setStatus("Todos os artigos da lista foram adicionados ao orçamento.");
