@@ -101,6 +101,8 @@ export function OrcamentoBuilder() {
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [visibleColumns, setVisibleColumns] = useState({
     code: true,
+    grandeCapituloCode: true,
+    capituloCode: true,
     description: true,
     qty: true,
     kAplicado: true,
@@ -768,6 +770,8 @@ export function OrcamentoBuilder() {
             {(
               [
                 ["code", "Código"],
+                ["grandeCapituloCode", "Grande cap."],
+                ["capituloCode", "Capítulo"],
                 ["description", "Descrição"],
                 ["qty", "Qtd."],
                 ["kAplicado", "K"],
@@ -803,6 +807,12 @@ export function OrcamentoBuilder() {
                 <tr className="text-[11px] uppercase tracking-wide text-slate-500">
                   {visibleColumns.code && (
                     <th className="px-3 py-2">Código</th>
+                  )}
+                  {visibleColumns.grandeCapituloCode && (
+                    <th className="px-3 py-2">Grande cap.</th>
+                  )}
+                  {visibleColumns.capituloCode && (
+                    <th className="px-3 py-2">Capítulo</th>
                   )}
                   {visibleColumns.description && (
                     <th className="px-3 py-2">Descrição</th>
@@ -922,6 +932,81 @@ export function OrcamentoBuilder() {
                                 ×
                               </button>
                               {it.code}
+                            </td>
+                          )}
+                          {visibleColumns.grandeCapituloCode && (
+                            <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                              <select
+                                className="w-28 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                                value={it.grandeCapituloCode}
+                                onChange={(e) => {
+                                  const gcCode = e.target.value;
+                                  setItems((prev) =>
+                                    prev.map((row) => {
+                                      if (row.rowId !== it.rowId) return row;
+                                      const capsForGc = capitulos.filter(
+                                        (c) => c.grandeCapituloCode === gcCode,
+                                      );
+                                      const currentCapValid = capsForGc.some(
+                                        (c) => c.code === row.capituloCode,
+                                      );
+                                      const newCapCode = currentCapValid
+                                        ? row.capituloCode
+                                        : capsForGc[0]?.code ?? row.capituloCode;
+                                      return {
+                                        ...row,
+                                        grandeCapituloCode: gcCode,
+                                        capituloCode: newCapCode,
+                                      };
+                                    }),
+                                  );
+                                }}
+                              >
+                                {grandesCapitulos.map((gc) => (
+                                  <option key={gc.code} value={gc.code}>
+                                    {gc.code}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                          )}
+                          {visibleColumns.capituloCode && (
+                            <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                              <select
+                                className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                                value={it.capituloCode}
+                                onChange={(e) => {
+                                  const capCode = e.target.value;
+                                  setItems((prev) =>
+                                    prev.map((row) => {
+                                      if (row.rowId !== it.rowId) return row;
+                                      const cap = capitulos.find(
+                                        (c) => c.code === capCode,
+                                      );
+                                      return cap
+                                        ? {
+                                            ...row,
+                                            capituloCode: cap.code,
+                                            grandeCapituloCode:
+                                              cap.grandeCapituloCode,
+                                          }
+                                        : row;
+                                    }),
+                                  );
+                                }}
+                              >
+                                {capitulos
+                                  .filter(
+                                    (c) =>
+                                      c.grandeCapituloCode ===
+                                      it.grandeCapituloCode,
+                                  )
+                                  .map((c) => (
+                                    <option key={c.code} value={c.code}>
+                                      {c.code}
+                                    </option>
+                                  ))}
+                              </select>
                             </td>
                           )}
                           {visibleColumns.description && (
