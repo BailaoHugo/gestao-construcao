@@ -61,38 +61,74 @@ function createRowId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Converte texto colado (linhas com tab ou ;) em DraftBudgetItem[] */
-function pastedTextToItems(text: string): DraftBudgetItem[] {
-  const grid = pasteToGrid(text);
-  if (grid.length === 0) return [];
-  const firstCap = capitulos[0];
-  const gcCode = firstCap?.grandeCapituloCode ?? "?";
-  const capCode = firstCap?.code ?? "?";
+/** Converte colunas separadas em DraftBudgetItem[].
+ * Cada coluna é uma string com uma linha por artigo. */
+function columnsToItems(opts: {
+  colGc: string;
+  colCap: string;
+  colDesc: string;
+  colUnit: string;
+  colQty: string;
+  colCost: string;
+}): DraftBudgetItem[] {
+  const split = (s: string) => s.split(/\r?\n/);
+  const gcLines = split(opts.colGc);
+  const capLines = split(opts.colCap);
+  const descLines = split(opts.colDesc);
+  const unitLines = split(opts.colUnit);
+  const qtyLines = split(opts.colQty);
+  const costLines = split(opts.colCost);
+
   const parseNum = (s: string) => {
     const n = parseFloat(String(s).replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : 0;
   };
+
+  const maxLen = Math.max(
+    gcLines.length,
+    capLines.length,
+    descLines.length,
+    unitLines.length,
+    qtyLines.length,
+    costLines.length,
+  );
+
+  const nextNumberByCap = new Map<string, number>();
   const items: DraftBudgetItem[] = [];
-  for (let i = 0; i < grid.length; i++) {
-    const row = grid[i];
-    if (!row || row.every((c) => !c.trim())) continue;
-    const code = (row[0] ?? "").trim();
-    const desc = (row[1] ?? "").trim();
-    const qtd = row.length >= 3 ? parseNum(row[2]) : 0;
-    const unit = (row[3] ?? "").trim() || "un";
-    const price = row.length >= 5 ? parseNum(row[4]) : 0;
-    if (!code && !desc && qtd === 0 && price === 0) continue;
+
+  for (let i = 0; i < maxLen; i++) {
+    const rawDesc = (descLines[i] ?? "").trim();
+    const rawUnit = (unitLines[i] ?? "").trim();
+    const rawQty = (qtyLines[i] ?? "").trim();
+    const rawCost = (costLines[i] ?? "").trim();
+    const rawGc = (gcLines[i] ?? "").trim();
+    const rawCap = (capLines[i] ?? "").trim();
+
+    if (!rawDesc && !rawUnit && !rawQty && !rawCost) continue;
+
+    const gcCode = rawGc || capitulos[0]?.grandeCapituloCode || "?";
+    const capCode = rawCap || capitulos[0]?.code || "?";
+    const quantity = rawQty ? parseNum(rawQty) : 1;
+    const unit = rawUnit || "un";
+    const unitPrice = rawCost ? parseNum(rawCost) : 0;
+
+    const prev = nextNumberByCap.get(capCode) ?? 0;
+    const next = prev + 1;
+    nextNumberByCap.set(capCode, next);
+    const code = `${capCode}.${String(next).padStart(4, "0")}`;
+
     items.push({
       rowId: createRowId(),
       code,
-      description: desc,
+      description: rawDesc,
       unit,
-      quantity: qtd,
-      unitPrice: price,
+      quantity,
+      unitPrice,
       grandeCapituloCode: gcCode,
       capituloCode: capCode,
     });
   }
+
   return items;
 }
 
@@ -210,7 +246,12 @@ export default function ImportarOrcamentoPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfFileName, setPdfFileName] = useState<string | null>(null);
   const [meta, setMeta] = useState<BudgetMeta>(() => defaultMeta());
-  const [pastedLines, setPastedLines] = useState("");
+  const [colGc, setColGc] = useState("");
+  const [colCap, setColCap] = useState("");
+  const [colDesc, setColDesc] = useState("");
+  const [colUnit, setColUnit] = useState("");
+  const [colQty, setColQty] = useState("");
+  const [colCost, setColCost] = useState("");
   const [items, setItems] = useState<DraftBudgetItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -240,7 +281,8 @@ export default function ImportarOrcamentoPage() {
       const buf = await file.arrayBuffer();
       const text = await extractPdfAsText(buf);
       if (text.trim()) {
-        setPastedLines((prev) => (prev.trim() ? prev : text));
+        // texto bruto pode ser usado como cola rápida na coluna de descrição
+        setColDesc((prev) => (prev.trim() ? prev : text));
         const date = tryExtractDate(text);
         if (date) setMeta((m) => ({ ...m, dataProposta: date }));
       }
@@ -261,10 +303,17 @@ export default function ImportarOrcamentoPage() {
   );
 
   const applyPastedLines = useCallback(() => {
-    const next = pastedTextToItems(pastedLines);
+    const next = columnsToItems({
+      colGc,
+      colCap,
+      colDesc,
+      colUnit,
+      colQty,
+      colCost,
+    });
     setItems(next);
     setError(null);
-  }, [pastedLines]);
+  }, [colGc, colCap, colDesc, colUnit, colQty, colCost]);
 
   const metaWithCodigo = useCallback((): BudgetMeta => {
     const codigo = buildCodigoInterno(meta);
@@ -413,21 +462,88 @@ export default function ImportarOrcamentoPage() {
 
             <div className="border-t border-slate-100 pt-4">
               <label className="block text-xs font-medium text-slate-700">
-                Linhas do orçamento (cole aqui; separar colunas por tab ou ;)
+                Linhas do orçamento (colar coluna a coluna)
               </label>
-              <textarea
-                value={pastedLines}
-                onChange={(e) => setPastedLines(e.target.value)}
-                placeholder="Código	Descrição	Quantidade	Unidade	Preço"
-                rows={6}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-xs"
-              />
+              <p className="mb-2 text-[10px] text-slate-500">
+                Cada campo é uma coluna: cole uma linha por artigo (por exemplo, a coluna de
+                &quot;Descrição&quot; do Excel na caixa de Descrição, a coluna de &quot;Unidade&quot;
+                na caixa de Unid., etc.). Os códigos serão gerados automaticamente a partir do
+                Grande Capítulo e Capítulo.
+              </p>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Grande Capítulo (uma linha por artigo, ex.: J)
+                  </label>
+                  <textarea
+                    value={colGc}
+                    onChange={(e) => setColGc(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Capítulo (ex.: J2)
+                  </label>
+                  <textarea
+                    value={colCap}
+                    onChange={(e) => setColCap(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Descrição
+                  </label>
+                  <textarea
+                    value={colDesc}
+                    onChange={(e) => setColDesc(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Unid.
+                  </label>
+                  <textarea
+                    value={colUnit}
+                    onChange={(e) => setColUnit(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Quantidade
+                  </label>
+                  <textarea
+                    value={colQty}
+                    onChange={(e) => setColQty(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-medium text-slate-700">
+                    Custo unitário (€)
+                  </label>
+                  <textarea
+                    value={colCost}
+                    onChange={(e) => setColCost(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px]"
+                  />
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={applyPastedLines}
-                className="mt-2 rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                className="mt-3 rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
               >
-                Aplicar linhas
+                Aplicar colunas
               </button>
             </div>
 
