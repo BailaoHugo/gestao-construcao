@@ -10,7 +10,6 @@ import type {
 } from "./domain";
 import { useBudgetDraft } from "./BudgetDraftContext";
 import { generateNextCodeForCap } from "./codeUtils";
-import { ExcelLikeImportGrid } from "./ExcelLikeImportGrid";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const staticArtigos: ArtigoMaster[] = require("../../data/orcamentos/processed/artigos_master.json");
@@ -126,12 +125,6 @@ export function OrcamentoBuilder() {
   const [novoArtigoAddToCatalog, setNovoArtigoAddToCatalog] = useState(false);
   const [novoArtigoSubmitting, setNovoArtigoSubmitting] = useState(false);
   const [novoArtigosPendentes, setNovoArtigosPendentes] = useState<NovoArtigoDraft[]>([]);
-  const [bulkColGc, setBulkColGc] = useState("");
-  const [bulkColCap, setBulkColCap] = useState("");
-  const [bulkColDesc, setBulkColDesc] = useState("");
-  const [bulkColUnit, setBulkColUnit] = useState("");
-  const [bulkColQty, setBulkColQty] = useState("");
-  const [bulkColCost, setBulkColCost] = useState("");
   useEffect(() => {
     fetch("/api/artigos")
       .then((r) => (r.ok ? r.json() : []))
@@ -282,6 +275,45 @@ export function OrcamentoBuilder() {
   function removeItem(rowId: string) {
     setItems((prev) => prev.filter((it) => it.rowId !== rowId));
     setStatus("Artigo removido.");
+  }
+
+  function addEmptyPreviewRow() {
+    const firstCap = capitulos[0];
+    if (!firstCap) {
+      setStatus("Não há capítulos configurados para criar uma nova linha.");
+      return;
+    }
+
+    const usedCodes = new Set<string>();
+    for (const a of artigos) usedCodes.add(a.code);
+    for (const it of items) usedCodes.add(it.code);
+
+    const capituloCode = firstCap.code;
+    const grandeCapituloCode = firstCap.grandeCapituloCode;
+    const code = generateNextCodeForCap(capituloCode, usedCodes);
+    const kDefault = firstCap.kFactor ?? 1;
+    const custoUnitario = 0;
+    const precoVendaUnitario = 0;
+
+    setItems((prev) => [
+      ...prev,
+      {
+        rowId: createRowId(),
+        code,
+        description: "",
+        unit: "un",
+        quantity: 1,
+        unitPrice: precoVendaUnitario,
+        kAplicado: kDefault,
+        custoUnitario,
+        precoVendaUnitario,
+        grandeCapituloCode,
+        capituloCode,
+      },
+    ]);
+    setStatus(
+      "Nova linha vazia adicionada. Preencha diretamente na tabela do preview.",
+    );
   }
 
   const capitulosByGC = useMemo(() => {
@@ -706,16 +738,25 @@ export function OrcamentoBuilder() {
                   {showCatalog ? "⤢" : "☰"}
                 </button>
               </div>
-              <p className="text-xs text-slate-500">
-                Total:{" "}
-                <span className="font-semibold text-slate-900">
-                  {total.toLocaleString("pt-PT", {
-                    style: "currency",
-                    currency: "EUR",
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={addEmptyPreviewRow}
+                  className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  + Adicionar linha manual
+                </button>
+                <p className="text-xs text-slate-500">
+                  Total:{" "}
+                  <span className="font-semibold text-slate-900">
+                    {total.toLocaleString("pt-PT", {
+                      style: "currency",
+                      currency: "EUR",
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </p>
+              </div>
             </div>
 
             <FolhaRostoResumo meta={meta} />
@@ -801,8 +842,8 @@ export function OrcamentoBuilder() {
                       }
                       className="px-3 py-6 text-center text-[11px] text-slate-400"
                     >
-                      Ainda não adicionou artigos. Use o campo de comandos para
-                      começar.
+                      Ainda não adicionou artigos. Use o campo de comandos ou o
+                      botão &quot;+ Adicionar linha manual&quot; para começar.
                     </td>
                   </tr>
                 ) : (
@@ -885,7 +926,21 @@ export function OrcamentoBuilder() {
                           )}
                           {visibleColumns.description && (
                             <td className="max-w-xs px-3 py-2 text-[11px] text-slate-800">
-                              {it.description}
+                              <input
+                                type="text"
+                                className="w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] text-slate-800 outline-none focus:border-slate-400"
+                                value={it.description}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setItems((prev) =>
+                                    prev.map((row) =>
+                                      row.rowId === it.rowId
+                                        ? { ...row, description: value }
+                                        : row,
+                                    ),
+                                  );
+                                }}
+                              />
                             </td>
                           )}
                           {visibleColumns.qty && (
@@ -943,7 +998,21 @@ export function OrcamentoBuilder() {
                           )}
                           {visibleColumns.unit && (
                             <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-700">
-                              {it.unit}
+                              <input
+                                type="text"
+                                className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] text-slate-800 outline-none focus:border-slate-400"
+                                value={it.unit}
+                                onChange={(e) => {
+                                  const value = e.target.value.trim();
+                                  setItems((prev) =>
+                                    prev.map((row) =>
+                                      row.rowId === it.rowId
+                                        ? { ...row, unit: value || row.unit }
+                                        : row,
+                                    ),
+                                  );
+                                }}
+                              />
                             </td>
                           )}
                           {visibleColumns.unitPrice && (
@@ -969,14 +1038,34 @@ export function OrcamentoBuilder() {
                           )}
                           {visibleColumns.custoUnitario && (
                             <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                              {(it.custoUnitario ?? 0).toLocaleString(
-                                "pt-PT",
-                                {
-                                  style: "currency",
-                                  currency: "EUR",
-                                  minimumFractionDigits: 2,
-                                },
-                              )}
+                              <input
+                                type="text"
+                                className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] text-slate-800 outline-none focus:border-slate-400"
+                                value={
+                                  it.custoUnitario !== undefined
+                                    ? it.custoUnitario.toString().replace(".", ",")
+                                    : ""
+                                }
+                                onChange={(e) => {
+                                  const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
+                                  const n = Number(raw);
+                                  if (Number.isNaN(n) || n < 0) return;
+                                  setItems((prev) =>
+                                    prev.map((row) => {
+                                      if (row.rowId !== it.rowId) return row;
+                                      const k = row.kAplicado ?? 1;
+                                      const precoVendaUnitario =
+                                        n > 0 ? n * k : row.precoVendaUnitario ?? row.unitPrice;
+                                      return {
+                                        ...row,
+                                        custoUnitario: n,
+                                        precoVendaUnitario,
+                                        unitPrice: precoVendaUnitario,
+                                      };
+                                    }),
+                                  );
+                                }}
+                              />
                             </td>
                           )}
                           {visibleColumns.precoVendaUnitario && (
@@ -1274,254 +1363,6 @@ export function OrcamentoBuilder() {
               )}
             </div>
           )}
-        </section>
-
-        {/* Importar artigos em massa (Excel) */}
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Importar artigos em massa (Excel)
-          </h2>
-          <p className="mb-3 text-[10px] text-slate-500">
-            Cole cada coluna vinda do Excel nas caixas abaixo (uma linha por artigo).
-            Os códigos serão gerados automaticamente por capítulo.
-          </p>
-          <div className="grid gap-3 md:grid-cols-3">
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Grande capítulo (GC)
-              </label>
-              <textarea
-                rows={5}
-                value={bulkColGc}
-                onChange={(e) => setBulkColGc(e.target.value)}
-                placeholder={`Ex.:\nJ\nJ\nJ`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Capítulo
-              </label>
-              <textarea
-                rows={5}
-                value={bulkColCap}
-                onChange={(e) => setBulkColCap(e.target.value)}
-                placeholder={`Ex.:\nJ1\nJ1\nJ2`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-            <div className="md:col-span-1 md:row-span-2">
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Descrição
-              </label>
-              <textarea
-                rows={10}
-                value={bulkColDesc}
-                onChange={(e) => setBulkColDesc(e.target.value)}
-                placeholder={`Ex.:\nDemolição de parede...\nRemoção de entulho...\nFornecimento e aplicação...`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-          </div>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Unidade
-              </label>
-              <textarea
-                rows={4}
-                value={bulkColUnit}
-                onChange={(e) => setBulkColUnit(e.target.value)}
-                placeholder={`Ex.:\nm²\nm²\nun`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Quantidade
-              </label>
-              <textarea
-                rows={4}
-                value={bulkColQty}
-                onChange={(e) => setBulkColQty(e.target.value)}
-                placeholder={`Ex.:\n10\n5\n2`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-600">
-                Custo unitário (€)
-              </label>
-              <textarea
-                rows={4}
-                value={bulkColCost}
-                onChange={(e) => setBulkColCost(e.target.value)}
-                placeholder={`Ex.:\n25,00\n15,50\n120,00`}
-                className="mt-1 w-full rounded border border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800"
-              />
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-              onClick={() => {
-                const split = (s: string) =>
-                  s
-                    .split(/\r?\n/)
-                    // Não remover linhas vazias ainda; precisamos manter alinhamento pelos índices
-                    .map((line) => line);
-                const gcLines = split(bulkColGc);
-                const capLines = split(bulkColCap);
-                const descLines = split(bulkColDesc);
-                const unitLines = split(bulkColUnit);
-                const qtyLines = split(bulkColQty);
-                const costLines = split(bulkColCost);
-
-                const parseNum = (value: string) => {
-                  const cleaned = value.replace(/\s/g, "").replace(",", ".");
-                  const n = Number.parseFloat(cleaned);
-                  return Number.isFinite(n) ? n : 0;
-                };
-
-                const maxLen = Math.max(
-                  gcLines.length,
-                  capLines.length,
-                  descLines.length,
-                  unitLines.length,
-                  qtyLines.length,
-                  costLines.length,
-                );
-
-                if (!capitulos.length) {
-                  setStatus(
-                    "Não há capítulos configurados. Não foi possível importar os artigos.",
-                  );
-                  return;
-                }
-
-                const usedCodes = new Set<string>();
-                for (const a of artigos) usedCodes.add(a.code);
-                for (const it of items) usedCodes.add(it.code);
-
-                const novos: DraftBudgetItem[] = [];
-
-                for (let i = 0; i < maxLen; i += 1) {
-                  const rawDesc = (descLines[i] ?? "").trim();
-                  const rawUnit = (unitLines[i] ?? "").trim();
-                  const rawQty = (qtyLines[i] ?? "").trim();
-                  const rawCost = (costLines[i] ?? "").trim();
-                  const rawGc = (gcLines[i] ?? "").trim();
-                  const rawCap = (capLines[i] ?? "").trim();
-
-                  if (!rawDesc && !rawUnit && !rawQty && !rawCost) continue;
-
-                  let gcCode = rawGc;
-                  let capCode = rawCap;
-
-                  const firstCap = capitulos[0];
-
-                  if (!capCode && firstCap) {
-                    capCode = firstCap.code;
-                  }
-
-                  if (!gcCode) {
-                    const cap = capitulos.find((c) => c.code === capCode);
-                    if (cap) {
-                      gcCode = cap.grandeCapituloCode;
-                    } else if (firstCap) {
-                      gcCode = firstCap.grandeCapituloCode;
-                    } else {
-                      gcCode = "?";
-                    }
-                  }
-
-                  if (!capCode) {
-                    // Se mesmo após os fallbacks não tivermos capítulo, saltar a linha
-                    // para evitar códigos inválidos.
-                    // eslint-disable-next-line no-continue
-                    continue;
-                  }
-
-                  const quantity = rawQty ? parseNum(rawQty) || 1 : 1;
-                  const unit = rawUnit || "un";
-                  const custoUnitario = rawCost ? parseNum(rawCost) : 0;
-
-                  const capitulo = capitulos.find((c) => c.code === capCode);
-                  const kAplicado = capitulo?.kFactor ?? 1;
-                  const precoVendaUnitario =
-                    custoUnitario && kAplicado ? custoUnitario * kAplicado : custoUnitario;
-                  const unitPrice = precoVendaUnitario || custoUnitario;
-
-                  const code = generateNextCodeForCap(capCode, usedCodes);
-                  usedCodes.add(code);
-
-                  novos.push({
-                    rowId: createRowId(),
-                    code,
-                    description: rawDesc,
-                    unit,
-                    quantity,
-                    unitPrice,
-                    kAplicado,
-                    custoUnitario,
-                    precoVendaUnitario,
-                    grandeCapituloCode: gcCode,
-                    capituloCode: capCode,
-                  });
-                }
-
-                if (!novos.length) {
-                  setStatus("Nenhuma linha válida encontrada nas colagens.");
-                  return;
-                }
-
-                setItems((prev) => [...prev, ...novos]);
-                setStatus(
-                  `${novos.length} artigo${
-                    novos.length > 1 ? "s" : ""
-                  } adicionados ao orçamento a partir da colagem.`,
-                );
-              }}
-            >
-              Adicionar ao orçamento
-            </button>
-            <p className="text-[10px] text-slate-500">
-              Linhas vazias são ignoradas. Pode ajustar quantidades, K e preços
-              diretamente no preview após a importação.
-            </p>
-          </div>
-        </section>
-
-        {/* Tabela tipo Excel para importar artigos */}
-        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Tabela tipo Excel para importar artigos
-          </h2>
-          <p className="mb-3 text-[10px] text-slate-500">
-            Edite diretamente numa grelha tipo Excel ou cole um bloco inteiro
-            vindo do Excel/Sheets. Cada linha será convertida em artigo do
-            orçamento com códigos sequenciais únicos.
-          </p>
-          <ExcelLikeImportGrid
-            artigos={artigos}
-            capitulos={capitulos}
-            grandesCapitulos={grandesCapitulos}
-            existingItems={items}
-            onAddToBudget={(novos) => {
-              if (!novos.length) {
-                setStatus("Nenhuma linha válida encontrada na tabela Excel.");
-                return;
-              }
-              setItems((prev) => [...prev, ...novos]);
-              setStatus(
-                `${novos.length} artigo${
-                  novos.length > 1 ? "s" : ""
-                } adicionados ao orçamento a partir da tabela Excel.`,
-              );
-            }}
-            onStatusChange={(message) => setStatus(message)}
-          />
         </section>
 
         {/* Resumo por capítulos */}
