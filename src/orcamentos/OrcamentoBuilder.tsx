@@ -285,11 +285,21 @@ export function OrcamentoBuilder() {
       setStatus("Preço unitário inválido.");
       return;
     }
-    if (!novoArtigoGC || !novoArtigoCap) {
-      setStatus("Selecione Grande Capítulo e Capítulo.");
-      return;
+    let gcCode = novoArtigoGC;
+    let capCode = novoArtigoCap;
+
+    // Se o utilizador não escolheu explicitamente, usar o primeiro capítulo disponível
+    if (!gcCode || !capCode) {
+      const firstCap = capitulos[0];
+      if (!firstCap) {
+        setStatus("Não há capítulos disponíveis para associar o artigo.");
+        return;
+      }
+      gcCode = firstCap.grandeCapituloCode;
+      capCode = firstCap.code;
     }
-    const capitulo = capitulos.find((c) => c.code === novoArtigoCap);
+
+    const capitulo = capitulos.find((c) => c.code === capCode);
     const kDefault = capitulo?.kFactor ?? 1;
 
     setNovoArtigoSubmitting(true);
@@ -303,8 +313,8 @@ export function OrcamentoBuilder() {
           body: JSON.stringify({
             description,
             unit,
-            grandeCapituloCode: novoArtigoGC,
-            capituloCode: novoArtigoCap,
+            grandeCapituloCode: gcCode,
+            capituloCode: capCode,
             puCusto: precoNum,
             puVendaFixo: precoNum * kDefault,
           }),
