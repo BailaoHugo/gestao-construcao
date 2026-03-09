@@ -79,6 +79,16 @@ interface ResumoCapituloRow {
   vendaTotal: number;
 }
 
+type NovoArtigoDraft = {
+  id: string;
+  description: string;
+  unit: string;
+  precoNum: number;
+  grandeCapituloCode: string;
+  capituloCode: string;
+  addToCatalog: boolean;
+};
+
 export function OrcamentoBuilder() {
   const [status, setStatus] = useState<string | null>(
     'Use comandos como "adicionar A1.0001 q=2" ou pesquise por texto.',
@@ -112,6 +122,7 @@ export function OrcamentoBuilder() {
   const [novoArtigoCap, setNovoArtigoCap] = useState("");
   const [novoArtigoAddToCatalog, setNovoArtigoAddToCatalog] = useState(false);
   const [novoArtigoSubmitting, setNovoArtigoSubmitting] = useState(false);
+  const [novoArtigosPendentes, setNovoArtigosPendentes] = useState<NovoArtigoDraft[]>([]);
   useEffect(() => {
     fetch("/api/artigos")
       .then((r) => (r.ok ? r.json() : []))
@@ -273,6 +284,76 @@ export function OrcamentoBuilder() {
     return m;
   }, []);
 
+  async function inserirNovoArtigoDraft(draft: NovoArtigoDraft) {
+    const { description, unit, precoNum, grandeCapituloCode, capituloCode, addToCatalog } =
+      draft;
+    const capitulo = capitulos.find((c) => c.code === capituloCode);
+    const kDefault = capitulo?.kFactor ?? 1;
+
+    // Gerar código sequencial local no capítulo, ex.: J2.0004
+    let nextNumber = 0;
+    for (const a of artigos) {
+      if (!a.code.startsWith(`${capituloCode}.`)) continue;
+      const suffix = a.code.slice(capituloCode.length + 1);
+      const num = parseInt(suffix.replace(/\D/g, ""), 10);
+      if (!Number.isNaN(num) && num > nextNumber) {
+        nextNumber = num;
+      }
+    }
+    const localCodeNumber = nextNumber + 1;
+    let code = `${capituloCode}.${String(localCodeNumber).padStart(4, "0")}`;
+
+    if (addToCatalog) {
+      try {
+        const res = await fetch("/api/artigos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description,
+            unit,
+            grandeCapituloCode,
+            capituloCode,
+            puCusto: precoNum,
+            puVendaFixo: precoNum * kDefault,
+          }),
+        });
+        if (res.ok) {
+          const row = (await res.json()) as CustomArticleFromApi;
+          code = row.code;
+          setCustomArticles((prev) => [...prev, row]);
+        } else {
+          const err = (await res.json().catch(() => ({}))) as { error?: string };
+          setStatus(
+            err.error ||
+              "Não foi possível adicionar ao catálogo, mas o artigo foi adicionado ao orçamento.",
+          );
+        }
+      } catch {
+        setStatus(
+          "Erro ao ligar ao catálogo. O artigo foi adicionado apenas a este orçamento.",
+        );
+      }
+    }
+
+    const unitPrice = precoNum * kDefault;
+    setItems((prev) => [
+      ...prev,
+      {
+        rowId: createRowId(),
+        code,
+        description,
+        unit,
+        quantity: 1,
+        unitPrice,
+        kAplicado: kDefault,
+        custoUnitario: precoNum,
+        precoVendaUnitario: unitPrice,
+        grandeCapituloCode,
+        capituloCode,
+      },
+    ]);
+  }
+
   async function addNovoArtigo() {
     const description = novoArtigoDesc.trim();
     const unit = novoArtigoUnit === "Outro" ? novoArtigoUnitOther.trim() : novoArtigoUnit;
@@ -288,7 +369,6 @@ export function OrcamentoBuilder() {
     let gcCode = novoArtigoGC;
     let capCode = novoArtigoCap;
 
-    // Se o utilizador não escolheu explicitamente, usar o primeiro capítulo disponível
     if (!gcCode || !capCode) {
       const firstCap = capitulos[0];
       if (!firstCap) {
@@ -299,80 +379,22 @@ export function OrcamentoBuilder() {
       capCode = firstCap.code;
     }
 
-    const capitulo = capitulos.find((c) => c.code === capCode);
-    const kDefault = capitulo?.kFactor ?? 1;
-
     setNovoArtigoSubmitting(true);
     setStatus(null);
     try {
-      // Código base local sequencial no capítulo, ex.: J2.0004
-      let nextNumber = 0;
-      for (const a of artigos) {
-        if (!a.code.startsWith(`${capCode}.`)) continue;
-        const suffix = a.code.slice(capCode.length + 1);
-        const num = parseInt(suffix.replace(/\D/g, ""), 10);
-        if (!Number.isNaN(num) && num > nextNumber) {
-          nextNumber = num;
-        }
-      }
-      const localCodeNumber = nextNumber + 1;
-      let code = `${capCode}.${String(localCodeNumber).padStart(4, "0")}`;
-
-      if (novoArtigoAddToCatalog) {
-        try {
-          const res = await fetch("/api/artigos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              description,
-              unit,
-              grandeCapituloCode: gcCode,
-              capituloCode: capCode,
-              puCusto: precoNum,
-              puVendaFixo: precoNum * kDefault,
-            }),
-          });
-          if (res.ok) {
-            const row = (await res.json()) as CustomArticleFromApi;
-            code = row.code;
-            setCustomArticles((prev) => [...prev, row]);
-          } else {
-            const err = (await res.json().catch(() => ({}))) as {
-              error?: string;
-            };
-            setStatus(
-              err.error ||
-                "Não foi possível adicionar ao catálogo, mas o artigo foi adicionado ao orçamento.",
-            );
-          }
-        } catch {
-          setStatus(
-            "Erro ao ligar ao catálogo. O artigo foi adicionado apenas a este orçamento.",
-          );
-        }
-      }
-
-      const unitPrice = precoNum * kDefault;
-      setItems((prev) => [
-        ...prev,
-        {
-          rowId: createRowId(),
-          code,
-          description,
-          unit,
-          quantity: 1,
-          unitPrice,
-          kAplicado: kDefault,
-          custoUnitario: precoNum,
-          precoVendaUnitario: unitPrice,
-          grandeCapituloCode: gcCode,
-          capituloCode: capCode,
-        },
-      ]);
+      await inserirNovoArtigoDraft({
+        id: createRowId(),
+        description,
+        unit,
+        precoNum,
+        grandeCapituloCode: gcCode,
+        capituloCode: capCode,
+        addToCatalog: novoArtigoAddToCatalog,
+      });
       setStatus(
         novoArtigoAddToCatalog
-          ? `Artigo ${code} adicionado ao orçamento e ao catálogo (ou apenas local se o catálogo falhou).`
-          : `Artigo ${code} adicionado ao orçamento.`,
+          ? "Artigo adicionado ao orçamento e ao catálogo (ou apenas local se o catálogo falhou)."
+          : "Artigo adicionado ao orçamento.",
       );
       setNovoArtigoDesc("");
       setNovoArtigoPreco("");
@@ -1111,14 +1133,131 @@ export function OrcamentoBuilder() {
                 />
                 Adicionar também ao catálogo para orçamentos futuros
               </label>
-              <button
-                type="button"
-                onClick={() => addNovoArtigo()}
-                disabled={novoArtigoSubmitting}
-                className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-              >
-                {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => addNovoArtigo()}
+                  disabled={novoArtigoSubmitting}
+                  className="rounded-full bg-slate-800 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+                >
+                  {novoArtigoSubmitting ? "A adicionar…" : "Adicionar ao orçamento"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const description = novoArtigoDesc.trim();
+                    const unit =
+                      novoArtigoUnit === "Outro"
+                        ? novoArtigoUnitOther.trim()
+                        : novoArtigoUnit;
+                    const precoNum = parseFloat(
+                      novoArtigoPreco.replace(",", "."),
+                    );
+                    if (!description || !unit || Number.isNaN(precoNum) || precoNum < 0) {
+                      setStatus(
+                        "Para adicionar à lista preencha descrição, unidade e preço válido.",
+                      );
+                      return;
+                    }
+                    let gcCode = novoArtigoGC;
+                    let capCode = novoArtigoCap;
+                    const firstCap = capitulos[0];
+                    if ((!gcCode || !capCode) && firstCap) {
+                      gcCode = firstCap.grandeCapituloCode;
+                      capCode = firstCap.code;
+                    }
+                    if (!gcCode || !capCode) {
+                      setStatus(
+                        "Não há capítulos disponíveis para associar o artigo à lista.",
+                      );
+                      return;
+                    }
+                    setNovoArtigosPendentes((prev) => [
+                      ...prev,
+                      {
+                        id: createRowId(),
+                        description,
+                        unit,
+                        precoNum,
+                        grandeCapituloCode: gcCode!,
+                        capituloCode: capCode!,
+                        addToCatalog: novoArtigoAddToCatalog,
+                      },
+                    ]);
+                    setStatus("Artigo adicionado à lista (ainda não no orçamento).");
+                    setNovoArtigoDesc("");
+                    setNovoArtigoPreco("");
+                    setNovoArtigoUnitOther("");
+                  }}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                >
+                  Adicionar à lista
+                </button>
+              </div>
+              {novoArtigosPendentes.length > 0 && (
+                <div className="mt-4 space-y-2 rounded-lg border border-slate-100 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between text-[11px] text-slate-600">
+                    <span>
+                      {novoArtigosPendentes.length} artigo
+                      {novoArtigosPendentes.length > 1 && "s"} na lista para
+                      adicionar ao orçamento.
+                    </span>
+                    <button
+                      type="button"
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100"
+                      disabled={novoArtigoSubmitting}
+                      onClick={async () => {
+                        if (!novoArtigosPendentes.length) return;
+                        setNovoArtigoSubmitting(true);
+                        try {
+                          for (const draft of novoArtigosPendentes) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await inserirNovoArtigoDraft(draft);
+                          }
+                          setNovoArtigosPendentes([]);
+                          setStatus("Todos os artigos da lista foram adicionados ao orçamento.");
+                        } finally {
+                          setNovoArtigoSubmitting(false);
+                        }
+                      }}
+                    >
+                      {novoArtigoSubmitting
+                        ? "A adicionar lista…"
+                        : "Adicionar todos ao orçamento"}
+                    </button>
+                  </div>
+                  <div className="max-h-40 overflow-auto rounded border border-slate-100 bg-white">
+                    <table className="min-w-full border-collapse text-[11px]">
+                      <thead className="bg-slate-50">
+                        <tr className="text-slate-500">
+                          <th className="px-2 py-1 text-left">Descrição</th>
+                          <th className="px-2 py-1 text-left">Un.</th>
+                          <th className="px-2 py-1 text-right">PU</th>
+                          <th className="px-2 py-1 text-left">Cap.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {novoArtigosPendentes.map((a) => (
+                          <tr key={a.id} className="border-t border-slate-100">
+                            <td className="px-2 py-1">{a.description}</td>
+                            <td className="px-2 py-1">{a.unit}</td>
+                            <td className="px-2 py-1 text-right">
+                              {a.precoNum.toLocaleString("pt-PT", {
+                                style: "currency",
+                                currency: "EUR",
+                                minimumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td className="px-2 py-1">
+                              {a.capituloCode}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
