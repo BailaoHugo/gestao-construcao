@@ -30,9 +30,9 @@ export default function Home() {
 
           <ModuleCard
             title="Obras"
-            description="Planeamento, acompanhamento e controlo de obras (em breve)."
-            actionLabel="Em breve"
-            disabled
+            description="Planeamento, acompanhamento e controlo de obras. Registo de despesas e facturas."
+            actionLabel="Abrir módulo"
+            href="/obras"
             icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
             iconVariant="amber"
           />

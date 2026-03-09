@@ -102,6 +102,46 @@ export function pasteToGrid(text: string): string[][] {
   );
 }
 
+/** Extrai texto simples do PDF (todas as páginas, uma linha por linha de texto) — para preencher à mão ou sugerir. */
+export async function extractPdfAsText(arrayBuffer: ArrayBuffer): Promise<string> {
+  const pdfjs = await import("pdfjs-dist");
+  if (typeof window !== "undefined") {
+    (pdfjs as unknown as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc =
+      "/pdf.worker.min.mjs";
+  }
+  const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const lines: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const items = content.items as { str: string; transform: number[] }[];
+    type Item = { str: string; y: number; x: number };
+    const withPos: Item[] = items.map((it) => ({
+      str: it.str,
+      y: it.transform[5] ?? 0,
+      x: it.transform[4] ?? 0,
+    }));
+    withPos.sort((a, b) => {
+      const dy = b.y - a.y;
+      if (Math.abs(dy) > 2) return dy;
+      return a.x - b.x;
+    });
+    const lineThreshold = 3;
+    let currentY = withPos[0]?.y ?? 0;
+    let currentLine: string[] = [];
+    for (const it of withPos) {
+      if (Math.abs(it.y - currentY) > lineThreshold) {
+        if (currentLine.length) lines.push(currentLine.join(" ").trim());
+        currentLine = [];
+        currentY = it.y;
+      }
+      currentLine.push(it.str);
+    }
+    if (currentLine.length) lines.push(currentLine.join(" ").trim());
+  }
+  return lines.filter((l) => l.length > 0).join("\n");
+}
+
 /** Excel: primeira sheet para grelha (headers = primeira linha, depois dados) */
 export async function excelToGrid(file: File): Promise<string[][]> {
   const XLSX = await import("xlsx");
