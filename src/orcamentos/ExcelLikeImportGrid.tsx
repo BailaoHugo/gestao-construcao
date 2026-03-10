@@ -206,6 +206,9 @@ export function ExcelLikeImportGrid({
   const [rows, setRows] = useState<ExcelRow[]>(
     Array.from({ length: 10 }, () => createEmptyRow()),
   );
+  const [massGc, setMassGc] = useState<string>("");
+  const [massCap, setMassCap] = useState<string>("");
+  const [massK, setMassK] = useState<string>("");
 
   const baseUsedCodes = useMemo(() => {
     const s = new Set<string>();
@@ -243,6 +246,16 @@ export function ExcelLikeImportGrid({
     return m;
   }, [artigos, existingItems]);
 
+  const gcOptions = useMemo(
+    () => grandesCapitulos.map((g) => g.code),
+    [grandesCapitulos],
+  );
+
+  const capOptions = useMemo(
+    () => capitulos.map((c) => c.code),
+    [capitulos],
+  );
+
   useEffect(() => {
     setRows((prev) =>
       recalcAllRows(
@@ -271,6 +284,78 @@ export function ExcelLikeImportGrid({
 
   const handleAddEmptyRows = () => {
     setRows((prev) => [...prev, createEmptyRow(), createEmptyRow(), createEmptyRow()]);
+  };
+
+  const applyMassGc = () => {
+    if (!massGc) return;
+    const next = rows.map((row) => ({ ...row, gc: massGc }));
+    setRows(
+      recalcAllRows(
+        next,
+        baseUsedCodes,
+        capitulos,
+        validGcCodes,
+        validCapCodes,
+        descToCodeByCap,
+      ),
+    );
+    if (onStatusChange) {
+      onStatusChange(`Grande capítulo ${massGc} aplicado a todas as linhas.`);
+    }
+  };
+
+  const applyMassCap = () => {
+    if (!massCap) return;
+    const next = rows.map((row) => ({ ...row, cap: massCap }));
+    setRows(
+      recalcAllRows(
+        next,
+        baseUsedCodes,
+        capitulos,
+        validGcCodes,
+        validCapCodes,
+        descToCodeByCap,
+      ),
+    );
+    if (onStatusChange) {
+      onStatusChange(`Capítulo ${massCap} aplicado a todas as linhas.`);
+    }
+  };
+
+  const applyMassK = () => {
+    const kNum = parseNum(massK);
+    if (!kNum || kNum <= 0) return;
+    const next = rows.map((row) => ({ ...row, k: kNum.toString() }));
+    setRows(
+      recalcAllRows(
+        next,
+        baseUsedCodes,
+        capitulos,
+        validGcCodes,
+        validCapCodes,
+        descToCodeByCap,
+      ),
+    );
+    if (onStatusChange) {
+      onStatusChange(`K=${kNum} aplicado a todas as linhas.`);
+    }
+  };
+
+  const regenerateCodes = () => {
+    const cleared = rows.map((row) => ({ ...row, code: "" }));
+    setRows(
+      recalcAllRows(
+        cleared,
+        baseUsedCodes,
+        capitulos,
+        validGcCodes,
+        validCapCodes,
+        descToCodeByCap,
+      ),
+    );
+    if (onStatusChange) {
+      onStatusChange("Códigos regenerados com base em GC, capítulo e descrição.");
+    }
   };
 
   const handleAddToBudgetClick = () => {
@@ -370,6 +455,77 @@ export function ExcelLikeImportGrid({
 
   return (
     <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-600">
+        <span className="font-medium text-slate-700">Ações em massa:</span>
+        <label className="inline-flex items-center gap-1">
+          <span>GC</span>
+          <select
+            value={massGc}
+            onChange={(e) => setMassGc(e.target.value)}
+            className="rounded border border-slate-200 bg-white px-2 py-1 text-[10px]"
+          >
+            <option value="">—</option>
+            {gcOptions.map((gc) => (
+              <option key={gc} value={gc}>
+                {gc}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={applyMassGc}
+            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Aplicar GC a todas
+          </button>
+        </label>
+        <label className="inline-flex items-center gap-1">
+          <span>Cap.</span>
+          <select
+            value={massCap}
+            onChange={(e) => setMassCap(e.target.value)}
+            className="rounded border border-slate-200 bg-white px-2 py-1 text-[10px]"
+          >
+            <option value="">—</option>
+            {capOptions.map((cap) => (
+              <option key={cap} value={cap}>
+                {cap}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={applyMassCap}
+            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Aplicar capítulo a todas
+          </button>
+        </label>
+        <label className="inline-flex items-center gap-1">
+          <span>K</span>
+          <input
+            type="text"
+            value={massK}
+            onChange={(e) => setMassK(e.target.value)}
+            className="w-14 rounded border border-slate-200 px-2 py-1 text-[10px]"
+            placeholder="1,00"
+          />
+          <button
+            type="button"
+            onClick={applyMassK}
+            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Aplicar K a todas
+          </button>
+        </label>
+        <button
+          type="button"
+          onClick={regenerateCodes}
+          className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Regerar códigos
+        </button>
+      </div>
       <div className="h-72 max-h-[28rem] overflow-hidden rounded border border-slate-100">
         <DataGrid
           columns={columns}
