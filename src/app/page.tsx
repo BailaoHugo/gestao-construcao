@@ -38,6 +38,15 @@ export default function Home() {
           />
 
           <ModuleCard
+            title="Propostas"
+            description="Criar, guardar, consultar e imprimir propostas comerciais."
+            actionLabel="Abrir módulo"
+            href="/propostas"
+            icon={<span className="text-xs font-semibold tracking-tight">PR</span>}
+            iconVariant="emerald"
+          />
+
+          <ModuleCard
             title="Clientes"
             description="Gestão de clientes e contactos associados às obras (em breve)."
             actionLabel="Em breve"
