@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Proposta, PropostaLinha } from "@/propostas/domain";
 import {
@@ -79,6 +80,12 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/propostas/${proposta.id}/print`}
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            Imprimir / PDF
+          </Link>
           <span
             className={`rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white ${
               revisaoAtiva.estado === "EMITIDA"
