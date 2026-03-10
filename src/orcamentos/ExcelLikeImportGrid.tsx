@@ -155,8 +155,8 @@ function recalcAllRows(
 }
 
 const columns: readonly Column<ExcelRow>[] = [
-  { key: "gc", name: "GC", width: 70, resizable: true },
-  { key: "cap", name: "Capítulo", width: 80, resizable: true },
+  { key: "gc", name: "GC", width: 70, resizable: true, editable: true },
+  { key: "cap", name: "Capítulo", width: 80, resizable: true, editable: true },
   {
     key: "code",
     name: "Código",
@@ -168,17 +168,19 @@ const columns: readonly Column<ExcelRow>[] = [
     key: "descricao",
     name: "Descrição",
     resizable: true,
+    editable: true,
   },
-  { key: "qtd", name: "Qtd", width: 70, resizable: true },
-  { key: "k", name: "K", width: 60, resizable: true },
-  { key: "unidade", name: "Unid.", width: 70, resizable: true },
+  { key: "qtd", name: "Qtd", width: 70, resizable: true, editable: true },
+  { key: "k", name: "K", width: 60, resizable: true, editable: true },
+  { key: "unidade", name: "Unid.", width: 70, resizable: true, editable: true },
   {
     key: "custoUnit",
     name: "Custo unitário",
     width: 110,
     resizable: true,
+    editable: true,
   },
-  { key: "pu", name: "PU venda", width: 100, resizable: true },
+  { key: "pu", name: "PU venda", width: 100, resizable: true, editable: true },
   {
     key: "total",
     name: "Total",
