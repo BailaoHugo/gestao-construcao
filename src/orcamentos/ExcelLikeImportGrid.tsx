@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { DataGrid, type Column } from "react-data-grid";
@@ -60,21 +60,12 @@ function parseNum(value: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function normalizeText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
 function recalcAllRows(
   rows: ExcelRow[],
   baseUsedCodes: Set<string>,
   capitulos: Capitulo[],
   validGcCodes: Set<string>,
   validCapCodes: Set<string>,
-  descToCodeByCap: Map<string, string>,
 ): ExcelRow[] {
   const used = new Set(baseUsedCodes);
   const firstCap = capitulos[0];
@@ -121,16 +112,11 @@ function recalcAllRows(
     const margemNum =
       custoNum && puNum ? ((puNum - custoNum) / custoNum) * 100 : Number.NaN;
 
-    const descNorm = normalizeText(row.descricao);
     let code = row.code.trim();
-    if (cap && descNorm) {
-      const key = `${cap}::${descNorm}`;
-      const existing = descToCodeByCap.get(key);
-      if (existing) {
-        code = existing;
-      } else if (!code) {
-        code = generateNextCodeForCap(cap, used);
-      }
+    if (cap && gc && !code) {
+      code = generateNextCodeForCap(cap, used);
+      used.add(code);
+    } else if (code) {
       used.add(code);
     }
 
@@ -208,6 +194,7 @@ export function ExcelLikeImportGrid({
   const [rows, setRows] = useState<ExcelRow[]>(
     Array.from({ length: 10 }, () => createEmptyRow()),
   );
+  const [rawPaste, setRawPaste] = useState<string>("");
   const [massGc, setMassGc] = useState<string>("");
   const [massCap, setMassCap] = useState<string>("");
   const [massK, setMassK] = useState<string>("");
@@ -229,25 +216,6 @@ export function ExcelLikeImportGrid({
     [capitulos],
   );
 
-  const descToCodeByCap = useMemo(() => {
-    const m = new Map<string, string>();
-    const add = (capCode: string, description: string, code: string) => {
-      const norm = normalizeText(description);
-      if (!norm) return;
-      const key = `${capCode}::${norm}`;
-      if (!m.has(key)) m.set(key, code);
-    };
-
-    for (const a of artigos) {
-      add(a.capituloCode, a.description, a.code);
-    }
-    for (const it of existingItems) {
-      add(it.capituloCode, it.description, it.code);
-    }
-
-    return m;
-  }, [artigos, existingItems]);
-
   const gcOptions = useMemo(
     () => grandesCapitulos.map((g) => g.code),
     [grandesCapitulos],
@@ -266,10 +234,9 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
-  }, [baseUsedCodes, capitulos, validGcCodes, validCapCodes, descToCodeByCap]);
+  }, [baseUsedCodes, capitulos, validGcCodes, validCapCodes]);
 
   const handleRowsChange = (nextRows: ExcelRow[]) => {
     setRows(
@@ -279,7 +246,6 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
   };
@@ -298,7 +264,6 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
     if (onStatusChange) {
@@ -316,7 +281,6 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
     if (onStatusChange) {
@@ -335,7 +299,6 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
     if (onStatusChange) {
@@ -352,7 +315,6 @@ export function ExcelLikeImportGrid({
         capitulos,
         validGcCodes,
         validCapCodes,
-        descToCodeByCap,
       ),
     );
     if (onStatusChange) {
@@ -367,7 +329,6 @@ export function ExcelLikeImportGrid({
       capitulos,
       validGcCodes,
       validCapCodes,
-      descToCodeByCap,
     );
     setRows(updatedRows);
 
@@ -457,6 +418,79 @@ export function ExcelLikeImportGrid({
 
   return (
     <div className="space-y-2">
+      <div className="space-y-1 text-[10px] text-slate-600">
+        <label className="block font-medium text-slate-700">
+          Colar linhas do Excel
+        </label>
+        <textarea
+          value={rawPaste}
+          onChange={(e) => setRawPaste(e.target.value)}
+          rows={4}
+          placeholder={
+            "Cole aqui linhas copiadas do Excel\nFormato esperado (colunas separadas por TAB):\nDescrição\tQtd\tUnid\tPU"
+          }
+          className="w-full rounded border border-slate-200 px-2 py-1 text-[11px] font-mono text-slate-800 placeholder:text-slate-400"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const text = rawPaste.trim();
+            if (!text) return;
+            const lines = text.split(/\r?\n/);
+            const parsed: ExcelRow[] = [];
+            for (const line of lines) {
+              const parts = line.split("\t");
+              const descricao = (parts[0] ?? "").trim();
+              const qtd = (parts[1] ?? "").trim();
+              const unidade = (parts[2] ?? "").trim();
+              const pu = (parts[3] ?? "").trim();
+              if (!descricao && !qtd && !unidade && !pu) continue;
+              parsed.push({
+                id: `${Date.now().toString(36)}-${Math.random()
+                  .toString(36)
+                  .slice(2, 8)}`,
+                gc: "",
+                cap: "",
+                code: "",
+                descricao,
+                qtd,
+                k: "",
+                unidade,
+                custoUnit: "",
+                pu,
+                total: "",
+                margemPercent: "",
+              });
+            }
+            if (!parsed.length) {
+              if (onStatusChange) {
+                onStatusChange(
+                  "Não foram encontradas linhas válidas na colagem (esperado: Descrição, Qtd, Unid, PU).",
+                );
+              }
+              return;
+            }
+            const recalculated = recalcAllRows(
+              parsed,
+              baseUsedCodes,
+              capitulos,
+              validGcCodes,
+              validCapCodes,
+            );
+            setRows(recalculated);
+            if (onStatusChange) {
+              onStatusChange(
+                `${recalculated.length} linha${
+                  recalculated.length > 1 ? "s" : ""
+                } importadas a partir da colagem.`,
+              );
+            }
+          }}
+          className="mt-1 rounded-full bg-slate-800 px-3 py-1 text-[10px] font-medium text-white hover:bg-slate-700"
+        >
+          Processar colagem
+        </button>
+      </div>
       <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-600">
         <span className="font-medium text-slate-700">Ações em massa:</span>
         <label className="inline-flex items-center gap-1">
