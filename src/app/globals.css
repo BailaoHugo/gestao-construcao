@@ -84,6 +84,16 @@ body {
   button {
     box-shadow: none !important;
   }
+
+  table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
 }
 
 
