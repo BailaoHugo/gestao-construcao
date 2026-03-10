@@ -10,6 +10,7 @@ import type {
 } from "./domain";
 import { useBudgetDraft } from "./BudgetDraftContext";
 import { generateNextCodeForCap } from "./codeUtils";
+import { ExcelLikeImportGrid } from "./ExcelLikeImportGrid";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const staticArtigos: ArtigoMaster[] = require("../../data/orcamentos/processed/artigos_master.json");
@@ -1448,6 +1449,37 @@ export function OrcamentoBuilder() {
               )}
             </div>
           )}
+        </section>
+
+        {/* Importar artigos em massa (grelha tipo Excel) */}
+        <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Importar artigos em massa (Excel)
+          </h2>
+          <p className="mb-3 text-[10px] text-slate-500">
+            Cole diretamente aqui blocos de Excel (GC, Cap., descrição, qtd,
+            unidade, custos). Use as ações em massa para alinhar GC/Cap/K e
+            depois adicione tudo ao orçamento de uma só vez.
+          </p>
+          <ExcelLikeImportGrid
+            artigos={artigos}
+            capitulos={capitulos}
+            grandesCapitulos={grandesCapitulos}
+            existingItems={items}
+            onAddToBudget={(novos) => {
+              if (!novos.length) {
+                setStatus("Nenhuma linha válida encontrada na tabela Excel.");
+                return;
+              }
+              setItems((prev) => [...prev, ...novos]);
+              setStatus(
+                `${novos.length} artigo${
+                  novos.length > 1 ? "s" : ""
+                } adicionados ao orçamento a partir da grelha Excel.`,
+              );
+            }}
+            onStatusChange={(message) => setStatus(message)}
+          />
         </section>
 
         {/* Resumo por capítulos */}
