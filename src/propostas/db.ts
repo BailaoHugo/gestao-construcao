@@ -390,7 +390,7 @@ export async function createPropostaWithRevisao(
           created_at,
           updated_at
         )
-        values ($1, $2, 1, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        values ($1, $2, 1, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
       `,
       [
         revisaoId,

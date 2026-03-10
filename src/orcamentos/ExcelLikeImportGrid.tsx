@@ -1,7 +1,6 @@
- "use client";
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { DataGrid, type Column } from "react-data-grid";
 import type {
   ArtigoMaster,
   Capitulo,
@@ -139,49 +138,6 @@ function recalcAllRows(
     };
   });
 }
-
-const columns: readonly Column<ExcelRow>[] = [
-  { key: "gc", name: "GC", width: 70, resizable: true, editable: true },
-  { key: "cap", name: "Capítulo", width: 80, resizable: true, editable: true },
-  {
-    key: "code",
-    name: "Código",
-    width: 100,
-    resizable: true,
-    editable: false,
-  },
-  {
-    key: "descricao",
-    name: "Descrição",
-    resizable: true,
-    editable: true,
-  },
-  { key: "qtd", name: "Qtd", width: 70, resizable: true, editable: true },
-  { key: "k", name: "K", width: 60, resizable: true, editable: true },
-  { key: "unidade", name: "Unid.", width: 70, resizable: true, editable: true },
-  {
-    key: "custoUnit",
-    name: "Custo unitário",
-    width: 110,
-    resizable: true,
-    editable: true,
-  },
-  { key: "pu", name: "PU venda", width: 100, resizable: true, editable: true },
-  {
-    key: "total",
-    name: "Total",
-    width: 110,
-    resizable: true,
-    editable: false,
-  },
-  {
-    key: "margemPercent",
-    name: "Margem %",
-    width: 100,
-    resizable: true,
-    editable: false,
-  },
-];
 
 export function ExcelLikeImportGrid({
   artigos,
@@ -562,13 +518,160 @@ export function ExcelLikeImportGrid({
           Regerar códigos
         </button>
       </div>
-      <div className="h-72 max-h-[28rem] overflow-hidden rounded border border-slate-100">
-        <DataGrid
-          columns={columns}
-          rows={rows}
-          onRowsChange={handleRowsChange}
-          className="rdg-light text-[11px]"
-        />
+      <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-100">
+        <table className="min-w-full border-collapse text-left text-xs">
+          <thead className="bg-slate-50">
+            <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+              <th className="px-3 py-2">GC</th>
+              <th className="px-3 py-2">Capítulo</th>
+              <th className="px-3 py-2">Código</th>
+              <th className="px-3 py-2">Descrição</th>
+              <th className="px-3 py-2 text-right">Qtd.</th>
+              <th className="px-3 py-2 text-right">K</th>
+              <th className="px-3 py-2">Unid.</th>
+              <th className="px-3 py-2 text-right">PU</th>
+              <th className="px-3 py-2 text-right">Total</th>
+              <th className="px-3 py-2 text-right">Margem %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={10}
+                  className="px-3 py-6 text-center text-[11px] text-slate-400"
+                >
+                  Ainda não há linhas importadas. Cole no campo acima e clique em
+                  &quot;Processar colagem&quot;.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-slate-100 last:border-0"
+                >
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                      value={row.gc}
+                      onChange={(e) => {
+                        const value = e.target.value.toUpperCase();
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, gc: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                      value={row.cap}
+                      onChange={(e) => {
+                        const value = e.target.value.toUpperCase();
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, cap: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-slate-800">
+                    {row.code}
+                  </td>
+                  <td className="px-3 py-2 text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                      value={row.descricao}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, descricao: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                      value={row.qtd}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, qtd: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                      value={row.k}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, k: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                      value={row.unidade}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, unidade: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    <input
+                      type="text"
+                      className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                      value={row.pu}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleRowsChange(
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, pu: value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    {row.total || "—"}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    {row.margemPercent
+                      ? `${row.margemPercent.replace(".", ",")} %`
+                      : "—"}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button
