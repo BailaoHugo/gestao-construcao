@@ -214,6 +214,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 <th className="px-3 py-2 text-right">Total Custo</th>
                 <th className="px-3 py-2 text-right">PU Venda</th>
                 <th className="px-3 py-2 text-right">Total Venda</th>
+                <th className="px-3 py-2 text-right">Margem</th>
               </tr>
             </thead>
             <tbody>
@@ -313,6 +314,22 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {formatCurrencyPt(linha.totalVendaLinha)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    {(() => {
+                      const margemValor =
+                        linha.totalVendaLinha - linha.totalCustoLinha;
+                      if (!Number.isFinite(margemValor)) {
+                        return "—";
+                      }
+                      const hasVenda = linha.totalVendaLinha > 0;
+                      const pct = hasVenda
+                        ? (margemValor / linha.totalVendaLinha) * 100
+                        : null;
+                      return pct !== null
+                        ? `${formatCurrencyPt(margemValor)} (${pct.toFixed(1)}%)`
+                        : formatCurrencyPt(margemValor);
+                    })()}
                   </td>
                 </tr>
               ))}
