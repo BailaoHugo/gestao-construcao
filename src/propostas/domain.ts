@@ -31,8 +31,10 @@ export interface PropostaLinha {
   descricao: string;
   unidade: string;
   quantidade: number;
-  precoUnitario: number;
-  totalLinha: number;
+  precoCustoUnitario: number;
+  totalCustoLinha: number;
+  precoVendaUnitario: number;
+  totalVendaLinha: number;
 }
 
 export interface PropostaRevisao {
@@ -42,7 +44,10 @@ export interface PropostaRevisao {
   estado: PropostaEstado;
   folhaRosto: PropostaFolhaRosto;
   linhas: PropostaLinha[];
-  total: number;
+  totalCusto: number;
+  totalVenda: number;
+  margemValor: number;
+  margemPercentagem: number;
   criadoEm: string; // ISO date-time
   atualizadoEm: string; // ISO date-time
 }

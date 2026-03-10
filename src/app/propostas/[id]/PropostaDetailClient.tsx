@@ -10,7 +10,7 @@ import {
 } from "@/propostas/format";
 
 function computeTotal(linhas: PropostaLinha[]): number {
-  return linhas.reduce((sum, l) => sum + l.totalLinha, 0);
+  return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
 }
 
 export function PropostaDetailClient({ initial }: { initial: Proposta }) {
@@ -39,14 +39,32 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           const quantidade = Number.isFinite(next.quantidade)
             ? next.quantidade
             : 0;
-          const preco = Number.isFinite(next.precoUnitario)
-            ? next.precoUnitario
+          const precoCusto = Number.isFinite(next.precoCustoUnitario)
+            ? next.precoCustoUnitario
             : 0;
-          next.totalLinha = quantidade * preco;
+          const precoVenda = Number.isFinite(next.precoVendaUnitario)
+            ? next.precoVendaUnitario
+            : 0;
+          next.totalCustoLinha = quantidade * precoCusto;
+          next.totalVendaLinha = quantidade * precoVenda;
           return next;
         });
-        const total = computeTotal(linhas);
-        return { ...rev, linhas, total };
+        const totalVenda = computeTotal(linhas);
+        const totalCusto = linhas.reduce(
+          (sum, l) => sum + l.totalCustoLinha,
+          0,
+        );
+        const margemValor = totalVenda - totalCusto;
+        const margemPercentagem =
+          totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
+        return {
+          ...rev,
+          linhas,
+          totalCusto,
+          totalVenda,
+          margemValor,
+          margemPercentagem,
+        };
       });
       const revisaoAtualizada =
         revisoesAtualizadas.find((r) => r.id === prev.revisaoAtual.id) ??
@@ -192,8 +210,10 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 <th className="px-3 py-2">Descrição</th>
                 <th className="px-3 py-2 text-right">Qtd.</th>
                 <th className="px-3 py-2">Unid.</th>
-                <th className="px-3 py-2 text-right">PU</th>
-                <th className="px-3 py-2 text-right">Total</th>
+                <th className="px-3 py-2 text-right">PU Custo</th>
+                <th className="px-3 py-2 text-right">Total Custo</th>
+                <th className="px-3 py-2 text-right">PU Venda</th>
+                <th className="px-3 py-2 text-right">Total Venda</th>
               </tr>
             </thead>
             <tbody>
@@ -259,19 +279,40 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                         min={0}
                         step="0.01"
                         className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.precoUnitario}
+                        value={linha.precoCustoUnitario}
                         onChange={(e) =>
                           handleLinhaChange(linha.id, {
-                            precoUnitario: Number(e.target.value) || 0,
+                            precoCustoUnitario: Number(e.target.value) || 0,
                           })
                         }
                       />
                     ) : (
-                      formatCurrencyPt(linha.precoUnitario)
+                      formatCurrencyPt(linha.precoCustoUnitario)
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalLinha)}
+                    {formatCurrencyPt(linha.totalCustoLinha)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    {podeEditar ? (
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                        value={linha.precoVendaUnitario}
+                        onChange={(e) =>
+                          handleLinhaChange(linha.id, {
+                            precoVendaUnitario: Number(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    ) : (
+                      formatCurrencyPt(linha.precoVendaUnitario)
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                    {formatCurrencyPt(linha.totalVendaLinha)}
                   </td>
                 </tr>
               ))}
@@ -285,12 +326,33 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         <div className="space-y-1 text-xs text-slate-600">
           <div>
             <span className="font-medium text-slate-700">
-              Total desta revisão:{" "}
+              Total custo:{" "}
             </span>
             <span className="text-sm font-semibold text-slate-900">
-              {formatCurrencyPt(revisaoAtiva.total)}
+              {formatCurrencyPt(revisaoAtiva.totalCusto)}
             </span>
           </div>
+          <div>
+            <span className="font-medium text-slate-700">
+              Total venda:{" "}
+            </span>
+            <span className="text-sm font-semibold text-slate-900">
+              {formatCurrencyPt(revisaoAtiva.totalVenda)}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-700">Margem: </span>
+            <span className="text-sm font-semibold text-slate-900">
+              {formatCurrencyPt(revisaoAtiva.margemValor)}{" "}
+              <span className="text-[11px] text-slate-500">
+                ({revisaoAtiva.margemPercentagem.toFixed(1)}%)
+              </span>
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Estes valores são calculados a partir das linhas; guardar alterações
+            ainda não atualiza a base de dados neste MVP.
+          </p>
         </div>
         {podeEditar && (
           <div className="flex flex-wrap items-center gap-2">

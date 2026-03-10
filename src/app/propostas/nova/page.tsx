@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PropostaFolhaRosto, PropostaLinha } from "@/propostas/domain";
+import { formatCurrencyPt } from "@/propostas/format";
 
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
@@ -27,8 +28,10 @@ function createEmptyLinha(): PropostaLinha {
     descricao: "",
     unidade: "",
     quantidade: 1,
-    precoUnitario: 0,
-    totalLinha: 0,
+    precoCustoUnitario: 0,
+    totalCustoLinha: 0,
+    precoVendaUnitario: 0,
+    totalVendaLinha: 0,
   };
 }
 
@@ -41,10 +44,20 @@ export default function NovaPropostaPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = useMemo(
-    () => linhas.reduce((sum, l) => sum + l.totalLinha, 0),
-    [linhas],
-  );
+  const totais = useMemo(() => {
+    const totalCusto = linhas.reduce(
+      (sum, l) => sum + l.totalCustoLinha,
+      0,
+    );
+    const totalVenda = linhas.reduce(
+      (sum, l) => sum + l.totalVendaLinha,
+      0,
+    );
+    const margemValor = totalVenda - totalCusto;
+    const margemPercentagem =
+      totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
+    return { totalCusto, totalVenda, margemValor, margemPercentagem };
+  }, [linhas]);
 
   const handleAddLinhaLivre = () => {
     setLinhas((prev) => [...prev, createEmptyLinha()]);
@@ -58,10 +71,14 @@ export default function NovaPropostaPage() {
         const quantidade = Number.isFinite(next.quantidade)
           ? next.quantidade
           : 0;
-        const preco = Number.isFinite(next.precoUnitario)
-          ? next.precoUnitario
+        const precoCusto = Number.isFinite(next.precoCustoUnitario)
+          ? next.precoCustoUnitario
           : 0;
-        next.totalLinha = quantidade * preco;
+        const precoVenda = Number.isFinite(next.precoVendaUnitario)
+          ? next.precoVendaUnitario
+          : 0;
+        next.totalCustoLinha = quantidade * precoCusto;
+        next.totalVendaLinha = quantidade * precoVenda;
         return next;
       }),
     );
@@ -104,13 +121,6 @@ export default function NovaPropostaPage() {
       setIsSaving(false);
     }
   };
-
-  const formatCurrency = (value: number) =>
-    value.toLocaleString("pt-PT", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    });
 
   return (
     <div className="space-y-6">
@@ -329,8 +339,10 @@ export default function NovaPropostaPage() {
                 <th className="px-3 py-2">Descrição</th>
                 <th className="px-3 py-2 text-right">Qtd.</th>
                 <th className="px-3 py-2">Unid.</th>
-                <th className="px-3 py-2 text-right">PU</th>
-                <th className="px-3 py-2 text-right">Total</th>
+                <th className="px-3 py-2 text-right">PU Custo</th>
+                <th className="px-3 py-2 text-right">Total Custo</th>
+                <th className="px-3 py-2 text-right">PU Venda</th>
+                <th className="px-3 py-2 text-right">Total Venda</th>
                 <th className="px-3 py-2" />
               </tr>
             </thead>
@@ -338,7 +350,7 @@ export default function NovaPropostaPage() {
               {linhas.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={8}
                     className="px-3 py-6 text-center text-[11px] text-slate-400"
                   >
                     Ainda não adicionou linhas. Use &quot;Adicionar linha
@@ -397,16 +409,33 @@ export default function NovaPropostaPage() {
                         min={0}
                         step="0.01"
                         className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.precoUnitario}
+                        value={linha.precoCustoUnitario}
                         onChange={(e) =>
                           handleLinhaChange(linha.id, {
-                            precoUnitario: Number(e.target.value) || 0,
+                            precoCustoUnitario: Number(e.target.value) || 0,
                           })
                         }
                       />
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                      {formatCurrency(linha.totalLinha)}
+                      {formatCurrencyPt(linha.totalCustoLinha)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                        value={linha.precoVendaUnitario}
+                        onChange={(e) =>
+                          handleLinhaChange(linha.id, {
+                            precoVendaUnitario: Number(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
+                      {formatCurrencyPt(linha.totalVendaLinha)}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-right">
                       <button
@@ -429,13 +458,33 @@ export default function NovaPropostaPage() {
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
         <div className="space-y-1 text-xs text-slate-600">
           <div>
-            <span className="font-medium text-slate-700">Total proposta: </span>
+            <span className="font-medium text-slate-700">
+              Total custo:{" "}
+            </span>
             <span className="text-sm font-semibold text-slate-900">
-              {formatCurrency(total)}
+              {formatCurrencyPt(totais.totalCusto)}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-700">
+              Total venda:{" "}
+            </span>
+            <span className="text-sm font-semibold text-slate-900">
+              {formatCurrencyPt(totais.totalVenda)}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium text-slate-700">Margem: </span>
+            <span className="text-sm font-semibold text-slate-900">
+              {formatCurrencyPt(totais.margemValor)}{" "}
+              <span className="text-[11px] text-slate-500">
+                ({totais.margemPercentagem.toFixed(1)}%)
+              </span>
             </span>
           </div>
           <p className="text-[11px] text-slate-500">
-            Os totais são calculados automaticamente a partir das linhas.
+            Os totais de custo e venda são calculados automaticamente a partir
+            das linhas; a margem é apenas informativa neste MVP.
           </p>
           {error && (
             <p className="text-[11px] text-red-600">

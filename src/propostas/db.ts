@@ -34,6 +34,10 @@ type RevisaoRow = {
   data_proposta: string | null;
   validade_texto: string | null;
   total: string | number | null;
+  total_custo: string | number | null;
+  total_venda: string | number | null;
+  margem_valor: string | number | null;
+  margem_percentagem: string | number | null;
   created_at: string;
   updated_at: string;
 };
@@ -50,6 +54,10 @@ type LinhaRow = {
   quantidade: string | number | null;
   preco_unitario: string | number | null;
   total_linha: string | number | null;
+  preco_custo_unitario: string | number | null;
+  total_custo_linha: string | number | null;
+  preco_venda_unitario: string | number | null;
+  total_venda_linha: string | number | null;
 };
 
 export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
@@ -63,7 +71,7 @@ export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
       estado_atual: string;
       created_at: string;
       numero_revisao: number;
-      total: string | number | null;
+      total_venda: string | number | null;
     }> = await client.query(
       `
         select
@@ -74,10 +82,10 @@ export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
           p.estado_atual,
           p.created_at,
           r.numero_revisao,
-          r.total
+          r.total_venda
         from propostas p
         left join lateral (
-          select numero_revisao, total
+          select numero_revisao, total_venda
           from proposta_revisoes
           where proposta_id = p.id
           order by numero_revisao desc
@@ -95,7 +103,7 @@ export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
       revisaoAtual: row.numero_revisao ?? 1,
       estadoAtual: (row.estado_atual as PropostaEstado) ?? "RASCUNHO",
       dataCriacao: row.created_at,
-      totalAtual: Number(row.total ?? 0),
+      totalAtual: Number(row.total_venda ?? 0),
     }));
   } finally {
     client.release();
@@ -173,7 +181,11 @@ export async function loadPropostaCompleta(
           unidade,
           quantidade,
           preco_unitario,
-          total_linha
+          total_linha,
+          preco_custo_unitario,
+          total_custo_linha,
+          preco_venda_unitario,
+          total_venda_linha
         from proposta_linhas
         where revisao_id = any($1::uuid[])
         order by revisao_id, ordem, created_at
@@ -183,15 +195,31 @@ export async function loadPropostaCompleta(
 
     const linhasByRevisao = new Map<string, PropostaLinha[]>();
     for (const row of linhasRes.rows) {
+      const quantidade = Number(row.quantidade ?? 0);
+      const precoCusto = Number(row.preco_custo_unitario ?? 0);
+      const precoVenda = Number(
+        row.preco_venda_unitario ?? row.preco_unitario ?? 0,
+      );
+      const totalCusto =
+        row.total_custo_linha !== null && row.total_custo_linha !== undefined
+          ? Number(row.total_custo_linha)
+          : quantidade * precoCusto;
+      const totalVenda =
+        row.total_venda_linha !== null && row.total_venda_linha !== undefined
+          ? Number(row.total_venda_linha)
+          : Number(row.total_linha ?? quantidade * precoVenda);
+
       const linha: PropostaLinha = {
         id: row.id,
         artigoId: row.artigo_id,
         origem: row.origem as PropostaLinha["origem"],
         descricao: row.descricao,
         unidade: row.unidade ?? "",
-        quantidade: Number(row.quantidade ?? 0),
-        precoUnitario: Number(row.preco_unitario ?? 0),
-        totalLinha: Number(row.total_linha ?? 0),
+        quantidade,
+        precoCustoUnitario: precoCusto,
+        totalCustoLinha: totalCusto,
+        precoVendaUnitario: precoVenda,
+        totalVendaLinha: totalVenda,
       };
       const list = linhasByRevisao.get(row.revisao_id) ?? [];
       list.push(linha);
@@ -220,7 +248,27 @@ export async function loadPropostaCompleta(
         estado: row.estado as PropostaEstado,
         folhaRosto,
         linhas,
-        total: Number(row.total ?? 0),
+        totalCusto: Number(
+          row.total_custo ??
+            linhas.reduce((sum, l) => sum + l.totalCustoLinha, 0),
+        ),
+        totalVenda: Number(
+          row.total_venda ??
+            linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0),
+        ),
+        margemValor: Number(
+          row.margem_valor ??
+            (Number(row.total_venda ?? 0) - Number(row.total_custo ?? 0)),
+        ),
+        margemPercentagem: Number(
+          row.margem_percentagem ??
+            (Number(row.total_venda ?? 0) > 0
+              ? ((Number(row.total_venda ?? 0) -
+                  Number(row.total_custo ?? 0)) /
+                  Number(row.total_venda ?? 0)) *
+                100
+              : 0),
+        ),
         criadoEm: row.created_at,
         atualizadoEm: row.updated_at,
       };
@@ -257,7 +305,32 @@ export async function createPropostaWithRevisao(
   const propostaId = randomUUID();
   const revisaoId = randomUUID();
 
-  const total = linhas.reduce((sum, l) => sum + (l.totalLinha ?? 0), 0);
+  const linhasEnriquecidas = linhas.map((linha) => {
+    const quantidade = linha.quantidade ?? 0;
+    const precoCusto = linha.precoCustoUnitario ?? 0;
+    const precoVenda = linha.precoVendaUnitario ?? 0;
+    const totalCusto = quantidade * precoCusto;
+    const totalVenda = quantidade * precoVenda;
+    return {
+      ...linha,
+      quantidade,
+      precoCustoUnitario: precoCusto,
+      precoVendaUnitario: precoVenda,
+      totalCustoLinha: totalCusto,
+      totalVendaLinha: totalVenda,
+    };
+  });
+
+  const totalCusto = linhasEnriquecidas.reduce(
+    (sum, l) => sum + l.totalCustoLinha,
+    0,
+  );
+  const totalVenda = linhasEnriquecidas.reduce(
+    (sum, l) => sum + l.totalVendaLinha,
+    0,
+  );
+  const margemValor = totalVenda - totalCusto;
+  const margemPercentagem = totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
 
   const codigo =
     "P-" +
@@ -310,10 +383,14 @@ export async function createPropostaWithRevisao(
           data_proposta,
           validade_texto,
           total,
+          total_custo,
+          total_venda,
+          margem_valor,
+          margem_percentagem,
           created_at,
           updated_at
         )
-        values ($1, $2, 1, $3, $4, $5, $6, $7, $7)
+        values ($1, $2, 1, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       `,
       [
         revisaoId,
@@ -324,13 +401,17 @@ export async function createPropostaWithRevisao(
           (folhaRosto.validadeDias
             ? `${folhaRosto.validadeDias} dias`
             : null),
-        total,
+        totalVenda,
+        totalCusto,
+        totalVenda,
+        margemValor,
+        margemPercentagem,
         now,
       ],
     );
 
     let ordem = 1;
-    for (const linha of linhas) {
+    for (const linha of linhasEnriquecidas) {
       const linhaId = randomUUID();
       await client.query(
         `
@@ -346,10 +427,14 @@ export async function createPropostaWithRevisao(
             quantidade,
             preco_unitario,
             total_linha,
+            preco_custo_unitario,
+            total_custo_linha,
+            preco_venda_unitario,
+            total_venda_linha,
             created_at,
             updated_at
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12)
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         `,
         [
           linhaId,
@@ -361,8 +446,12 @@ export async function createPropostaWithRevisao(
           linha.descricao,
           linha.unidade || null,
           linha.quantidade,
-          linha.precoUnitario,
-          linha.totalLinha,
+          linha.precoVendaUnitario,
+          linha.totalVendaLinha,
+          linha.precoCustoUnitario,
+          linha.totalCustoLinha,
+          linha.precoVendaUnitario,
+          linha.totalVendaLinha,
           now,
         ],
       );

@@ -109,7 +109,7 @@ export default async function PropostaPrintPage({
               <div className="mt-1 flex items-center justify-between gap-2 border-t border-slate-200 pt-1.5">
                 <dt className="text-slate-600">Total</dt>
                 <dd className="text-sm font-semibold text-slate-900">
-                  {formatCurrencyPt(rev.total)}
+                  {formatCurrencyPt(rev.totalVenda)}
                 </dd>
               </div>
             </dl>
@@ -147,10 +147,10 @@ export default async function PropostaPrintPage({
                     {linha.unidade}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.precoUnitario)}
+                    {formatCurrencyPt(linha.precoVendaUnitario)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalLinha)}
+                    {formatCurrencyPt(linha.totalVendaLinha)}
                   </td>
                 </tr>
               ))}
@@ -164,7 +164,7 @@ export default async function PropostaPrintPage({
             <div className="flex items-center justify-between">
               <span className="font-medium text-slate-700">Total proposta</span>
               <span className="text-base font-semibold text-slate-900">
-                {formatCurrencyPt(rev.total)}
+                {formatCurrencyPt(rev.totalVenda)}
               </span>
             </div>
           </div>
