@@ -1,9 +1,5 @@
 import { Pool } from "pg";
 
-// O código usa apenas process.env.DATABASE_URL (formato postgresql://…).
-// Para Vercel/serverless, usa a connection string do Supabase "Connection Pooler"
-// (Settings → Database → Connection string → URI, modo "Session" ou "Transaction";
-// host tipo aws-0-XX.pooler.supabase.com, porta 6543) para evitar esgotar ligações.
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -15,20 +11,18 @@ if (!connectionString) {
   );
 }
 
-// Supabase exige TLS; usar SSL sempre que a URL for do Supabase
-const useSsl =
-  !!process.env.VERCEL ||
-  (typeof connectionString === "string" && connectionString.includes("supabase"));
-
+// Supabase pooler usa TLS; o certificado intermédio pode não estar no truststore.
+// Forçamos a não rejeitar certificados "self-signed".
 export const pool = new Pool({
   connectionString,
-  ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+  ssl: { rejectUnauthorized: false },
 });
 
 export async function withTransaction<T>(
   fn: (client: import("pg").PoolClient) => Promise<T>,
 ): Promise<T> {
   const client = await pool.connect();
+
   try {
     await client.query("BEGIN");
     const result = await fn(client);
