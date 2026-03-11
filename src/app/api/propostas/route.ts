@@ -14,6 +14,32 @@ function getDbHostname(): string | null {
   }
 }
 
+export async function GET() {
+  const dbHost = getDbHostname();
+  if (!dbHost) {
+    console.error("[api/propostas] DATABASE_URL missing or invalid (no hostname)");
+    return NextResponse.json(
+      { error: "Database not configured" },
+      { status: 503 },
+    );
+  }
+
+  // Mantém a verificação DNS por consistência com o POST.
+  try {
+    await lookup(dbHost);
+  } catch (dnsErr) {
+    const msg = dnsErr instanceof Error ? dnsErr.message : String(dnsErr);
+    console.error("[api/propostas] DNS lookup failed for DB host:", dbHost, msg);
+    return NextResponse.json(
+      { error: "Database unreachable (DNS)" },
+      { status: 503 },
+    );
+  }
+
+  // TODO: substituir pela query real à BD quando tiveres o método/DB acessível.
+  return NextResponse.json([]);
+}
+
 export async function POST(req: NextRequest) {
   const dbHost = getDbHostname();
   if (!dbHost) {
@@ -80,4 +106,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
