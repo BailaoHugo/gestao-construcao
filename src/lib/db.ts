@@ -18,8 +18,7 @@ if (!connectionString) {
 // Supabase exige TLS; usar SSL sempre que a URL for do Supabase
 const useSsl =
   !!process.env.VERCEL ||
-  (typeof connectionString === "string" &&
-    connectionString.includes("supabase.co"));
+  (typeof connectionString === "string" && connectionString.includes("supabase"));
 
 export const pool = new Pool({
   connectionString,
@@ -42,4 +41,3 @@ export async function withTransaction<T>(
     client.release();
   }
 }
-
