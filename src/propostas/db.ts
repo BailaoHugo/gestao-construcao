@@ -58,7 +58,29 @@ type LinhaRow = {
   total_custo_linha: string | number | null;
   preco_venda_unitario: string | number | null;
   total_venda_linha: string | number | null;
+  grande_capitulo: string | null;
+  capitulo: string | null;
 };
+
+function sortPropostaLinhas(linhas: PropostaLinha[]): PropostaLinha[] {
+  return [...linhas].sort((a, b) => {
+    const aGc = (a.grandeCapitulo ?? "").toUpperCase();
+    const bGc = (b.grandeCapitulo ?? "").toUpperCase();
+    if (aGc !== bGc) {
+      return aGc.localeCompare(bGc, "pt-PT");
+    }
+
+    const aCap = (a.capitulo ?? "").toUpperCase();
+    const bCap = (b.capitulo ?? "").toUpperCase();
+    if (aCap !== bCap) {
+      return aCap.localeCompare(bCap, "pt-PT", { numeric: true });
+    }
+
+    const aDesc = (a.descricao ?? "").toUpperCase();
+    const bDesc = (b.descricao ?? "").toUpperCase();
+    return aDesc.localeCompare(bDesc, "pt-PT");
+  });
+}
 
 export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
   const client = await pool.connect();
@@ -185,7 +207,9 @@ export async function loadPropostaCompleta(
           preco_custo_unitario,
           total_custo_linha,
           preco_venda_unitario,
-          total_venda_linha
+          total_venda_linha,
+          grande_capitulo,
+          capitulo
         from proposta_linhas
         where revisao_id = any($1::uuid[])
         order by revisao_id, ordem, created_at
@@ -215,6 +239,8 @@ export async function loadPropostaCompleta(
         origem: row.origem as PropostaLinha["origem"],
         descricao: row.descricao,
         unidade: row.unidade ?? "",
+        grandeCapitulo: row.grande_capitulo ?? "",
+        capitulo: row.capitulo ?? "",
         quantidade,
         precoCustoUnitario: precoCusto,
         totalCustoLinha: totalCusto,
@@ -227,7 +253,8 @@ export async function loadPropostaCompleta(
     }
 
     const revisoes: PropostaRevisao[] = revisoesRes.rows.map((row) => {
-      const linhas = linhasByRevisao.get(row.id) ?? [];
+      const linhasNaoOrdenadas = linhasByRevisao.get(row.id) ?? [];
+      const linhas = sortPropostaLinhas(linhasNaoOrdenadas);
       const folhaRosto: PropostaFolhaRosto = {
         clienteNome: propostaRow.cliente_nome,
         clienteContacto: propostaRow.cliente_contacto ?? undefined,
@@ -431,10 +458,12 @@ export async function createPropostaWithRevisao(
             total_custo_linha,
             preco_venda_unitario,
             total_venda_linha,
+            grande_capitulo,
+            capitulo,
             created_at,
             updated_at
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
         `,
         [
           linhaId,
@@ -452,6 +481,8 @@ export async function createPropostaWithRevisao(
           linha.totalCustoLinha,
           linha.precoVendaUnitario,
           linha.totalVendaLinha,
+          linha.grandeCapitulo ?? null,
+          linha.capitulo ?? null,
           now,
           now,
         ],

@@ -18,6 +18,40 @@ export default async function PropostaPrintPage({
 
   const { revisaoAtual: rev } = proposta;
 
+  const gruposPorCapitulo: {
+    capitulo: string;
+    grandeCapitulo: string | null;
+    linhas: typeof rev.linhas;
+    subtotal: number;
+  }[] = [];
+
+  for (const linha of rev.linhas) {
+    const capituloTrim = (linha.capitulo ?? "").trim();
+    const grandeTrim = (linha.grandeCapitulo ?? "").trim();
+    const capitulo =
+      capituloTrim.length > 0 ? capituloTrim : "Sem capítulo";
+    const grandeCapitulo =
+      grandeTrim.length > 0 ? grandeTrim : null;
+
+    let grupo = gruposPorCapitulo.find((g) => g.capitulo === capitulo);
+    if (!grupo) {
+      grupo = {
+        capitulo,
+        grandeCapitulo,
+        linhas: [],
+        subtotal: 0,
+      };
+      gruposPorCapitulo.push(grupo);
+    }
+
+    grupo.linhas.push(linha);
+    grupo.subtotal += linha.totalVendaLinha;
+
+    if (!grupo.grandeCapitulo && grandeCapitulo) {
+      grupo.grandeCapitulo = grandeCapitulo;
+    }
+  }
+
   return (
     <div className="print-page text-xs text-slate-800">
       <div className="mx-auto max-w-[180mm] space-y-6">
@@ -116,46 +150,66 @@ export default async function PropostaPrintPage({
           </div>
         </section>
 
-        {/* Tabela de linhas */}
-        <section className="print-section mt-4 space-y-2">
+        {/* Tabela de linhas por capítulo */}
+        <section className="print-section mt-4 space-y-3">
           <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
             Detalhe da proposta
           </h2>
-          <table className="min-w-full border-collapse text-left text-xs">
-            <thead className="border-b border-slate-200 bg-slate-50">
-              <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-                <th className="px-3 py-2">Descrição</th>
-                <th className="px-3 py-2 text-right">Qtd.</th>
-                <th className="px-3 py-2">Unid.</th>
-                <th className="px-3 py-2 text-right">PU</th>
-                <th className="px-3 py-2 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rev.linhas.map((linha) => (
-                <tr
-                  key={linha.id}
-                  className="border-b border-slate-100 last:border-0"
-                >
-                  <td className="px-3 py-2 align-top text-[11px] text-slate-800">
-                    {linha.descricao}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                    {linha.quantidade}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-800">
-                    {linha.unidade}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.precoVendaUnitario)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalVendaLinha)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {gruposPorCapitulo.map((grupo) => (
+            <div key={grupo.capitulo} className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                  CAP. {grupo.capitulo}
+                </h3>
+                {grupo.grandeCapitulo && (
+                  <span className="text-[10px] text-slate-500">
+                    Grande capítulo {grupo.grandeCapitulo}
+                  </span>
+                )}
+              </div>
+              <table className="min-w-full border-collapse text-left text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+                    <th className="px-3 py-2">Descrição</th>
+                    <th className="px-3 py-2 text-right">Qtd.</th>
+                    <th className="px-3 py-2">Unid.</th>
+                    <th className="px-3 py-2 text-right">PU</th>
+                    <th className="px-3 py-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {grupo.linhas.map((linha) => (
+                    <tr
+                      key={linha.id}
+                      className="border-b border-slate-100 last:border-0"
+                    >
+                      <td className="px-3 py-2 align-top text-[11px] text-slate-800">
+                        {linha.descricao}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
+                        {linha.quantidade}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-800">
+                        {linha.unidade}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
+                        {formatCurrencyPt(linha.precoVendaUnitario)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
+                        {formatCurrencyPt(linha.totalVendaLinha)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-1 flex justify-end text-[10px] text-slate-600">
+                <span className="mr-2">Subtotal capítulo</span>
+                <span className="font-semibold text-slate-900">
+                  {formatCurrencyPt(grupo.subtotal)}
+                </span>
+              </div>
+            </div>
+          ))}
         </section>
 
         {/* Totais */}

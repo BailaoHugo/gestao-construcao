@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PropostaFolhaRosto, PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
@@ -43,6 +43,27 @@ export default function NovaPropostaPage() {
   const [linhas, setLinhas] = useState<PropostaLinha[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+   const [fatorVenda, setFatorVenda] = useState(1.3);
+
+  type CatalogoArtigo = {
+    id: string;
+    codigo: string;
+    descricao: string;
+    unidade: string | null;
+    grande_capitulo: string | null;
+    capitulo: string | null;
+    preco_custo_unitario: number | null;
+    preco_venda_unitario: number | null;
+    origem: string;
+  };
+
+  const [catalogoQuery, setCatalogoQuery] = useState("");
+  const [catalogoResultados, setCatalogoResultados] = useState<CatalogoArtigo[]>(
+    [],
+  );
+  const [catalogoLoading, setCatalogoLoading] = useState(false);
+  const [catalogoDropdownVisivel, setCatalogoDropdownVisivel] = useState(false);
+  const catalogoDebounceRef = useRef<number | null>(null);
 
   const totais = useMemo(() => {
     const totalCusto = linhas.reduce(
@@ -86,6 +107,87 @@ export default function NovaPropostaPage() {
 
   const handleRemoverLinha = (id: string) => {
     setLinhas((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  useEffect(() => {
+    if (catalogoDebounceRef.current !== null) {
+      window.clearTimeout(catalogoDebounceRef.current);
+      catalogoDebounceRef.current = null;
+    }
+
+    const q = catalogoQuery.trim();
+
+    if (q.length < 2) {
+      setCatalogoResultados([]);
+      setCatalogoDropdownVisivel(false);
+      setCatalogoLoading(false);
+      return;
+    }
+
+    catalogoDebounceRef.current = window.setTimeout(async () => {
+      try {
+        setCatalogoLoading(true);
+        const res = await fetch(
+          `/api/propostas/catalogo?q=${encodeURIComponent(q)}`,
+        );
+        if (!res.ok) {
+          throw new Error("Falha ao pesquisar catálogo");
+        }
+        const data = (await res.json()) as CatalogoArtigo[];
+        setCatalogoResultados(data);
+        setCatalogoDropdownVisivel(true);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        setCatalogoResultados([]);
+        setCatalogoDropdownVisivel(false);
+      } finally {
+        setCatalogoLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      if (catalogoDebounceRef.current !== null) {
+        window.clearTimeout(catalogoDebounceRef.current);
+        catalogoDebounceRef.current = null;
+      }
+    };
+  }, [catalogoQuery]);
+
+  const handleSelectArtigo = (artigo: CatalogoArtigo) => {
+    // Criar nova linha de proposta pré-preenchida a partir do catálogo.
+    const quantidade = 1;
+    const precoCusto =
+      artigo.preco_custo_unitario !== null
+        ? artigo.preco_custo_unitario
+        : 0;
+    const precoVenda =
+      artigo.preco_venda_unitario !== null
+        ? artigo.preco_venda_unitario
+        : precoCusto * fatorVenda;
+
+    const novaLinha: PropostaLinha = {
+      id: crypto.randomUUID(),
+      artigoId: artigo.id,
+      origem: "CATALOGO",
+      descricao: artigo.descricao,
+      unidade: artigo.unidade ?? "",
+      grandeCapitulo: artigo.grande_capitulo ?? "",
+      capitulo: artigo.capitulo ?? "",
+      quantidade,
+      precoCustoUnitario: precoCusto,
+      totalCustoLinha: quantidade * precoCusto,
+      precoVendaUnitario: precoVenda,
+      totalVendaLinha: quantidade * precoVenda,
+    };
+
+    setLinhas((prev) => [...prev, novaLinha]);
+
+    // Manter comportamento atual do campo de pesquisa.
+    setCatalogoQuery(`${artigo.codigo} — ${artigo.descricao}`);
+    setCatalogoDropdownVisivel(false);
+    // eslint-disable-next-line no-console
+    console.log("[propostas/nova] Artigo selecionado:", artigo);
   };
 
   const handleGuardar = async () => {
@@ -315,13 +417,57 @@ export default function NovaPropostaPage() {
             Linhas da proposta
           </h2>
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            {/* TODO: pesquisa de catálogo com Supabase */}
-            <input
-              type="text"
-              placeholder="Pesquisar artigo no catálogo (futuro)"
-              className="w-56 rounded-full border border-slate-200 px-3 py-1 text-[11px] text-slate-700 placeholder:text-slate-400"
-              disabled
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Pesquisar artigo no catálogo"
+                className="w-64 rounded-full border border-slate-200 px-3 py-1 text-[11px] text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400"
+                value={catalogoQuery}
+                onChange={(e) => setCatalogoQuery(e.target.value)}
+                onFocus={() => {
+                  if (catalogoResultados.length > 0) {
+                    setCatalogoDropdownVisivel(true);
+                  }
+                }}
+              />
+              {catalogoLoading && (
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[10px] text-slate-400">
+                  A pesquisar…
+                </div>
+              )}
+              {catalogoDropdownVisivel && catalogoResultados.length > 0 && (
+                <div className="absolute z-10 mt-1 max-h-64 w-80 overflow-auto rounded-lg border border-slate-200 bg-white text-[11px] shadow-lg">
+                  <ul>
+                    {catalogoResultados.map((artigo) => (
+                      <li
+                        key={artigo.id}
+                        className="cursor-pointer border-b border-slate-100 px-3 py-2 last:border-0 hover:bg-slate-50"
+                        onClick={() => handleSelectArtigo(artigo)}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[10px] text-emerald-700">
+                            {artigo.codigo}
+                          </span>
+                          <span className="text-[10px] text-slate-500">
+                            {artigo.capitulo ?? "—"}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-slate-800">
+                          {artigo.descricao}
+                        </div>
+                        <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
+                          <span>
+                            {artigo.unidade ?? "—"} · Custo:{" "}
+                            {artigo.preco_custo_unitario ?? "—"} · Venda:{" "}
+                            {artigo.preco_venda_unitario ?? "—"}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleAddLinhaLivre}
@@ -339,6 +485,7 @@ export default function NovaPropostaPage() {
                 <th className="px-3 py-2">Descrição</th>
                 <th className="px-3 py-2 text-right">Qtd.</th>
                 <th className="px-3 py-2">Unid.</th>
+                <th className="px-3 py-2">Capítulo</th>
                 <th className="px-3 py-2 text-right">PU Custo</th>
                 <th className="px-3 py-2 text-right">Total Custo</th>
                 <th className="px-3 py-2 text-right">PU Venda</th>
@@ -351,7 +498,7 @@ export default function NovaPropostaPage() {
               {linhas.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={10}
                     className="px-3 py-6 text-center text-[11px] text-slate-400"
                   >
                     Ainda não adicionou linhas. Use &quot;Adicionar linha
@@ -403,6 +550,32 @@ export default function NovaPropostaPage() {
                         }
                         placeholder="m², un, vg..."
                       />
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                      <div className="flex flex-col gap-1">
+                        <input
+                          type="text"
+                          className="w-14 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
+                          value={linha.grandeCapitulo ?? ""}
+                          onChange={(e) =>
+                            handleLinhaChange(linha.id, {
+                              grandeCapitulo: e.target.value,
+                            })
+                          }
+                          placeholder="GC"
+                        />
+                        <input
+                          type="text"
+                          className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
+                          value={linha.capitulo ?? ""}
+                          onChange={(e) =>
+                            handleLinhaChange(linha.id, {
+                              capitulo: e.target.value,
+                            })
+                          }
+                          placeholder="Cap."
+                        />
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                       <input
@@ -498,6 +671,20 @@ export default function NovaPropostaPage() {
                 ({totais.margemPercentagem.toFixed(1)}%)
               </span>
             </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-slate-700">Fator venda:</span>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              className="w-20 rounded border border-slate-200 px-2 py-1 text-right text-[11px] text-slate-800 outline-none focus:border-slate-400"
+              value={fatorVenda}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setFatorVenda(Number.isFinite(v) && v > 0 ? v : 1.3);
+              }}
+            />
           </div>
           <p className="text-[11px] text-slate-500">
             Os totais de custo e venda são calculados automaticamente a partir

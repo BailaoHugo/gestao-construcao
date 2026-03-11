@@ -25,6 +25,16 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       proposta.revisaoAtual
     );
   }, [proposta, revisaoAtivaId]);
+  const linhasOrdenadas = useMemo(() => {
+    return [...revisaoAtiva.linhas].sort((a, b) => {
+      const aCap = (a.capitulo ?? "").toUpperCase();
+      const bCap = (b.capitulo ?? "").toUpperCase();
+      if (aCap !== bCap) {
+        return aCap.localeCompare(bCap, "pt-PT", { numeric: true });
+      }
+      return 0;
+    });
+  }, [revisaoAtiva.linhas]);
 
   const podeEditar = revisaoAtiva.estado === "RASCUNHO";
 
@@ -208,6 +218,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             <thead className="bg-slate-50">
               <tr className="text-[11px] uppercase tracking-wide text-slate-500">
                 <th className="px-3 py-2">Descrição</th>
+                <th className="px-3 py-2">Capítulo</th>
                 <th className="px-3 py-2 text-right">Qtd.</th>
                 <th className="px-3 py-2">Unid.</th>
                 <th className="px-3 py-2 text-right">PU Custo</th>
@@ -218,11 +229,11 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </tr>
             </thead>
             <tbody>
-              {revisaoAtiva.linhas.map((linha) => (
-                <tr
-                  key={linha.id}
-                  className="border-b border-slate-100 last:border-0"
-                >
+              {linhasOrdenadas.map((linha) => (
+                  <tr
+                    key={linha.id}
+                    className="border-b border-slate-100 last:border-0"
+                  >
                   <td className="px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -238,6 +249,11 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                     ) : (
                       linha.descricao
                     )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                    {linha.capitulo && linha.capitulo.trim().length > 0
+                      ? linha.capitulo
+                      : "—"}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {podeEditar ? (

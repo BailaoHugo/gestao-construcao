@@ -30,6 +30,8 @@ export interface PropostaLinha {
   origem: "CATALOGO" | "LIVRE";
   descricao: string;
   unidade: string;
+  grandeCapitulo?: string;
+  capitulo?: string;
   quantidade: number;
   precoCustoUnitario: number;
   totalCustoLinha: number;
