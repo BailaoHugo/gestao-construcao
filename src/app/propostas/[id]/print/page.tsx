@@ -62,9 +62,9 @@ export default async function PropostaPrintPage({
             <Image
               src="/logo-ennova.png"
               alt="Ennova - Engenharia e Gestão de Obra"
-              width={112}
-              height={47}
-              className="h-12 w-auto object-contain"
+              width={157}
+              height={66}
+              className="h-16 w-auto object-contain"
             />
           </div>
           <div className="text-right text-[11px] text-slate-700">
