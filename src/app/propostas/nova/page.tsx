@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PropostaFolhaRosto, PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
+import { ImportarLinhasModal } from "@/components/propostas/ImportarLinhasModal";
+import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
@@ -43,7 +45,8 @@ export default function NovaPropostaPage() {
   const [linhas, setLinhas] = useState<PropostaLinha[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-   const [fatorVenda, setFatorVenda] = useState(1.3);
+  const [fatorVenda, setFatorVenda] = useState(1.3);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   type CatalogoArtigo = {
     id: string;
@@ -107,6 +110,31 @@ export default function NovaPropostaPage() {
 
   const handleRemoverLinha = (id: string) => {
     setLinhas((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const handleInsertImportedLines = (linhasImportadas: ParsedImportedLine[]) => {
+    const novas: PropostaLinha[] = linhasImportadas.map((l) => {
+      const quantidade = l.quantidade ?? 0;
+      const precoVendaUnitario = l.preco_venda_unitario ?? 0;
+      const precoCustoUnitario = l.preco_custo_unitario ?? 0;
+      return {
+        id: crypto.randomUUID(),
+        artigoId: null,
+        origem: "IMPORTADA",
+        descricao: l.descricao,
+        unidade: l.unidade ?? "",
+        grandeCapitulo: "",
+        capitulo: l.capitulo ?? "",
+        quantidade,
+        precoCustoUnitario,
+        totalCustoLinha:
+          l.total_custo_linha ?? quantidade * precoCustoUnitario,
+        precoVendaUnitario,
+        totalVendaLinha:
+          l.total_venda_linha ?? quantidade * precoVendaUnitario,
+      };
+    });
+    setLinhas((prev) => [...prev, ...novas]);
   };
 
   useEffect(() => {
@@ -475,6 +503,13 @@ export default function NovaPropostaPage() {
             >
               Adicionar linha livre
             </button>
+            <button
+              type="button"
+              onClick={() => setImportModalOpen(true)}
+              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Importar linhas
+            </button>
           </div>
         </div>
 
@@ -707,6 +742,11 @@ export default function NovaPropostaPage() {
           </button>
         </div>
       </section>
+      <ImportarLinhasModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onInsert={handleInsertImportedLines}
+      />
     </div>
   );
 }

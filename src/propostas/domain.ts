@@ -27,7 +27,7 @@ export interface PropostaFolhaRosto {
 export interface PropostaLinha {
   id: string;
   artigoId?: string | null;
-  origem: "CATALOGO" | "LIVRE";
+  origem: "CATALOGO" | "LIVRE" | "IMPORTADA";
   descricao: string;
   unidade: string;
   grandeCapitulo?: string;
