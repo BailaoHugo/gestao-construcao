@@ -6,7 +6,7 @@ type TopBarProps = {
 
 export function TopBar({ title = "Gestão Construção" }: TopBarProps) {
   return (
-    <header className="flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
+    <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
       <div className="text-sm font-semibold tracking-wide text-slate-800">
         {title}
       </div>
