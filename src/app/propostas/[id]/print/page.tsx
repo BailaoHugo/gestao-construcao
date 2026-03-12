@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { loadPropostaCompleta } from "@/propostas/db";
 import { formatCurrencyPt, formatDatePt } from "@/propostas/format";
@@ -58,8 +59,14 @@ export default async function PropostaPrintPage({
         {/* Cabeçalho com logo e título */}
         <header className="print-section flex items-start justify-between border-b border-slate-200 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-900 text-[10px] font-semibold tracking-tight text-white">
-              LOGO
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded bg-slate-900">
+              <Image
+                src="/logo-ennova.png"
+                alt="Ennova - Engenharia e Gestão de Obra"
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain"
+              />
             </div>
             <div className="space-y-0.5">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-700">
