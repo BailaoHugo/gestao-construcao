@@ -197,6 +197,7 @@ export default function NovaPropostaPage() {
     const novaLinha: PropostaLinha = {
       id: crypto.randomUUID(),
       artigoId: artigo.id,
+      codigoArtigo: artigo.codigo,
       origem: "CATALOGO",
       descricao: artigo.descricao,
       unidade: artigo.unidade ?? "",

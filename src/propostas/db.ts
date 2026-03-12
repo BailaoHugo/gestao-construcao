@@ -216,6 +216,7 @@ export async function loadPropostaCompleta(
       const linha: PropostaLinha = {
         id: row.id,
         artigoId: row.artigo_id,
+        codigoArtigo: row.codigo_artigo ?? null,
         origem: row.origem as PropostaLinha["origem"],
         descricao: row.descricao,
         unidade: row.unidade ?? "",
@@ -299,6 +300,196 @@ export async function loadPropostaCompleta(
   }
 }
 
+export async function updatePropostaWithRevisao(
+  propostaId: string,
+  folhaRosto: PropostaFolhaRosto,
+  linhas: PropostaLinha[],
+): Promise<void> {
+  if (!folhaRosto.clienteNome || linhas.length === 0) {
+    throw new Error("Cliente e pelo menos uma linha são obrigatórios");
+  }
+
+  const now = new Date().toISOString();
+
+  const linhasEnriquecidas = linhas.map((linha) => {
+    const quantidade = linha.quantidade ?? 0;
+    const precoCusto = linha.precoCustoUnitario ?? 0;
+    const precoVenda = linha.precoVendaUnitario ?? 0;
+    const totalCusto = quantidade * precoCusto;
+    const totalVenda = quantidade * precoVenda;
+    return {
+      ...linha,
+      quantidade,
+      precoCustoUnitario: precoCusto,
+      precoVendaUnitario: precoVenda,
+      totalCustoLinha: totalCusto,
+      totalVendaLinha: totalVenda,
+    };
+  });
+
+  const totalCusto = linhasEnriquecidas.reduce(
+    (sum, l) => sum + l.totalCustoLinha,
+    0,
+  );
+  const totalVenda = linhasEnriquecidas.reduce(
+    (sum, l) => sum + l.totalVendaLinha,
+    0,
+  );
+  const margemValor = totalVenda - totalCusto;
+  const margemPercentagem = totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
+
+  await withTransaction(async (client) => {
+    // Atualizar cabeçalho da proposta
+    await client.query(
+      `
+        update propostas
+        set
+          cliente_nome = $2,
+          cliente_contacto = $3,
+          cliente_email = $4,
+          obra_nome = $5,
+          obra_morada = $6,
+          referencia_interna = $7,
+          notas = $8,
+          updated_at = $9
+        where id = $1
+      `,
+      [
+        propostaId,
+        folhaRosto.clienteNome,
+        folhaRosto.clienteContacto ?? null,
+        folhaRosto.clienteEmail ?? null,
+        folhaRosto.obraNome ?? null,
+        folhaRosto.obraMorada ?? null,
+        folhaRosto.referenciaInterna ?? null,
+        folhaRosto.notas ?? null,
+        now,
+      ],
+    );
+
+    // Obter revisão ativa (última revisão)
+    const revisaoRes: QueryResult<{ id: string }> = await client.query(
+      `
+        select id
+        from proposta_revisoes
+        where proposta_id = $1
+        order by numero_revisao desc
+        limit 1
+      `,
+      [propostaId],
+    );
+
+    if (revisaoRes.rowCount === 0) {
+      throw new Error("Revisão da proposta não encontrada");
+    }
+
+    const revisaoId = revisaoRes.rows[0].id;
+
+    // Atualizar revisão
+    const validadeTexto =
+      folhaRosto.validadeTexto ??
+      (folhaRosto.validadeDias ? `${folhaRosto.validadeDias} dias` : null);
+
+    await client.query(
+      `
+        update proposta_revisoes
+        set
+          data_proposta = $2,
+          validade_texto = $3,
+          total = $4,
+          total_custo = $5,
+          total_venda = $6,
+          margem_valor = $7,
+          margem_percentagem = $8,
+          updated_at = $9
+        where id = $1
+      `,
+      [
+        revisaoId,
+        folhaRosto.dataProposta || null,
+        validadeTexto,
+        totalVenda,
+        totalCusto,
+        totalVenda,
+        margemValor,
+        margemPercentagem,
+        now,
+      ],
+    );
+
+    // Apagar linhas atuais da revisão
+    await client.query(
+      `
+        delete from proposta_linhas
+        where revisao_id = $1
+      `,
+      [revisaoId],
+    );
+
+    // Inserir novamente as linhas com a ordem atual
+    let ordem = 1;
+    for (const linha of linhasEnriquecidas) {
+      await client.query(
+        `
+          insert into proposta_linhas (
+            id,
+            revisao_id,
+            ordem,
+            origem,
+            artigo_id,
+            codigo_artigo,
+            descricao,
+            unidade,
+            quantidade,
+            preco_custo_unitario,
+            total_custo_linha,
+            preco_venda_unitario,
+            total_venda_linha,
+            grande_capitulo,
+            capitulo,
+            created_at,
+            updated_at
+          )
+          values (
+            gen_random_uuid(),
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            $9,
+            $10,
+            $11,
+            $12,
+            $13,
+            $14,
+            now(),
+            now()
+          )
+        `,
+        [
+          revisaoId,
+          ordem++,
+          linha.origem ?? "LIVRE",
+          linha.artigoId ?? null,
+          linha.codigoArtigo ?? null,
+          linha.descricao,
+          linha.unidade ?? null,
+          linha.quantidade,
+          linha.precoCustoUnitario,
+          linha.totalCustoLinha,
+          linha.precoVendaUnitario,
+          linha.totalVendaLinha,
+          linha.grandeCapitulo ?? null,
+          linha.capitulo ?? null,
+        ],
+      );
+    }
+  });
+}
 export async function createPropostaWithRevisao(
   folhaRosto: PropostaFolhaRosto,
   linhas: PropostaLinha[],

@@ -18,6 +18,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   const [revisaoAtivaId, setRevisaoAtivaId] = useState<string>(
     initial.revisaoAtual.id,
   );
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const revisaoAtiva = useMemo(() => {
     return (
@@ -27,6 +29,32 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   }, [proposta, revisaoAtivaId]);
 
   const podeEditar = revisaoAtiva.estado === "RASCUNHO";
+
+  const handleFolhaRostoChange = (
+    patch: Partial<Proposta["revisaoAtual"]["folhaRosto"]>,
+  ) => {
+    if (!podeEditar) return;
+    setProposta((prev) => {
+      const revisoesAtualizadas = prev.todasRevisoes.map((rev) => {
+        if (rev.id !== revisaoAtiva.id) return rev;
+        return {
+          ...rev,
+          folhaRosto: {
+            ...rev.folhaRosto,
+            ...patch,
+          },
+        };
+      });
+      const revisaoAtualizada =
+        revisoesAtualizadas.find((r) => r.id === prev.revisaoAtual.id) ??
+        prev.revisaoAtual;
+      return {
+        ...prev,
+        revisaoAtual: revisaoAtualizada,
+        todasRevisoes: revisoesAtualizadas,
+      };
+    });
+  };
 
   const handleLinhaChange = (id: string, patch: Partial<PropostaLinha>) => {
     if (!podeEditar) return;
@@ -78,9 +106,40 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   };
 
   const handleCriarNovaRevisao = () => {
-    // TODO: criar nova revisão em Supabase a partir da última EMITIDA
+    // Futuro: criar nova revisão em Supabase
     // eslint-disable-next-line no-console
-    console.log("Criar nova revisão (MVP, ainda sem persistência)");
+    console.log("Criar nova revisão (ainda não suportado nesta versão).");
+  };
+
+  const handleGuardarAlteracoes = async () => {
+    if (!podeEditar) return;
+    try {
+      setIsSaving(true);
+      setError(null);
+      const res = await fetch(`/api/propostas/${proposta.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folhaRosto: revisaoAtiva.folhaRosto,
+          linhas: revisaoAtiva.linhas,
+        }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(
+          data?.error || "Falha ao atualizar proposta. Tente novamente.",
+        );
+      }
+      const updated = (await res.json()) as Proposta;
+      setProposta(updated);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -147,44 +206,127 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         })}
       </section>
 
-      {/* Folha de rosto (read-only por enquanto) */}
+      {/* Folha de rosto */}
       <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900">Folha de rosto</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-1 text-xs text-slate-700">
+          <div className="space-y-3 text-xs text-slate-700">
             <div>
-              <span className="font-medium">Cliente: </span>
-              <span>{revisaoAtiva.folhaRosto.clienteNome}</span>
+              <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                Cliente
+              </label>
+              <input
+                type="text"
+                className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                value={revisaoAtiva.folhaRosto.clienteNome}
+                onChange={(e) =>
+                  handleFolhaRostoChange({ clienteNome: e.target.value })
+                }
+                disabled={!podeEditar}
+              />
             </div>
-            {revisaoAtiva.folhaRosto.clienteEmail && (
+            <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <span className="font-medium">Email: </span>
-                <span>{revisaoAtiva.folhaRosto.clienteEmail}</span>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                  Contacto
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  value={revisaoAtiva.folhaRosto.clienteContacto ?? ""}
+                  onChange={(e) =>
+                    handleFolhaRostoChange({
+                      clienteContacto: e.target.value,
+                    })
+                  }
+                  disabled={!podeEditar}
+                />
               </div>
-            )}
-            {revisaoAtiva.folhaRosto.clienteContacto && (
               <div>
-                <span className="font-medium">Contacto: </span>
-                <span>{revisaoAtiva.folhaRosto.clienteContacto}</span>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  value={revisaoAtiva.folhaRosto.clienteEmail ?? ""}
+                  onChange={(e) =>
+                    handleFolhaRostoChange({
+                      clienteEmail: e.target.value,
+                    })
+                  }
+                  disabled={!podeEditar}
+                />
               </div>
-            )}
+            </div>
           </div>
-          <div className="space-y-1 text-xs text-slate-700">
-            {revisaoAtiva.folhaRosto.obraNome && (
-              <div>
-                <span className="font-medium">Obra: </span>
-                <span>{revisaoAtiva.folhaRosto.obraNome}</span>
-              </div>
-            )}
-            {revisaoAtiva.folhaRosto.obraMorada && (
-              <div>
-                <span className="font-medium">Morada: </span>
-                <span>{revisaoAtiva.folhaRosto.obraMorada}</span>
-              </div>
-            )}
+          <div className="space-y-3 text-xs text-slate-700">
             <div>
-              <span className="font-medium">Data proposta: </span>
-              <span>{formatDatePt(revisaoAtiva.folhaRosto.dataProposta)}</span>
+              <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                Obra (opcional)
+              </label>
+              <input
+                type="text"
+                className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                value={revisaoAtiva.folhaRosto.obraNome ?? ""}
+                onChange={(e) =>
+                  handleFolhaRostoChange({
+                    obraNome: e.target.value,
+                  })
+                }
+                disabled={!podeEditar}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                Morada da obra (opcional)
+              </label>
+              <input
+                type="text"
+                className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                value={revisaoAtiva.folhaRosto.obraMorada ?? ""}
+                onChange={(e) =>
+                  handleFolhaRostoChange({
+                    obraMorada: e.target.value,
+                  })
+                }
+                disabled={!podeEditar}
+              />
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                  Data proposta
+                </label>
+                <input
+                  type="date"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  value={revisaoAtiva.folhaRosto.dataProposta}
+                  onChange={(e) =>
+                    handleFolhaRostoChange({
+                      dataProposta: e.target.value,
+                    })
+                  }
+                  disabled={!podeEditar}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                  Validade (dias)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  value={revisaoAtiva.folhaRosto.validadeDias ?? 0}
+                  onChange={(e) =>
+                    handleFolhaRostoChange({
+                      validadeDias: Number(e.target.value) || 0,
+                    })
+                  }
+                  disabled={!podeEditar}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -344,7 +486,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </div>
       </section>
 
-      {/* Totais (ainda apenas em memória) */}
+      {/* Totais */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
         <div className="space-y-1 text-xs text-slate-600">
           <div>
@@ -373,18 +515,23 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             </span>
           </div>
           <p className="text-[11px] text-slate-500">
-            Estes valores são calculados a partir das linhas; guardar alterações
-            ainda não atualiza a base de dados neste MVP.
+            Estes valores são calculados a partir das linhas da revisão ativa.
           </p>
+          {error && (
+            <p className="text-[11px] text-red-600">
+              {error}
+            </p>
+          )}
         </div>
         {podeEditar && (
           <div className="flex flex-wrap items-center gap-2">
-            {/* TODO: guardar alterações da revisão em Supabase */}
             <button
               type="button"
+              onClick={handleGuardarAlteracoes}
+              disabled={isSaving}
               className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500"
             >
-              Guardar alterações (em breve)
+              {isSaving ? "A gravar alterações…" : "Guardar alterações"}
             </button>
           </div>
         )}
