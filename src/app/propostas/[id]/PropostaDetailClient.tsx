@@ -25,16 +25,6 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       proposta.revisaoAtual
     );
   }, [proposta, revisaoAtivaId]);
-  const linhasOrdenadas = useMemo(() => {
-    return [...revisaoAtiva.linhas].sort((a, b) => {
-      const aCap = (a.capitulo ?? "").toUpperCase();
-      const bCap = (b.capitulo ?? "").toUpperCase();
-      if (aCap !== bCap) {
-        return aCap.localeCompare(bCap, "pt-PT", { numeric: true });
-      }
-      return 0;
-    });
-  }, [revisaoAtiva.linhas]);
 
   const podeEditar = revisaoAtiva.estado === "RASCUNHO";
 
@@ -229,7 +219,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </tr>
             </thead>
             <tbody>
-              {linhasOrdenadas.map((linha) => (
+              {revisaoAtiva.linhas.map((linha) => (
                   <tr
                     key={linha.id}
                     className="border-b border-slate-100 last:border-0"

@@ -62,26 +62,6 @@ type LinhaRow = {
   capitulo: string | null;
 };
 
-function sortPropostaLinhas(linhas: PropostaLinha[]): PropostaLinha[] {
-  return [...linhas].sort((a, b) => {
-    const aGc = (a.grandeCapitulo ?? "").toUpperCase();
-    const bGc = (b.grandeCapitulo ?? "").toUpperCase();
-    if (aGc !== bGc) {
-      return aGc.localeCompare(bGc, "pt-PT");
-    }
-
-    const aCap = (a.capitulo ?? "").toUpperCase();
-    const bCap = (b.capitulo ?? "").toUpperCase();
-    if (aCap !== bCap) {
-      return aCap.localeCompare(bCap, "pt-PT", { numeric: true });
-    }
-
-    const aDesc = (a.descricao ?? "").toUpperCase();
-    const bDesc = (b.descricao ?? "").toUpperCase();
-    return aDesc.localeCompare(bDesc, "pt-PT");
-  });
-}
-
 export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
   const client = await pool.connect();
   try {
@@ -253,8 +233,7 @@ export async function loadPropostaCompleta(
     }
 
     const revisoes: PropostaRevisao[] = revisoesRes.rows.map((row) => {
-      const linhasNaoOrdenadas = linhasByRevisao.get(row.id) ?? [];
-      const linhas = sortPropostaLinhas(linhasNaoOrdenadas);
+      const linhas = linhasByRevisao.get(row.id) ?? [];
       const folhaRosto: PropostaFolhaRosto = {
         clienteNome: propostaRow.cliente_nome,
         clienteContacto: propostaRow.cliente_contacto ?? undefined,
