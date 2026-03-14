@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  labelGrandeCapitulo,
+  labelCapitulo,
+} from "@/lib/catalogo/descricoesCapitulos";
 
 type Artigo = {
   id: string;
@@ -99,7 +103,7 @@ export default function CatalogoPage() {
               <option value="">Todos</option>
               {opcoes.grandeCapitulos.map((g) => (
                 <option key={g} value={g}>
-                  {g}
+                  {labelGrandeCapitulo(g)}
                 </option>
               ))}
             </select>
@@ -116,7 +120,7 @@ export default function CatalogoPage() {
               <option value="">Todos</option>
               {opcoes.capitulos.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {labelCapitulo(c)}
                 </option>
               ))}
             </select>
@@ -179,10 +183,10 @@ export default function CatalogoPage() {
                       className="hover:bg-slate-50/50 transition-colors"
                     >
                       <td className="px-3 py-2 text-slate-700">
-                        {a.grande_capitulo ?? "—"}
+                        {labelGrandeCapitulo(a.grande_capitulo)}
                       </td>
                       <td className="px-3 py-2 text-slate-700">
-                        {a.capitulo ?? "—"}
+                        {labelCapitulo(a.capitulo)}
                       </td>
                       <td className="px-3 py-2 font-mono text-slate-800">
                         {a.codigo}
