@@ -47,6 +47,15 @@ export default function Home() {
           />
 
           <ModuleCard
+            title="Catálogo"
+            description="Base de dados de artigos, capítulos e códigos do sistema."
+            actionLabel="Abrir módulo"
+            href="/catalogo"
+            icon={<span className="text-xs font-semibold tracking-tight">CT</span>}
+            iconVariant="blue"
+          />
+
+          <ModuleCard
             title="Clientes"
             description="Gestão de clientes e contactos associados às obras (em breve)."
             actionLabel="Em breve"
