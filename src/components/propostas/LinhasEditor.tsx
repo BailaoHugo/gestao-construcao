@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
 import { ImportarLinhasModal } from "@/components/propostas/ImportarLinhasModal";
-import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
+import {
+  parseImportedLines,
+  type ParsedImportedLine,
+} from "@/lib/propostas/parseImportedLines";
 
 export type CatalogoArtigo = {
   id: string;
@@ -46,8 +49,10 @@ export default function LinhasEditor({
   const [catalogoLoading, setCatalogoLoading] = useState(false);
   const [catalogoDropdownVisivel, setCatalogoDropdownVisivel] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
-   const [iaModalOpen, setIaModalOpen] = useState(false);
-   const [iaDescricao, setIaDescricao] = useState("");
+  const [iaModalOpen, setIaModalOpen] = useState(false);
+  const [iaDescricao, setIaDescricao] = useState("");
+  const [iaLoading, setIaLoading] = useState(false);
+  const [iaError, setIaError] = useState<string | null>(null);
   const catalogoDebounceRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -411,7 +416,11 @@ export default function LinhasEditor({
               </h2>
               <button
                 type="button"
-                onClick={() => setIaModalOpen(false)}
+                onClick={() => {
+                  if (iaLoading) return;
+                  setIaModalOpen(false);
+                  setIaError(null);
+                }}
                 className="text-[11px] text-slate-500 hover:text-slate-700"
               >
                 Fechar
@@ -429,25 +438,73 @@ export default function LinhasEditor({
                 value={iaDescricao}
                 onChange={(e) => setIaDescricao(e.target.value)}
               />
+              {iaError && (
+                <p className="text-[11px] text-red-600">{iaError}</p>
+              )}
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIaModalOpen(false)}
+                  onClick={() => {
+                    if (iaLoading) return;
+                    setIaModalOpen(false);
+                    setIaError(null);
+                  }}
                   className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Fechar
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    // MVP: apenas mensagem/console, sem ligação a IA ainda.
-                    // eslint-disable-next-line no-console
-                    console.log("[LinhasEditor][IA] Texto para gerar linhas:", iaDescricao);
-                    alert("Integração IA em preparação. O texto foi recebido, mas ainda não gera linhas automaticamente.");
+                  disabled={iaLoading || !iaDescricao.trim()}
+                  onClick={async () => {
+                    const texto = iaDescricao.trim();
+                    if (!texto || iaLoading) return;
+                    try {
+                      setIaLoading(true);
+                      setIaError(null);
+                      const res = await fetch("/api/ia/orcamento", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ descricao: texto }),
+                      });
+                      if (!res.ok) {
+                        const data = (await res.json().catch(() => null)) as
+                          | { error?: string }
+                          | null;
+                        throw new Error(
+                          data?.error ||
+                            "Falha ao gerar linhas com IA (mock).",
+                        );
+                      }
+                      const data = (await res.json()) as {
+                        linhas?: string[];
+                      };
+                      const rawText = (data.linhas ?? []).join("\n");
+                      const parsed = parseImportedLines(rawText);
+                      const valid = parsed.filter((l) => l.isValid);
+                      if (valid.length === 0) {
+                        setIaError(
+                          "Não foi possível gerar linhas válidas a partir do texto.",
+                        );
+                        return;
+                      }
+                      onInsertImportedLines(valid);
+                      setIaDescricao("");
+                      setIaError(null);
+                      setIaModalOpen(false);
+                    } catch (err) {
+                      const message =
+                        err instanceof Error ? err.message : String(err);
+                      setIaError(message);
+                    } finally {
+                      setIaLoading(false);
+                    }
                   }}
-                  className="rounded-full bg-slate-900 px-4 py-1.5 text-[11px] font-medium text-white hover:bg-slate-800"
+                  className="rounded-full bg-slate-900 px-4 py-1.5 text-[11px] font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  Gerar
+                  {iaLoading ? "A gerar…" : "Gerar"}
                 </button>
               </div>
             </div>
