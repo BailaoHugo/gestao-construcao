@@ -46,6 +46,8 @@ export default function LinhasEditor({
   const [catalogoLoading, setCatalogoLoading] = useState(false);
   const [catalogoDropdownVisivel, setCatalogoDropdownVisivel] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+   const [iaModalOpen, setIaModalOpen] = useState(false);
+   const [iaDescricao, setIaDescricao] = useState("");
   const catalogoDebounceRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -191,6 +193,13 @@ export default function LinhasEditor({
               className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
             >
               Importar linhas
+            </button>
+            <button
+              type="button"
+              onClick={() => setIaModalOpen(true)}
+              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Gerar com IA
             </button>
           </div>
         )}
@@ -392,6 +401,59 @@ export default function LinhasEditor({
         onClose={() => setImportModalOpen(false)}
         onInsert={onInsertImportedLines}
       />
+
+      {iaModalOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <h2 className="text-sm font-semibold text-slate-900">
+                Gerar linhas com IA
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIaModalOpen(false)}
+                className="text-[11px] text-slate-500 hover:text-slate-700"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="space-y-3 px-4 py-4 text-xs text-slate-700">
+              <p className="text-[11px] text-slate-500">
+                Nesta versão ainda não estamos a ligar à IA. Descreve os
+                trabalhos abaixo; em breve este texto será usado para sugerir
+                linhas de orçamento automaticamente.
+              </p>
+              <textarea
+                className="h-40 w-full resize-none rounded border border-slate-200 p-2 text-[11px] text-slate-800 outline-none focus:border-slate-400"
+                placeholder="Descreve os trabalhos que queres transformar em linhas de orçamento (ex.: demolições, pinturas, pavimentos, instalações elétricas, etc.)"
+                value={iaDescricao}
+                onChange={(e) => setIaDescricao(e.target.value)}
+              />
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIaModalOpen(false)}
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Fechar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // MVP: apenas mensagem/console, sem ligação a IA ainda.
+                    // eslint-disable-next-line no-console
+                    console.log("[LinhasEditor][IA] Texto para gerar linhas:", iaDescricao);
+                    alert("Integração IA em preparação. O texto foi recebido, mas ainda não gera linhas automaticamente.");
+                  }}
+                  className="rounded-full bg-slate-900 px-4 py-1.5 text-[11px] font-medium text-white hover:bg-slate-800"
+                >
+                  Gerar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
