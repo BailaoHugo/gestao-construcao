@@ -30,14 +30,19 @@ export function parseImportedLines(rawText: string): ParsedImportedLine[] {
       continue;
     }
 
-    let separator: string | null = null;
+    let parts: string[] | null = null;
     if (trimmed.includes("\t")) {
-      separator = "\t";
+      parts = trimmed.split("\t").map((p) => p.trim());
     } else if (trimmed.includes("|")) {
-      separator = "|";
+      parts = trimmed.split("|").map((p) => p.trim());
+    } else if (trimmed.includes(";")) {
+      parts = trimmed.split(";").map((p) => p.trim());
+    } else if (/\s{2,}/.test(trimmed)) {
+      // Fallback: 2 ou mais espaços consecutivos entre colunas
+      parts = trimmed.split(/\s{2,}/).map((p) => p.trim());
     }
 
-    if (!separator) {
+    if (!parts) {
       result.push({
         rawLine: raw,
         descricao: "",
@@ -49,12 +54,11 @@ export function parseImportedLines(rawText: string): ParsedImportedLine[] {
         total_custo_linha: null,
         capitulo: null,
         isValid: false,
-        error: "Separador inválido (esperado TAB ou |)",
+        error:
+          "Não foi possível identificar 8 colunas válidas. Usa TAB, |, ; ou garante separação clara entre colunas.",
       });
       continue;
     }
-
-    const parts = trimmed.split(separator).map((p) => p.trim());
 
     if (parts.length !== 8) {
       result.push({
