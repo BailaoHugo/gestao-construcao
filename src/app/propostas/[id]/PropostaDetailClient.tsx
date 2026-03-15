@@ -5,12 +5,34 @@ import { useMemo, useState } from "react";
 import type { Proposta, PropostaLinha } from "@/propostas/domain";
 import {
   formatCurrencyPt,
-  formatDatePt,
   formatEstadoLabel,
 } from "@/propostas/format";
+import LinhasEditor, {
+  type CatalogoArtigo,
+} from "@/components/propostas/LinhasEditor";
+import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 
 function computeTotal(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
+}
+
+function computeTotalCusto(linhas: PropostaLinha[]): number {
+  return linhas.reduce((sum, l) => sum + l.totalCustoLinha, 0);
+}
+
+function createEmptyLinha(): PropostaLinha {
+  return {
+    id: crypto.randomUUID(),
+    artigoId: null,
+    origem: "LIVRE",
+    descricao: "",
+    unidade: "",
+    quantidade: 1,
+    precoCustoUnitario: 0,
+    totalCustoLinha: 0,
+    precoVendaUnitario: 0,
+    totalVendaLinha: 0,
+  };
 }
 
 export function PropostaDetailClient({ initial }: { initial: Proposta }) {
@@ -56,38 +78,19 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     });
   };
 
-  const handleLinhaChange = (id: string, patch: Partial<PropostaLinha>) => {
+  const handleLinhasChange = (novasLinhas: PropostaLinha[]) => {
     if (!podeEditar) return;
     setProposta((prev) => {
       const revisoesAtualizadas = prev.todasRevisoes.map((rev) => {
         if (rev.id !== revisaoAtiva.id) return rev;
-        const linhas = rev.linhas.map((linha) => {
-          if (linha.id !== id) return linha;
-          const next: PropostaLinha = { ...linha, ...patch };
-          const quantidade = Number.isFinite(next.quantidade)
-            ? next.quantidade
-            : 0;
-          const precoCusto = Number.isFinite(next.precoCustoUnitario)
-            ? next.precoCustoUnitario
-            : 0;
-          const precoVenda = Number.isFinite(next.precoVendaUnitario)
-            ? next.precoVendaUnitario
-            : 0;
-          next.totalCustoLinha = quantidade * precoCusto;
-          next.totalVendaLinha = quantidade * precoVenda;
-          return next;
-        });
-        const totalVenda = computeTotal(linhas);
-        const totalCusto = linhas.reduce(
-          (sum, l) => sum + l.totalCustoLinha,
-          0,
-        );
+        const totalVenda = computeTotal(novasLinhas);
+        const totalCusto = computeTotalCusto(novasLinhas);
         const margemValor = totalVenda - totalCusto;
         const margemPercentagem =
           totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
         return {
           ...rev,
-          linhas,
+          linhas: novasLinhas,
           totalCusto,
           totalVenda,
           margemValor,
@@ -103,6 +106,74 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         todasRevisoes: revisoesAtualizadas,
       };
     });
+  };
+
+  const handleAddLinhaLivre = () => {
+    if (!podeEditar) return;
+    handleLinhasChange([...revisaoAtiva.linhas, createEmptyLinha()]);
+  };
+
+  const handleRemoverLinha = (id: string) => {
+    if (!podeEditar) return;
+    handleLinhasChange(revisaoAtiva.linhas.filter((l) => l.id !== id));
+  };
+
+  const handleInsertImportedLines = (linhasImportadas: ParsedImportedLine[]) => {
+    if (!podeEditar) return;
+    const novas: PropostaLinha[] = linhasImportadas.map((l) => {
+      const quantidade = l.quantidade ?? 0;
+      const precoVendaUnitario = l.preco_venda_unitario ?? 0;
+      const precoCustoUnitario = l.preco_custo_unitario ?? 0;
+      return {
+        id: crypto.randomUUID(),
+        artigoId: null,
+        origem: "IMPORTADA",
+        descricao: l.descricao,
+        unidade: l.unidade ?? "",
+        grandeCapitulo: "",
+        capitulo: l.capitulo ?? "",
+        quantidade,
+        precoCustoUnitario,
+        totalCustoLinha:
+          l.total_custo_linha ?? quantidade * precoCustoUnitario,
+        precoVendaUnitario,
+        totalVendaLinha:
+          l.total_venda_linha ?? quantidade * precoVendaUnitario,
+      };
+    });
+    handleLinhasChange([...revisaoAtiva.linhas, ...novas]);
+  };
+
+  const handleSelectArtigo = (artigo: CatalogoArtigo) => {
+    if (!podeEditar) return;
+    const fatorVenda = 1.3;
+    const quantidade = 1;
+    const precoCusto =
+      artigo.preco_custo_unitario !== null
+        ? artigo.preco_custo_unitario
+        : 0;
+    const precoVenda =
+      artigo.preco_venda_unitario !== null
+        ? artigo.preco_venda_unitario
+        : precoCusto * fatorVenda;
+
+    const novaLinha: PropostaLinha = {
+      id: crypto.randomUUID(),
+      artigoId: artigo.id,
+      codigoArtigo: artigo.codigo,
+      origem: "CATALOGO",
+      descricao: artigo.descricao,
+      unidade: artigo.unidade ?? "",
+      grandeCapitulo: artigo.grande_capitulo ?? "",
+      capitulo: artigo.capitulo ?? "",
+      quantidade,
+      precoCustoUnitario: precoCusto,
+      totalCustoLinha: quantidade * precoCusto,
+      precoVendaUnitario: precoVenda,
+      totalVendaLinha: quantidade * precoVenda,
+    };
+
+    handleLinhasChange([...revisaoAtiva.linhas, novaLinha]);
   };
 
   const handleCriarNovaRevisao = () => {
@@ -332,159 +403,17 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </div>
       </section>
 
-      {/* Linhas da proposta (edição só se rascunho, ainda sem guardar na BD) */}
-      <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Linhas da proposta
-          </h2>
-          {!podeEditar && (
-            <p className="text-[11px] text-slate-500">
-              Esta revisão está emitida e não pode ser editada diretamente.
-            </p>
-          )}
-        </div>
-
-        <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-100">
-          <table className="min-w-full border-collapse text-left text-xs">
-            <thead className="bg-slate-50">
-              <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-                <th className="px-3 py-2">Descrição</th>
-                <th className="px-3 py-2">Capítulo</th>
-                <th className="px-3 py-2 text-right">Qtd.</th>
-                <th className="px-3 py-2">Unid.</th>
-                <th className="px-3 py-2 text-right">PU Custo</th>
-                <th className="px-3 py-2 text-right">Total Custo</th>
-                <th className="px-3 py-2 text-right">PU Venda</th>
-                <th className="px-3 py-2 text-right">Total Venda</th>
-                <th className="px-3 py-2 text-right">Margem</th>
-              </tr>
-            </thead>
-            <tbody>
-              {revisaoAtiva.linhas.map((linha) => (
-                  <tr
-                    key={linha.id}
-                    className="border-b border-slate-100 last:border-0"
-                  >
-                  <td className="px-3 py-2 text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="text"
-                        className="w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
-                        value={linha.descricao}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            descricao: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      linha.descricao
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
-                    {linha.capitulo && linha.capitulo.trim().length > 0
-                      ? linha.capitulo
-                      : "—"}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.quantidade}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            quantidade: Number(e.target.value) || 0,
-                          })
-                        }
-                      />
-                    ) : (
-                      linha.quantidade
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="text"
-                        className="w-16 rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
-                        value={linha.unidade}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            unidade: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      linha.unidade
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.precoCustoUnitario}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            precoCustoUnitario: Number(e.target.value) || 0,
-                          })
-                        }
-                      />
-                    ) : (
-                      formatCurrencyPt(linha.precoCustoUnitario)
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalCustoLinha)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.precoVendaUnitario}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            precoVendaUnitario: Number(e.target.value) || 0,
-                          })
-                        }
-                      />
-                    ) : (
-                      formatCurrencyPt(linha.precoVendaUnitario)
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalVendaLinha)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {(() => {
-                      const margemValor =
-                        linha.totalVendaLinha - linha.totalCustoLinha;
-                      if (!Number.isFinite(margemValor)) {
-                        return "—";
-                      }
-                      const hasVenda = linha.totalVendaLinha > 0;
-                      const pct = hasVenda
-                        ? (margemValor / linha.totalVendaLinha) * 100
-                        : null;
-                      return pct !== null
-                        ? `${formatCurrencyPt(margemValor)} (${pct.toFixed(1)}%)`
-                        : formatCurrencyPt(margemValor);
-                    })()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* Linhas da proposta — mesmo editor que /propostas/nova */}
+      <LinhasEditor
+        linhas={revisaoAtiva.linhas}
+        onLinhasChange={handleLinhasChange}
+        podeEditar={podeEditar}
+        fatorVenda={1.3}
+        onAddLinhaLivre={handleAddLinhaLivre}
+        onRemoveLinha={handleRemoverLinha}
+        onInsertImportedLines={handleInsertImportedLines}
+        onSelectArtigoCatalogo={handleSelectArtigo}
+      />
 
       {/* Totais */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
