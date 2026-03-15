@@ -1,35 +1,82 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
-type Body = {
-  descricao?: string;
-};
-
-export async function POST(req: NextRequest) {
-  let body: Body;
+export async function POST(req: Request) {
   try {
-    body = (await req.json()) as Body;
-  } catch {
+    const { descricao } = await req.json();
+
+    if (!descricao || typeof descricao !== "string" || !descricao.trim()) {
+      return NextResponse.json(
+        { error: "Descrição inválida" },
+        { status: 400 }
+      );
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "OPENAI_API_KEY não configurada" },
+        { status: 500 }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const systemPrompt = `
+És um assistente de orçamentação de construção civil em Portugal.
+
+Recebes uma descrição de trabalhos e tens de devolver linhas de orçamento.
+
+Cada linha deve ter exatamente 8 colunas separadas por ;
+
+Formato obrigatório:
+CAPÍTULO;LISTAGEM DE TRABALHOS;UN.;QTD.;UNITÁRIO VENDA;TOTAL VENDA;UNITÁRIO CUSTO;TOTAL CUSTO
+
+Regras:
+- Não devolver cabeçalho
+- Não devolver texto antes ou depois
+- Não usar markdown
+- Usar vírgula decimal
+- Usar capítulos plausíveis
+- Gerar entre 2 e 6 linhas
+`;
+
+    const response = await openai.responses.create({
+      model: "gpt-4.1",
+      input: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: descricao,
+        },
+      ],
+    });
+
+    const texto = response.output_text?.trim() || "";
+
+    if (!texto) {
+      return NextResponse.json(
+        { error: "Falha ao gerar linhas com IA" },
+        { status: 500 }
+      );
+    }
+
+    const linhas = texto
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    return NextResponse.json({ linhas });
+  } catch (err) {
+    console.error("IA erro:", err);
+
     return NextResponse.json(
-      { error: "Payload inválido" },
-      { status: 400 },
+      { error: "Erro ao gerar linhas com IA" },
+      { status: 500 }
     );
   }
-
-  const descricao = body.descricao?.trim() ?? "";
-  if (!descricao) {
-    return NextResponse.json(
-      { error: "Descrição obrigatória" },
-      { status: 400 },
-    );
-  }
-
-  // Mock simples: devolve sempre as mesmas linhas de teste.
-  const linhas: string[] = [
-    "E1 — Demolições e Remoções;Remoção de pavimento existente;m2;10,00;12,00;120,00;8,00;80,00",
-    "E3 — Rebocos e Acabamentos;Execução de parede em gesso cartonado hidrófugo;m2;8,00;42,00;336,00;28,00;224,00",
-    "E5 — Pinturas;Pintura plástica interior em paredes;m2;25,00;14,00;350,00;10,00;250,00",
-  ];
-
-  return NextResponse.json({ linhas });
 }
-
