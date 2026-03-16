@@ -117,7 +117,8 @@ export default function LinhasEditor({
 
   const handleSelectArtigo = (artigo: CatalogoArtigo) => {
     onSelectArtigoCatalogo(artigo);
-    setCatalogoQuery(`${artigo.codigo} — ${artigo.descricao}`);
+    setCatalogoQuery("");
+    setCatalogoResultados([]);
     setCatalogoDropdownVisivel(false);
   };
 
@@ -175,8 +176,13 @@ export default function LinhasEditor({
                         <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
                           <span>
                             {artigo.unidade ?? "—"} · Custo:{" "}
-                            {artigo.preco_custo_unitario ?? "—"} · Venda:{" "}
-                            {artigo.preco_venda_unitario ?? "—"}
+                            {artigo.preco_custo_unitario != null
+                              ? formatCurrencyPt(artigo.preco_custo_unitario)
+                              : "—"}{" "}
+                            · Venda:{" "}
+                            {artigo.preco_venda_unitario != null
+                              ? formatCurrencyPt(artigo.preco_venda_unitario)
+                              : "—"}
                           </span>
                         </div>
                       </li>
@@ -244,6 +250,11 @@ export default function LinhasEditor({
                   className="border-b border-slate-100 last:border-0"
                 >
                   <td className="px-3 py-2 text-[11px] text-slate-800">
+                    {linha.codigoArtigo && (
+                      <div className="mb-0.5 font-mono text-[10px] text-slate-500">
+                        {linha.codigoArtigo}
+                      </div>
+                    )}
                     {podeEditar ? (
                       <input
                         type="text"
@@ -257,7 +268,7 @@ export default function LinhasEditor({
                         placeholder="Descrição da linha"
                       />
                     ) : (
-                      linha.descricao
+                      <div>{linha.descricao}</div>
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
