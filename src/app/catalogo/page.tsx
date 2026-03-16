@@ -71,6 +71,8 @@ export default function CatalogoPage() {
   const [novoArtigoError, setNovoArtigoError] = useState<string | null>(null);
   const [savingNovoArtigo, setSavingNovoArtigo] = useState(false);
   const [toggleAtivoId, setToggleAtivoId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingArtigoId, setEditingArtigoId] = useState<string | null>(null);
 
   const [novoArtigoForm, setNovoArtigoForm] = useState<NovoArtigoForm>({
     grande_capitulo: "",
@@ -184,6 +186,81 @@ export default function CatalogoPage() {
     }
   }
 
+  function abrirModalNovoArtigo() {
+    setIsEditMode(false);
+    setEditingArtigoId(null);
+    resetNovoArtigoForm();
+    setIsNovoArtigoOpen(true);
+  }
+
+  function abrirModalEditarArtigo(artigo: Artigo) {
+    setIsEditMode(true);
+    setEditingArtigoId(artigo.id);
+    setNovoArtigoError(null);
+    setNovoArtigoForm({
+      grande_capitulo: artigo.grande_capitulo ?? "",
+      capitulo: artigo.capitulo ?? "",
+      codigo: artigo.codigo,
+      descricao: artigo.descricao,
+      unidade: artigo.unidade ?? "",
+      pu_custo: "",
+      pu_venda: "",
+      ativo: artigo.ativo,
+    });
+    setIsNovoArtigoOpen(true);
+  }
+
+  async function handleGuardarArtigoEditado() {
+    if (!editingArtigoId) return;
+    setNovoArtigoError(null);
+    const erroValidacao = validarNovoArtigoForm();
+    if (erroValidacao) {
+      setNovoArtigoError(erroValidacao);
+      return;
+    }
+
+    try {
+      setSavingNovoArtigo(true);
+      const payload = {
+        descricao: novoArtigoForm.descricao.trim(),
+        unidade: novoArtigoForm.unidade.trim() || null,
+        grande_capitulo: novoArtigoForm.grande_capitulo || null,
+        capitulo: novoArtigoForm.capitulo,
+        pu_custo: novoArtigoForm.pu_custo.trim() || null,
+        pu_venda: novoArtigoForm.pu_venda.trim() || null,
+      };
+
+      const res = await fetch(`/api/catalogo/${editingArtigoId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(
+          data?.error || "Falha ao atualizar artigo",
+        );
+      }
+
+      setIsNovoArtigoOpen(false);
+      setIsEditMode(false);
+      setEditingArtigoId(null);
+      resetNovoArtigoForm();
+      await fetchCatalogo();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Falha ao atualizar artigo";
+      setNovoArtigoError(message);
+    } finally {
+      setSavingNovoArtigo(false);
+    }
+  }
+
   const fetchCatalogo = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -241,6 +318,7 @@ export default function CatalogoPage() {
 
   useEffect(() => {
     if (!isNovoArtigoOpen) return;
+    if (isEditMode) return;
     if (!novoArtigoForm.capitulo) return;
     const fetchCodigo = async () => {
       try {
@@ -270,7 +348,7 @@ export default function CatalogoPage() {
       }
     };
     void fetchCodigo();
-  }, [isNovoArtigoOpen, novoArtigoForm.capitulo]);
+  }, [isNovoArtigoOpen, isEditMode, novoArtigoForm.capitulo]);
 
   const capitulosFiltrados = capitulosAutorizados.filter((c) => {
     if (!novoArtigoForm.grande_capitulo) return true;
@@ -294,10 +372,7 @@ export default function CatalogoPage() {
 
         <button
           type="button"
-          onClick={() => {
-            resetNovoArtigoForm();
-            setIsNovoArtigoOpen(true);
-          }}
+          onClick={abrirModalNovoArtigo}
           className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
         >
           Novo artigo
@@ -391,6 +466,7 @@ export default function CatalogoPage() {
                   <th className="px-3 py-2 font-medium">Descrição</th>
                   <th className="px-3 py-2 font-medium">Unidade</th>
                   <th className="px-3 py-2 font-medium">Ativo</th>
+                  <th className="px-3 py-2 font-medium" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -449,6 +525,15 @@ export default function CatalogoPage() {
                           </button>
                         </div>
                       </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => abrirModalEditarArtigo(a)}
+                          className="rounded-md border border-slate-200 px-3 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
+                        >
+                          Editar
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -469,11 +554,15 @@ export default function CatalogoPage() {
           <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-slate-900">
-                Novo artigo
+                {isEditMode ? "Editar artigo" : "Novo artigo"}
               </h2>
               <button
                 type="button"
-                onClick={() => setIsNovoArtigoOpen(false)}
+                onClick={() => {
+                  setIsNovoArtigoOpen(false);
+                  setIsEditMode(false);
+                  setEditingArtigoId(null);
+                }}
                 className="rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700"
               >
                 Fechar
@@ -644,6 +733,8 @@ export default function CatalogoPage() {
                   type="button"
                   onClick={() => {
                     setIsNovoArtigoOpen(false);
+                    setIsEditMode(false);
+                    setEditingArtigoId(null);
                     setNovoArtigoError(null);
                   }}
                   className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
@@ -652,11 +743,17 @@ export default function CatalogoPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleGuardarNovoArtigo}
+                  onClick={
+                    isEditMode ? handleGuardarArtigoEditado : handleGuardarNovoArtigo
+                  }
                   disabled={savingNovoArtigo || loadingNovoArtigo}
                   className="rounded-lg bg-slate-900 px-4 py-1.5 text-xs font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  {savingNovoArtigo ? "A guardar..." : "Guardar"}
+                  {savingNovoArtigo
+                    ? "A guardar..."
+                    : isEditMode
+                      ? "Guardar alterações"
+                      : "Guardar"}
                 </button>
               </div>
             </div>

@@ -1,3 +1,150 @@
+# TASK
+
+Implementar edição de artigo no módulo Catálogo.
+
+## Objetivo
+Permitir editar artigos existentes diretamente a partir da página `/catalogo`, com alterações pequenas e seguras, sem refatorizações grandes e sem alterar o schema da base de dados.
+
+## Contexto
+Projeto:
+- Next.js App Router
+- TypeScript
+- Supabase / PostgreSQL
+
+Fonte única de verdade:
+- tabela `artigos`
+
+Página principal:
+- `src/app/catalogo/page.tsx`
+
+Backend existente:
+- GET /api/catalogo
+- POST /api/catalogo
+- GET /api/catalogo/capitulos
+- GET /api/catalogo/proximo-codigo
+- PATCH /api/catalogo/[id]
+
+## Objetivo funcional
+Adicionar a capacidade de editar um artigo já existente no catálogo.
+
+Fluxo esperado:
+
+1. utilizador clica em botão "Editar" na grelha da página `/catalogo`
+2. abre modal de edição pré-preenchido com os dados atuais do artigo
+3. utilizador altera os campos permitidos
+4. clica em "Guardar"
+5. frontend envia atualização ao backend
+6. modal fecha
+7. listagem atualiza automaticamente com `fetchCatalogo()`
+
+## Campos editáveis
+Permitir editar:
+- descricao
+- unidade
+- pu_custo
+- pu_venda
+- grande_capitulo
+- capitulo
+
+## Regra crítica
+O campo `codigo` NÃO deve ser alterado na edição.
+
+O código deve ser apresentado no modal apenas para leitura.
+
+## Backend
+Evoluir o endpoint existente:
+
+src/app/api/catalogo/[id]/route.ts
+
+Objetivo:
+- manter o PATCH atual compatível com ativar/inativar
+- permitir também atualizar os campos de edição do artigo
+
+Payload esperado para edição:
+
+{
+  "descricao": "Nova descrição",
+  "unidade": "m2",
+  "grande_capitulo": "E",
+  "capitulo": "E8",
+  "pu_custo": "12.50",
+  "pu_venda": "18.00"
+}
+
+Também deve continuar a aceitar:
+
+{
+  "ativo": false
+}
+
+Regras backend:
+- validar id
+- validar payload
+- aceitar atualização parcial
+- não exigir todos os campos
+- atualizar updated_at = now()
+- devolver artigo atualizado
+- não alterar schema
+- não criar novos endpoints
+
+## Frontend
+
+Página:
+src/app/catalogo/page.tsx
+
+Adicionar na tabela uma nova ação:
+botão "Editar".
+
+Ao clicar:
+- abrir modal de edição
+- pré-preencher campos atuais
+
+Campos no modal:
+- codigo (readonly)
+- descricao
+- unidade
+- grande_capitulo
+- capitulo
+- pu_custo
+- pu_venda
+
+Reutilizar a estrutura do modal "Novo artigo" sempre que possível.
+
+## Regras de frontend
+- não refatorizar a página inteira
+- reaproveitar lógica existente
+- manter consistência visual
+- continuar a usar fetchCatalogo() para refresh
+- não mexer no fluxo atual de criação de artigo
+- não mexer no toggle ativo/inativo da grelha
+
+## Capítulos autorizados
+Se for possível alterar capítulo, reutilizar a lógica já existente de carregamento de capítulos autorizados.
+
+## Resultado esperado
+
+Na página `/catalogo` deve ser possível:
+
+- clicar em "Editar"
+- editar um artigo existente
+- guardar alterações
+- ver a tabela atualizar automaticamente
+
+## Não fazer
+- não alterar schema
+- não alterar código do artigo
+- não criar refatorizações grandes
+- não mexer em módulos Propostas ou IA
+
+## Resposta final esperada
+O assistente deve devolver:
+
+1. ficheiros alterados
+2. resumo do que foi feito
+3. como testar localmente
+4. confirmação do que não foi alterado
+5. riscos ou pontos críticos
+
 # TASK — MÓDULO CATÁLOGO / ARTIGOS
 
 ## Descrição da tarefa atual
