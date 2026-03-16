@@ -13,6 +13,8 @@ type Artigo = {
   unidade: string | null;
   grande_capitulo: string | null;
   capitulo: string | null;
+  pu_custo: number | null;
+  pu_venda: number | null;
   ativo: boolean;
 };
 
@@ -203,8 +205,14 @@ export default function CatalogoPage() {
       codigo: artigo.codigo,
       descricao: artigo.descricao,
       unidade: artigo.unidade ?? "",
-      pu_custo: "",
-      pu_venda: "",
+      pu_custo:
+        artigo.pu_custo != null && Number.isFinite(artigo.pu_custo)
+          ? artigo.pu_custo.toString()
+          : "",
+      pu_venda:
+        artigo.pu_venda != null && Number.isFinite(artigo.pu_venda)
+          ? artigo.pu_venda.toString()
+          : "",
       ativo: artigo.ativo,
     });
     setIsNovoArtigoOpen(true);
@@ -465,6 +473,8 @@ export default function CatalogoPage() {
                   <th className="px-3 py-2 font-medium">Código</th>
                   <th className="px-3 py-2 font-medium">Descrição</th>
                   <th className="px-3 py-2 font-medium">Unidade</th>
+                  <th className="px-3 py-2 font-medium text-right">PU Custo</th>
+                  <th className="px-3 py-2 font-medium text-right">PU Venda</th>
                   <th className="px-3 py-2 font-medium">Ativo</th>
                   <th className="px-3 py-2 font-medium" />
                 </tr>
@@ -499,6 +509,12 @@ export default function CatalogoPage() {
                       </td>
                       <td className="px-3 py-2 text-slate-600">
                         {a.unidade ?? "—"}
+                      </td>
+                      <td className="px-3 py-2 text-right text-slate-700">
+                        {a.pu_custo != null ? a.pu_custo.toFixed(2) : "—"}
+                      </td>
+                      <td className="px-3 py-2 text-right text-slate-700">
+                        {a.pu_venda != null ? a.pu_venda.toFixed(2) : "—"}
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">

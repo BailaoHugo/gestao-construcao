@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { pool } from "@/lib/db";
+import { toNumberOrNull } from "@/lib/number";
 
 type ArtigoRow = {
   id: string;
@@ -8,6 +9,8 @@ type ArtigoRow = {
   unidade: string | null;
   grande_capitulo: string | null;
   capitulo: string | null;
+  pu_custo: unknown;
+  pu_venda: unknown;
   ativo: boolean;
 };
 
@@ -26,6 +29,8 @@ export async function GET(req: NextRequest) {
       unidade,
       grande_capitulo,
       capitulo,
+      pu_custo,
+      pu_venda,
       ativo
     from artigos
     where 1=1
@@ -76,6 +81,8 @@ export async function GET(req: NextRequest) {
       unidade: row.unidade,
       grande_capitulo: row.grande_capitulo,
       capitulo: row.capitulo,
+      pu_custo: toNumberOrNull(row.pu_custo),
+      pu_venda: toNumberOrNull(row.pu_venda),
       ativo: row.ativo,
     }));
 
