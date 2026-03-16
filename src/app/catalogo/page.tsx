@@ -70,6 +70,7 @@ export default function CatalogoPage() {
   const [loadingNovoArtigo, setLoadingNovoArtigo] = useState(false);
   const [novoArtigoError, setNovoArtigoError] = useState<string | null>(null);
   const [savingNovoArtigo, setSavingNovoArtigo] = useState(false);
+  const [toggleAtivoId, setToggleAtivoId] = useState<string | null>(null);
 
   const [novoArtigoForm, setNovoArtigoForm] = useState<NovoArtigoForm>({
     grande_capitulo: "",
@@ -153,6 +154,33 @@ export default function CatalogoPage() {
       setNovoArtigoError(message);
     } finally {
       setSavingNovoArtigo(false);
+    }
+  }
+
+  async function handleToggleAtivo(artigo: Artigo) {
+    try {
+      setError(null);
+      setToggleAtivoId(artigo.id);
+
+      const res = await fetch(`/api/catalogo/${artigo.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ativo: !artigo.ativo }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          (data as { error?: string })?.error ||
+            "Falha ao atualizar estado do artigo",
+        );
+      }
+
+      await fetchCatalogo();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setToggleAtivoId(null);
     }
   }
 
@@ -397,15 +425,29 @@ export default function CatalogoPage() {
                         {a.unidade ?? "—"}
                       </td>
                       <td className="px-3 py-2">
-                        <span
-                          className={
-                            a.ativo
-                              ? "text-emerald-600 font-medium"
-                              : "text-slate-400"
-                          }
-                        >
-                          {a.ativo ? "Sim" : "Não"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={
+                              a.ativo
+                                ? "text-emerald-600 font-medium"
+                                : "text-slate-400"
+                            }
+                          >
+                            {a.ativo ? "Sim" : "Não"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleAtivo(a)}
+                            disabled={toggleAtivoId === a.id}
+                            className="rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                          >
+                            {toggleAtivoId === a.id
+                              ? "A atualizar..."
+                              : a.ativo
+                                ? "Inativar"
+                                : "Ativar"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
