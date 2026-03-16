@@ -78,6 +78,7 @@ export default function LinhasEditor({
   const [iaLoading, setIaLoading] = useState(false);
   const [iaError, setIaError] = useState<string | null>(null);
   const catalogoDebounceRef = useRef<number | null>(null);
+  const catalogoInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (catalogoDebounceRef.current !== null) {
@@ -147,6 +148,11 @@ export default function LinhasEditor({
     setCatalogoResultados([]);
     setCatalogoDropdownVisivel(false);
     setCatalogoHighlightedIndex(-1);
+
+    // restore focus to the catalog search input on the next frame
+    window.requestAnimationFrame(() => {
+      catalogoInputRef.current?.focus();
+    });
   };
 
   return (
@@ -165,6 +171,7 @@ export default function LinhasEditor({
             <div className="relative">
               <input
                 type="text"
+                ref={catalogoInputRef}
                 placeholder="Pesquisar artigo no catálogo"
                 className="w-64 rounded-full border border-slate-200 px-3 py-1 text-[11px] text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400"
                 value={catalogoQuery}
