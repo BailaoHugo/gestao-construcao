@@ -39,6 +39,8 @@ export async function GET(req: NextRequest) {
       and (
         codigo ilike $1
         or descricao ilike $1
+        or grande_capitulo ilike $1
+        or capitulo ilike $1
       )
     `;
     params.push(`%${q}%`);

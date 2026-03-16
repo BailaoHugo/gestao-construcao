@@ -32,6 +32,28 @@ type LinhasEditorProps = {
   onSelectArtigoCatalogo: (artigo: CatalogoArtigo) => void;
 };
 
+function highlightMatch(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return text;
+
+  const index = text.toLowerCase().indexOf(q.toLowerCase());
+  if (index === -1) return text;
+
+  const before = text.slice(0, index);
+  const match = text.slice(index, index + q.length);
+  const after = text.slice(index + q.length);
+
+  return (
+    <>
+      {before}
+      <mark className="rounded bg-amber-100 px-0.5 text-amber-900">
+        {match}
+      </mark>
+      {after}
+    </>
+  );
+}
+
 export default function LinhasEditor({
   linhas,
   onLinhasChange,
@@ -142,6 +164,16 @@ export default function LinhasEditor({
                 className="w-64 rounded-full border border-slate-200 px-3 py-1 text-[11px] text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400"
                 value={catalogoQuery}
                 onChange={(e) => setCatalogoQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    catalogoResultados.length > 0 &&
+                    !catalogoLoading
+                  ) {
+                    e.preventDefault();
+                    handleSelectArtigo(catalogoResultados[0]);
+                  }
+                }}
                 onFocus={() => {
                   if (catalogoResultados.length > 0) {
                     setCatalogoDropdownVisivel(true);
@@ -171,19 +203,23 @@ export default function LinhasEditor({
                           </span>
                         </div>
                         <div className="mt-0.5 text-[11px] text-slate-800">
-                          {artigo.descricao}
+                          {highlightMatch(artigo.descricao, catalogoQuery)}
                         </div>
-                        <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
-                          <span>
-                            {artigo.unidade ?? "—"} · Custo:{" "}
-                            {artigo.preco_custo_unitario != null
-                              ? formatCurrencyPt(artigo.preco_custo_unitario)
-                              : "—"}{" "}
-                            · Venda:{" "}
+                        <div className="mt-1 space-y-0.5 text-[10px] text-slate-600">
+                          <div className="font-medium text-slate-800">
                             {artigo.preco_venda_unitario != null
                               ? formatCurrencyPt(artigo.preco_venda_unitario)
+                              : "—"}{" "}
+                            <span className="text-[10px] text-slate-500">
+                              / {artigo.unidade ?? "—"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500">Custo:</span>{" "}
+                            {artigo.preco_custo_unitario != null
+                              ? formatCurrencyPt(artigo.preco_custo_unitario)
                               : "—"}
-                          </span>
+                          </div>
                         </div>
                       </li>
                     ))}
