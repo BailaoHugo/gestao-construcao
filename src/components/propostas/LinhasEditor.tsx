@@ -70,6 +70,8 @@ export default function LinhasEditor({
   >([]);
   const [catalogoLoading, setCatalogoLoading] = useState(false);
   const [catalogoDropdownVisivel, setCatalogoDropdownVisivel] = useState(false);
+  const [catalogoHighlightedIndex, setCatalogoHighlightedIndex] =
+    useState<number>(-1);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [iaModalOpen, setIaModalOpen] = useState(false);
   const [iaDescricao, setIaDescricao] = useState("");
@@ -102,9 +104,11 @@ export default function LinhasEditor({
         const data = (await res.json()) as CatalogoArtigo[];
         setCatalogoResultados(data);
         setCatalogoDropdownVisivel(true);
+        setCatalogoHighlightedIndex(data.length > 0 ? 0 : -1);
       } catch {
         setCatalogoResultados([]);
         setCatalogoDropdownVisivel(false);
+        setCatalogoHighlightedIndex(-1);
       } finally {
         setCatalogoLoading(false);
       }
@@ -142,6 +146,7 @@ export default function LinhasEditor({
     setCatalogoQuery("");
     setCatalogoResultados([]);
     setCatalogoDropdownVisivel(false);
+    setCatalogoHighlightedIndex(-1);
   };
 
   return (
@@ -165,13 +170,56 @@ export default function LinhasEditor({
                 value={catalogoQuery}
                 onChange={(e) => setCatalogoQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (
-                    e.key === "Enter" &&
-                    catalogoResultados.length > 0 &&
-                    !catalogoLoading
-                  ) {
-                    e.preventDefault();
-                    handleSelectArtigo(catalogoResultados[0]);
+                  if (e.key === "ArrowDown") {
+                    if (
+                      catalogoDropdownVisivel &&
+                      catalogoResultados.length > 0
+                    ) {
+                      e.preventDefault();
+                      setCatalogoHighlightedIndex((prev) => {
+                        const next = prev + 1;
+                        return next >= catalogoResultados.length
+                          ? catalogoResultados.length - 1
+                          : next;
+                      });
+                    }
+                    return;
+                  }
+                  if (e.key === "ArrowUp") {
+                    if (
+                      catalogoDropdownVisivel &&
+                      catalogoResultados.length > 0
+                    ) {
+                      e.preventDefault();
+                      setCatalogoHighlightedIndex((prev) => {
+                        const next = prev - 1;
+                        return next < 0 ? 0 : next;
+                      });
+                    }
+                    return;
+                  }
+                  if (e.key === "Enter") {
+                    if (
+                      catalogoDropdownVisivel &&
+                      !catalogoLoading &&
+                      catalogoResultados.length > 0
+                    ) {
+                      e.preventDefault();
+                      const indexToUse =
+                        catalogoHighlightedIndex >= 0 &&
+                        catalogoHighlightedIndex < catalogoResultados.length
+                          ? catalogoHighlightedIndex
+                          : 0;
+                      handleSelectArtigo(catalogoResultados[indexToUse]);
+                    }
+                    return;
+                  }
+                  if (e.key === "Escape") {
+                    if (catalogoDropdownVisivel) {
+                      e.preventDefault();
+                      setCatalogoDropdownVisivel(false);
+                      setCatalogoHighlightedIndex(-1);
+                    }
                   }
                 }}
                 onFocus={() => {
@@ -188,11 +236,18 @@ export default function LinhasEditor({
               {catalogoDropdownVisivel && catalogoResultados.length > 0 && (
                 <div className="absolute z-10 mt-1 max-h-64 w-80 overflow-auto rounded-lg border border-slate-200 bg-white text-[11px] shadow-lg">
                   <ul>
-                    {catalogoResultados.map((artigo) => (
+                    {catalogoResultados.map((artigo, index) => (
                       <li
                         key={artigo.id}
-                        className="cursor-pointer border-b border-slate-100 px-3 py-2 last:border-0 hover:bg-slate-50"
+                        className={`cursor-pointer border-b border-slate-100 px-3 py-2 last:border-0 hover:bg-slate-50 ${
+                          index === catalogoHighlightedIndex
+                            ? "bg-slate-100"
+                            : ""
+                        }`}
                         onClick={() => handleSelectArtigo(artigo)}
+                        onMouseEnter={() =>
+                          setCatalogoHighlightedIndex(index)
+                        }
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-mono text-[10px] text-emerald-700">
