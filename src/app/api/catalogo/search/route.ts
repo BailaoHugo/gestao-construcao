@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { pool } from "@/lib/db";
+import { labelCapitulo } from "@/lib/catalogo/descricoesCapitulos";
 
 type ArtigoRow = {
   id: string;
@@ -71,6 +72,10 @@ export async function GET(req: NextRequest) {
       unidade: row.unidade,
       grande_capitulo: row.grande_capitulo,
       capitulo: row.capitulo,
+      capitulo_descricao:
+        row.capitulo && row.capitulo.trim() !== ""
+          ? labelCapitulo(row.capitulo)
+          : null,
       preco_custo_unitario:
         row.pu_custo === null || row.pu_custo === undefined
           ? null
