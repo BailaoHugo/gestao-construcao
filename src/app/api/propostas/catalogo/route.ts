@@ -15,43 +15,92 @@ type ArtigoRow = {
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  const q = searchParams.get("q")?.trim();
-
-  let sql = `
-    select
-      id,
-      codigo,
-      descricao,
-      unidade,
-      grande_capitulo,
-      capitulo,
-      pu_custo,
-      pu_venda,
-      origem
-    from artigos
-    where ativo = true
-  `;
-
-  const params: any[] = [];
-
-  if (q && q.length > 0) {
-    sql += `
-      and (
-        codigo ilike $1
-        or descricao ilike $1
-        or grande_capitulo ilike $1
-        or capitulo ilike $1
-      )
-    `;
-    params.push(`%${q}%`);
-  }
-
-  sql += `
-    order by grande_capitulo, capitulo, codigo
-  `;
+  const raw = searchParams.get("q")?.trim() ?? "";
+  const q = raw;
 
   try {
-    const result = await pool.query<ArtigoRow>(sql, params);
+    // Se não houver termo de pesquisa, devolver rápido a lista base ordenada por capítulo/código.
+    if (!q) {
+      const result = await pool.query<ArtigoRow>(
+        `
+        select
+          id,
+          codigo,
+          descricao,
+          unidade,
+          grande_capitulo,
+          capitulo,
+          pu_custo,
+          pu_venda,
+          origem
+        from artigos
+        where ativo = true
+        order by grande_capitulo, capitulo, codigo
+        limit 20
+        `,
+      );
+
+      const data = result.rows.map((row) => ({
+        id: row.id,
+        codigo: row.codigo,
+        descricao: row.descricao,
+        unidade: row.unidade,
+        grande_capitulo: row.grande_capitulo,
+        capitulo: row.capitulo,
+        preco_custo_unitario:
+          row.pu_custo === null || row.pu_custo === undefined
+            ? null
+            : Number(row.pu_custo),
+        preco_venda_unitario:
+          row.pu_venda === null || row.pu_venda === undefined
+            ? null
+            : Number(row.pu_venda),
+        origem: row.origem,
+      }));
+
+      return NextResponse.json(data);
+    }
+
+    const result = await pool.query<ArtigoRow>(
+      `
+      select
+        id,
+        codigo,
+        descricao,
+        unidade,
+        grande_capitulo,
+        capitulo,
+        pu_custo,
+        pu_venda,
+        origem
+      from artigos
+      where ativo = true
+        and (
+          unaccent(lower(codigo)) like $1
+          or unaccent(lower(descricao)) like $2
+          or unaccent(lower(grande_capitulo)) like $2
+          or unaccent(lower(capitulo)) like $2
+        )
+      order by
+        case
+          when unaccent(lower(codigo)) like $1 then 0
+          when unaccent(lower(descricao)) like $1 then 1
+          when unaccent(lower(descricao)) like $2 then 2
+          else 3
+        end,
+        grande_capitulo,
+        capitulo,
+        codigo
+      limit 20
+      `,
+      [
+        `${q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}%`,
+        `%${q
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")}%`,
+      ],
+    );
 
     const data = result.rows.map((row) => ({
       id: row.id,
