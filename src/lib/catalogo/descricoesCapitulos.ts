@@ -1,7 +1,6 @@
-/**
- * Mapas de códigos → descrições textuais para Grandes Capítulos (A–J) e Capítulos.
- * Usado na página /catalogo para mostrar código + descrição. Sem alteração de schema.
- */
+// ==============================
+// GRANDES CAPÍTULOS (A–J)
+// ==============================
 
 export const GRANDES_CAPITULOS: Record<string, string> = {
   A: "Licenciamentos e Entidades",
@@ -16,91 +15,108 @@ export const GRANDES_CAPITULOS: Record<string, string> = {
   J: "Estaleiro, Gestão e Encargos",
 };
 
-export const CAPITULOS: Record<string, string> = {
-  // A
-  A1: "Licenças e Taxas Municipais",
-  A2: "Ramais e Ligações (Água, Eletricidade, etc.)",
-  A3: "Entidades e Fiscalização",
-  A4: "Outros Licenciamentos",
-  // B
-  B1: "Projetos de Arquitetura",
-  B2: "Projetos de Especialidades",
-  B3: "Estudos e Ensaios",
-  B4: "Fiscalização e Direção de Obra",
-  B5: "Coordenação e Gestão de Projeto",
-  B6: "Outros Projetos e Estudos",
-  // C
-  C1: "Demolições e Desaterros",
-  C2: "Movimentos de Terras",
-  C3: "Drenagens e Escavações",
-  C4: "Fundações Diretas",
-  C5: "Saneamento e Redes",
-  C6: "Pavimentação e Acessos",
-  C7: "Outros Movimentos de Terras",
-  // D
-  D1: "Estrutura em Betão",
-  D2: "Estrutura Metálica",
-  D3: "Pré‑esforço e Pré‑fabricados",
-  D4: "Alvenarias Estruturais",
-  D5: "Madeira e Derivados",
-  D6: "Fundações Especiais",
-  D7: "Contenções",
-  D8: "Outros Elementos Estruturais",
-  // E
-  E1: "Demolições e Remoções",
-  E2: "Alvenarias e Paredes",
-  E3: "Rebocos e Acabamentos",
-  E4: "Pavimentos",
-  E5: "Pinturas",
-  E6: "Caixilharias",
-  E7: "Coberturas e Tectos",
-  E8: "Revestimentos Cerâmicos e Barramentos",
-  E9: "Divisórias e Tetos Falsos",
-  E10: "Instalações Sanitárias e Águas",
-  E11: "Escadas e Guardas",
-  E12: "Carpintarias e Portas Interiores",
-  E13: "Outros (Arquitetura Interior)",
-  // F
-  F1: "Instalações Elétricas",
-  F2: "AVAC e Ventilação",
-  F3: "Gás e Combustíveis",
-  F4: "Saneamento e Águas",
-  F5: "Segurança contra Incêndios",
-  F6: "Comunicações e IT",
-  F7: "Elevadores e Monta‑cargas",
-  F8: "Proteção contra Descargas",
-  F9: "Automação e Domótica",
-  F10: "Outras Especialidades",
-  // G
-  G1: "Coberturas (Telhados)",
-  G2: "Fachadas e Isolamento",
-  G3: "Canalizações e Águas Pluviais",
-  G4: "Janelas e Caixilharia Exterior",
-  G5: "Impermeabilizações",
-  G6: "Outros (Coberturas e Fachadas)",
-  // H
-  H1: "Pavimentação Exterior",
-  H2: "Drenagens e Rede Pluvial",
-  H3: "Muros e Cercas",
-  H4: "Paisagismo e Plantação",
-  H5: "Acessos e Vias",
-  H6: "Iluminação Exterior",
-  H7: "Outros Arranjos Exteriores",
-  // I
-  I1: "Equipamentos de Cozinha",
-  I2: "Equipamentos Sanitários",
-  I3: "Aquecimento e AC",
-  I4: "Mobiliário Incorporado",
-  I5: "Fornecimentos Especiais",
-  I6: "Sinalética e Segurança",
-  I7: "Outros Fornecimentos",
-  // J
-  J1: "Instalação de Estaleiro",
-  J2: "Segurança e Saúde",
-  J3: "Gestão e Coordenação",
-  J4: "Encargos Gerais",
-  J5: "Contingências e Imprevistos",
+// ==============================
+// CAPÍTULOS (A1–J5)
+// ==============================
+
+export const DESCRICOES_CAPITULOS: Record<string, string> = {
+  // A — Licenciamentos e Entidades
+  A1: "Taxas e Licenças",
+  A2: "Ramais e Ligações",
+  A3: "Certificações, Vistorias e Licenças Finais",
+  A4: "Gestão Administrativa e Entidades",
+
+  // B — Projetos e Estudos
+  B1: "Levantamentos e Diagnóstico",
+  B2: "Projeto de Arquitetura",
+  B3: "Projeto de Estruturas",
+  B4: "Projetos de Especialidades",
+  B5: "Medições, MQ e Especificações",
+  B6: "Coordenação, Fiscalização e Estudos Complementares",
+
+  // C — Movimentos de Terras
+  C1: "Implantação e Preparação de Terreno",
+  C2: "Escavações",
+  C3: "Aterros, Regularizações e Camadas de Forma",
+  C4: "Transporte e Gestão de Terras e Entulhos",
+  C5: "Drenagens e Camadas Drenantes",
+  C6: "Escavações e Intervenções Especiais",
+  C7: "Trabalhos Especiais em Reabilitação",
+
+  // D — Estruturas
+  D1: "Demolições e Aberturas em Estruturas",
+  D2: "Escoramentos e Contenções Provisórias",
+  D3: "Fundações",
+  D4: "Estruturas em Betão Armado",
+  D5: "Estruturas Metálicas",
+  D6: "Estruturas em Madeira",
+  D7: "Reforços Estruturais",
+  D8: "Reparação e Proteção Estrutural",
+
+  // E — Arquitetura (Obra Interior)
+  E1: "Trabalhos Preparatórios e Proteções",
+  E2: "Demolições, Remoções e Gestão de Entulhos",
+  E3: "Paredes e Forras em Gesso Cartonado",
+  E4: "Rebocos, Estuques, Barramentos e Regularizações",
+  E5: "Impermeabilizações",
+  E6: "Tetos Falsos e Isolamentos em Teto",
+  E7: "Revestimentos de Parede",
+  E8: "Pavimentos e Rodapés",
+  E9: "Carpintarias e Marcenarias Interiores",
+  E10: "Vidros, Espelhos, Guardas e Caixilharias Interiores",
+  E11: "Pinturas, Vernizes e Tratamentos de Superfície",
+  E12: "Remates e Trabalhos Complementares",
+  E13: "Caixilharias Exteriores e Vãos Exteriores",
+
+  // F — Especialidades
+  F1: "Infraestruturas Elétricas",
+  F2: "Aparelhagem, Quadros e Iluminação",
+  F3: "ITED e Telecomunicações",
+  F4: "Redes de Águas e Esgotos",
+  F5: "Equipamentos Sanitários, Cozinhas e AQS",
+  F6: "Infraestruturas AVAC e Ventilação",
+  F7: "Equipamentos AVAC e Ventilação",
+  F8: "Redes de Gás",
+  F9: "SCIE, Segurança e Sistemas Especiais",
+  F10: "Domótica e Automação",
+
+  // G — Coberturas e Fachadas
+  G1: "Coberturas Planas",
+  G2: "Coberturas Inclinadas",
+  G3: "Revestimentos e Sistemas de Fachada",
+  G4: "Reparação e Consolidação de Fachadas",
+  G5: "Rufos, Caleiras, Guardas e Remates Exteriores",
+  G6: "Trabalhos Auxiliares em Fachadas e Varandas",
+
+  // H — Arranjos Exteriores
+  H1: "Preparação e Regularização de Terrenos Exteriores",
+  H2: "Pavimentos Exteriores",
+  H3: "Muros e Elementos de Contenção",
+  H4: "Redes Exteriores",
+  H5: "Arranjos Verdes",
+  H6: "Vedações, Iluminação e Mobiliário Exterior",
+  H7: "Limpezas Finais Exteriores",
+
+  // I — Fornecimentos e Equipamentos
+  I1: "Mobiliário Fixo e Bancadas",
+  I2: "Louças Sanitárias, Bases e Torneiras",
+  I3: "Iluminação Decorativa",
+  I4: "Eletrodomésticos e Extração",
+  I5: "Equipamentos Técnicos",
+  I6: "Sistemas Especiais e Mobilidade Elétrica",
+  I7: "Outros Fornecimentos e Elementos Personalizados",
+
+  // J — Estaleiro, Gestão e Encargos
+  J1: "Instalação e Infraestruturas de Estaleiro",
+  J2: "Gestão, Coordenação e Direção de Obra",
+  J3: "Segurança e Saúde em Obra",
+  J4: "Limpezas Finais e Desmobilização",
+  J5: "Encargos Administrativos, Financeiros e Seguros",
 };
+
+// ==============================
+// HELPERS
+// ==============================
 
 /** Devolve "codigo — descrição" ou só "codigo" se não houver descrição. */
 export function labelGrandeCapitulo(codigo: string | null | undefined): string {
@@ -112,6 +128,6 @@ export function labelGrandeCapitulo(codigo: string | null | undefined): string {
 /** Devolve "codigo — descrição" ou só "codigo" se não houver descrição. */
 export function labelCapitulo(codigo: string | null | undefined): string {
   if (codigo == null || codigo === "") return "—";
-  const desc = CAPITULOS[codigo.trim()];
+  const desc = DESCRICOES_CAPITULOS[codigo.trim()];
   return desc ? `${codigo} — ${desc}` : codigo;
 }
