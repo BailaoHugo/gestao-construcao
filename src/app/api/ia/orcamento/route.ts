@@ -24,38 +24,118 @@ export async function POST(req: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const like = `%${descricao.trim()}%`;
+    // Normalizar descrição e extrair tokens úteis
+    const normalized = descricao
+      .toLowerCase()
+      .replace(/[.,;:!?()[\]{}"']/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const stopwords = new Set([
+      "de",
+      "da",
+      "do",
+      "das",
+      "dos",
+      "e",
+      "em",
+      "para",
+      "com",
+      "por",
+      "na",
+      "no",
+      "nas",
+      "nos",
+      "um",
+      "uma",
+    ]);
+
+    const rawTokens = normalized.length > 0 ? normalized.split(" ") : [];
+    const usefulTokens: string[] = [];
+    for (const t of rawTokens) {
+      if (t.length < 3) continue;
+      if (stopwords.has(t)) continue;
+      if (usefulTokens.includes(t)) continue;
+      usefulTokens.push(t);
+      if (usefulTokens.length >= 5) break;
+    }
+
+    const likeFull = `%${descricao.trim()}%`;
 
     let catalogoBloco = "ARTIGOS EXISTENTES NO CATÁLOGO:\n";
 
     try {
-      const { rows } = await pool.query<{
-        codigo: string;
-        descricao: string;
-        unidade: string | null;
-        capitulo: string | null;
-        pu_custo: number | string | null;
-        pu_venda: number | string | null;
-      }>(
-        `
-        select
-          codigo,
-          descricao,
-          unidade,
-          capitulo,
-          pu_custo,
-          pu_venda
-        from artigos
-        where ativo = true
-          and (
-            codigo ilike $1
-            or descricao ilike $1
-          )
-        order by codigo asc
-        limit 10
-        `,
-        [like],
-      );
+      const rowsQuery = await (async () => {
+        // Se houver tokens úteis, construir query dinâmica; caso contrário, fallback para like completo
+        if (usefulTokens.length > 0) {
+          const likeTokens = usefulTokens.map((t) => `%${t}%`);
+
+          const conditionsCodigo = likeTokens
+            .map((_, idx) => `codigo ilike $${idx + 1}`)
+            .join(" or ");
+          const conditionsDescricao = likeTokens
+            .map((_, idx) => `descricao ilike $${idx + 1}`)
+            .join(" or ");
+
+          const sql = `
+            select
+              codigo,
+              descricao,
+              unidade,
+              capitulo,
+              pu_custo,
+              pu_venda
+            from artigos
+            where ativo = true
+              and (
+                (${conditionsCodigo})
+                or
+                (${conditionsDescricao})
+              )
+            order by codigo asc
+            limit 10
+          `;
+
+          return pool.query<{
+            codigo: string;
+            descricao: string;
+            unidade: string | null;
+            capitulo: string | null;
+            pu_custo: number | string | null;
+            pu_venda: number | string | null;
+          }>(sql, likeTokens);
+        }
+
+        // Fallback: pesquisa com descrição completa
+        const sqlFallback = `
+          select
+            codigo,
+            descricao,
+            unidade,
+            capitulo,
+            pu_custo,
+            pu_venda
+          from artigos
+          where ativo = true
+            and (
+              codigo ilike $1
+              or descricao ilike $1
+            )
+          order by codigo asc
+          limit 10
+        `;
+
+        return pool.query<{
+          codigo: string;
+          descricao: string;
+          unidade: string | null;
+          capitulo: string | null;
+          pu_custo: number | string | null;
+          pu_venda: number | string | null;
+        }>(sqlFallback, [likeFull]);
+      })();
+
+      const { rows } = rowsQuery;
 
       if (!rows || rows.length === 0) {
         catalogoBloco += "- Nenhum artigo relevante encontrado.\n";
