@@ -73,10 +73,6 @@ export default function LinhasEditor({
   const [catalogoHighlightedIndex, setCatalogoHighlightedIndex] =
     useState<number>(-1);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [iaModalOpen, setIaModalOpen] = useState(false);
-  const [iaDescricao, setIaDescricao] = useState("");
-  const [iaLoading, setIaLoading] = useState(false);
-  const [iaError, setIaError] = useState<string | null>(null);
   const catalogoDebounceRef = useRef<number | null>(null);
   const catalogoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -302,13 +298,6 @@ export default function LinhasEditor({
               className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
             >
               Importar linhas
-            </button>
-            <button
-              type="button"
-              onClick={() => setIaModalOpen(true)}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Gerar com IA
             </button>
           </div>
         )}

@@ -24,6 +24,8 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
   const [resultados, setResultados] = useState<MariaResultadoArtigo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastIntent, setLastIntent] = useState<string | null>(null);
+  const [quantidades, setQuantidades] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,7 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
 
     const intent = interpretarMensagem(texto);
 
+    setLastIntent(intent.intent);
     setHistorico((prev) => [
       {
         id: crypto.randomUUID(),
@@ -115,6 +118,7 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
+      setResultados([]);
     } finally {
       setLoading(false);
     }
@@ -210,12 +214,13 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
           </h3>
           <ul className="space-y-2 max-h-64 overflow-auto pr-1">
             {resultados.map((artigo) => {
-              const [quantidadeLocal, setQuantidadeLocal] = useState("1");
+              const keyId = `${artigo.codigo}-${artigo.id ?? "sem-id"}`;
+              const quantidadeLocal = quantidades[keyId] ?? "1";
               const quantidadeNum =
                 Number.parseFloat(quantidadeLocal.replace(",", ".")) || 1;
               return (
                 <li
-                  key={`${artigo.codigo}-${artigo.id ?? "sem-id"}`}
+                  key={keyId}
                   className="space-y-1 rounded border border-slate-100 bg-slate-50 p-2"
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -251,7 +256,12 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
                     <input
                       type="text"
                       value={quantidadeLocal}
-                      onChange={(e) => setQuantidadeLocal(e.target.value)}
+                      onChange={(e) =>
+                        setQuantidades((prev) => ({
+                          ...prev,
+                          [keyId]: e.target.value,
+                        }))
+                      }
                       className="w-16 rounded border border-slate-200 px-2 py-1 text-[11px] text-slate-800 outline-none focus:border-slate-400"
                     />
                     <button
@@ -269,6 +279,11 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
             })}
           </ul>
         </section>
+      )}
+      {lastIntent === "searchArtigos" && !loading && resultados.length === 0 && (
+        <p className="text-[11px] text-slate-500">
+          Sem resultados para este pedido.
+        </p>
       )}
     </aside>
   );
