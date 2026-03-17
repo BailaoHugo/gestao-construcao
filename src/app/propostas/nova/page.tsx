@@ -8,6 +8,7 @@ import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
 import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
+import { MariaPanel } from "@/components/propostas/MariaPanel";
 
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
@@ -97,9 +98,22 @@ export default function NovaPropostaPage() {
     setLinhas((prev) => [...prev, ...novas]);
   };
 
-  const handleSelectArtigo = (artigo: CatalogoArtigo) => {
-    // Criar nova linha de proposta pré-preenchida a partir do catálogo.
-    const quantidade = 1;
+  const handleAddLinhaFromCatalogo = (
+    artigo: {
+      id?: string | null;
+      codigo: string;
+      descricao: string;
+      unidade: string | null;
+      grande_capitulo?: string | null;
+      capitulo: string | null;
+      preco_custo_unitario: number | null;
+      preco_venda_unitario: number | null;
+    },
+    quantidadeParam = 1,
+  ) => {
+    const quantidade = Number.isFinite(quantidadeParam)
+      ? quantidadeParam
+      : 1;
     const precoCusto =
       artigo.preco_custo_unitario !== null
         ? artigo.preco_custo_unitario
@@ -107,11 +121,11 @@ export default function NovaPropostaPage() {
     const precoVenda =
       artigo.preco_venda_unitario !== null
         ? artigo.preco_venda_unitario
-        : precoCusto * fatorVenda;
+        : 0;
 
     const novaLinha: PropostaLinha = {
       id: crypto.randomUUID(),
-      artigoId: artigo.id,
+      artigoId: artigo.id ?? null,
       codigoArtigo: artigo.codigo,
       origem: "CATALOGO",
       descricao: artigo.descricao,
@@ -126,6 +140,10 @@ export default function NovaPropostaPage() {
     };
 
     setLinhas((prev) => [...prev, novaLinha]);
+  };
+
+  const handleSelectArtigo = (artigo: CatalogoArtigo) => {
+    handleAddLinhaFromCatalogo(artigo, 1);
   };
 
   const handleGuardar = async () => {
@@ -348,17 +366,25 @@ export default function NovaPropostaPage() {
         </div>
       </section>
 
-      {/* Linhas da proposta — componente partilhado com /propostas/[id] */}
-      <LinhasEditor
-        linhas={linhas}
-        onLinhasChange={setLinhas}
-        podeEditar={true}
-        fatorVenda={fatorVenda}
-        onAddLinhaLivre={handleAddLinhaLivre}
-        onRemoveLinha={handleRemoverLinha}
-        onInsertImportedLines={handleInsertImportedLines}
-        onSelectArtigoCatalogo={handleSelectArtigo}
-      />
+      {/* Linhas da proposta — componente partilhado com /propostas/[id] — e Maria v1 */}
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
+        <LinhasEditor
+          linhas={linhas}
+          onLinhasChange={setLinhas}
+          podeEditar={true}
+          fatorVenda={fatorVenda}
+          onAddLinhaLivre={handleAddLinhaLivre}
+          onRemoveLinha={handleRemoverLinha}
+          onInsertImportedLines={handleInsertImportedLines}
+          onSelectArtigoCatalogo={handleSelectArtigo}
+        />
+        <MariaPanel
+          podeEditar={true}
+          onInsertArtigo={(artigo, quantidade) =>
+            handleAddLinhaFromCatalogo(artigo, quantidade)
+          }
+        />
+      </section>
 
       {/* Totais e ações */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
