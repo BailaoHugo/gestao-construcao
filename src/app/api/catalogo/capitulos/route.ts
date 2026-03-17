@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import {
   GRANDES_CAPITULOS,
-  CAPITULOS,
+  DESCRICOES_CAPITULOS,
 } from "@/lib/catalogo/descricoesCapitulos";
 
 type GrandeRow = { grande_capitulo: string | null };
@@ -81,7 +81,7 @@ export async function GET() {
         const grandeCodigo = row.grande_capitulo?.trim() ?? "";
         return {
           codigo,
-          descricao: codigo ? CAPITULOS[codigo] ?? null : null,
+          descricao: codigo ? DESCRICOES_CAPITULOS[codigo] ?? null : null,
           grande_capitulo: grandeCodigo || null,
         };
       });
@@ -89,7 +89,6 @@ export async function GET() {
     return NextResponse.json({ grandes_capitulos, capitulos });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    // eslint-disable-next-line no-console
     console.error("[api/catalogo/capitulos] GET failed:", message);
     return NextResponse.json(
       { error: "Falha ao carregar lista de capítulos" },
@@ -97,4 +96,3 @@ export async function GET() {
     );
   }
 }
-
