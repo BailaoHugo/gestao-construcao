@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: Maria Orçamentista - Catálogo
+  version: 1.0.0
+servers:
+  - url: https://gestao2026.vercel.app
+paths:
+  /api/catalogo/search:
+    get:
+      summary: Pesquisa de artigos no catálogo
+      description: Pesquisa artigos ativos no catálogo por texto livre.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Texto de pesquisa para código, descrição ou capítulos.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de artigos encontrados.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    codigo:
+                      type: string
+                    descricao:
+                      type: string
+                    unidade:
+                      type:
+                        - string
+                        - "null"
+                    grande_capitulo:
+                      type:
+                        - string
+                        - "null"
+                    capitulo:
+                      type:
+                        - string
+                        - "null"
+                    preco_custo_unitario:
+                      type:
+                        - number
+                        - "null"
+                    preco_venda_unitario:
+                      type:
+                        - number
+                        - "null"
+                    origem:
+                      type: string
+                    ativo:
+                      type: boolean
+                  required:
+                    - id
+                    - codigo
+                    - descricao
+                    - unidade
+                    - grande_capitulo
+                    - capitulo
+                    - preco_custo_unitario
+                    - preco_venda_unitario
+                    - origem
+                    - ativo
+  /api/catalogo/artigo:
+    get:
+      summary: Obter artigo do catálogo por código
+      description: Devolve um único artigo do catálogo a partir do código exato.
+      parameters:
+        - name: codigo
+          in: query
+          required: true
+          description: Código exato do artigo (por exemplo, E5.0001).
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Artigo encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  codigo:
+                    type: string
+                  descricao:
+                    type: string
+                  unidade:
+                    type:
+                      - string
+                      - "null"
+                  grande_capitulo:
+                    type:
+                      - string
+                      - "null"
+                  capitulo:
+                    type:
+                      - string
+                      - "null"
+                  pu_custo:
+                    type:
+                      - number
+                      - "null"
+                  pu_venda:
+                    type:
+                      - number
+                      - "null"
+                  ativo:
+                    type: boolean
+                  origem:
+                    type: string
+                required:
+                  - id
+                  - codigo
+                  - descricao
+                  - unidade
+                  - grande_capitulo
+                  - capitulo
+                  - pu_custo
+                  - pu_venda
+                  - ativo
+                  - origem
+        "400":
+          description: Pedido inválido (parâmetro codigo em falta ou vazio).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+        "404":
+          description: Artigo não encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+
