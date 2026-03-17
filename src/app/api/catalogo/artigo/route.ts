@@ -69,6 +69,12 @@ export async function GET(req: NextRequest) {
           : null,
       pu_custo: toNumberOrNull(row.pu_custo),
       pu_venda: toNumberOrNull(row.pu_venda),
+      capitulo_formatado:
+        row.capitulo && row.capitulo.trim() !== ""
+          ? labelCapitulo(row.capitulo)
+          : null,
+      preco_custo_unitario: toNumberOrNull(row.pu_custo),
+      preco_venda_unitario: toNumberOrNull(row.pu_venda),
       ativo: row.ativo,
       origem: row.origem,
     };

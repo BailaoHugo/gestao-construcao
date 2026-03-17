@@ -103,11 +103,23 @@ paths:
                     type:
                       - string
                       - "null"
-                  grande_capitulo:
+                  capitulo:
                     type:
                       - string
                       - "null"
-                  capitulo:
+                  capitulo_formatado:
+                    type:
+                      - string
+                      - "null"
+                  preco_custo_unitario:
+                    type:
+                      - number
+                      - "null"
+                  preco_venda_unitario:
+                    type:
+                      - number
+                      - "null"
+                  grande_capitulo:
                     type:
                       - string
                       - "null"
@@ -132,8 +144,11 @@ paths:
                   - codigo
                   - descricao
                   - unidade
-                  - grande_capitulo
                   - capitulo
+                  - capitulo_formatado
+                  - preco_custo_unitario
+                  - preco_venda_unitario
+                  - grande_capitulo
                   - capitulo_descricao
                   - pu_custo
                   - pu_venda
