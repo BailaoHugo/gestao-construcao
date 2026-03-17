@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { pool } from "@/lib/db";
 
+function normalizeText(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 export async function POST(req: Request) {
   try {
     const { descricao } = await req.json();
@@ -25,8 +32,8 @@ export async function POST(req: Request) {
     });
 
     // Normalizar descrição e extrair tokens úteis
-    const normalized = descricao
-      .toLowerCase()
+    const normalizedDescricao = normalizeText(descricao);
+    const normalized = normalizedDescricao
       .replace(/[.,;:!?()[\]{}"']/g, " ")
       .replace(/\s+/g, " ")
       .trim();
@@ -60,7 +67,7 @@ export async function POST(req: Request) {
       if (usefulTokens.length >= 5) break;
     }
 
-    const likeFull = `%${descricao.trim()}%`;
+    const likeFull = `%${normalizedDescricao.trim()}%`;
 
     let catalogoBloco = "ARTIGOS EXISTENTES NO CATÁLOGO:\n";
 
@@ -71,10 +78,14 @@ export async function POST(req: Request) {
           const likeTokens = usefulTokens.map((t) => `%${t}%`);
 
           const conditionsCodigo = likeTokens
-            .map((_, idx) => `codigo ilike $${idx + 1}`)
+            .map(
+              (_, idx) => `unaccent(lower(codigo)) ilike $${idx + 1}`,
+            )
             .join(" or ");
           const conditionsDescricao = likeTokens
-            .map((_, idx) => `descricao ilike $${idx + 1}`)
+            .map(
+              (_, idx) => `unaccent(lower(descricao)) ilike $${idx + 1}`,
+            )
             .join(" or ");
 
           const sql = `
@@ -118,8 +129,8 @@ export async function POST(req: Request) {
           from artigos
           where ativo = true
             and (
-              codigo ilike $1
-              or descricao ilike $1
+              unaccent(lower(codigo)) ilike $1
+              or unaccent(lower(descricao)) ilike $1
             )
           order by codigo asc
           limit 10
