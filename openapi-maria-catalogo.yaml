@@ -45,6 +45,10 @@ paths:
                       type:
                         - string
                         - "null"
+                    capitulo_descricao:
+                      type:
+                        - string
+                        - "null"
                     preco_custo_unitario:
                       type:
                         - number
@@ -64,6 +68,7 @@ paths:
                     - unidade
                     - grande_capitulo
                     - capitulo
+                    - capitulo_descricao
                     - preco_custo_unitario
                     - preco_venda_unitario
                     - origem
@@ -106,6 +111,10 @@ paths:
                     type:
                       - string
                       - "null"
+                  capitulo_descricao:
+                    type:
+                      - string
+                      - "null"
                   pu_custo:
                     type:
                       - number
@@ -125,6 +134,7 @@ paths:
                   - unidade
                   - grande_capitulo
                   - capitulo
+                  - capitulo_descricao
                   - pu_custo
                   - pu_venda
                   - ativo
