@@ -7,6 +7,7 @@ servers:
 paths:
   /api/catalogo/search:
     get:
+      operationId: searchCatalogo
       summary: Pesquisa de artigos no catálogo
       description: Pesquisa artigos ativos no catálogo por texto livre.
       parameters:
@@ -69,6 +70,7 @@ paths:
                     - ativo
   /api/catalogo/artigo:
     get:
+      operationId: getArtigoByCodigo
       summary: Obter artigo do catálogo por código
       description: Devolve um único artigo do catálogo a partir do código exato.
       parameters:
