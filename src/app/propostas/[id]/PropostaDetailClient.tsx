@@ -421,25 +421,25 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </div>
       </section>
 
-      {/* Linhas da proposta — mesmo editor que /propostas/nova — e painel Maria v1 */}
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
-        <LinhasEditor
-          linhas={revisaoAtiva.linhas}
-          onLinhasChange={handleLinhasChange}
-          podeEditar={podeEditar}
-          fatorVenda={1.3}
-          onAddLinhaLivre={handleAddLinhaLivre}
-          onRemoveLinha={handleRemoverLinha}
-          onInsertImportedLines={handleInsertImportedLines}
-          onSelectArtigoCatalogo={handleSelectArtigo}
-        />
-        <MariaPanel
-          podeEditar={podeEditar}
-          onInsertArtigo={(artigo, quantidade) =>
-            handleAddLinhaFromCatalogo(artigo, quantidade)
-          }
-        />
-      </section>
+      {/* Maria v1 — entre folha de rosto e linhas */}
+      <MariaPanel
+        podeEditar={podeEditar}
+        onInsertArtigo={(artigo, quantidade) =>
+          handleAddLinhaFromCatalogo(artigo, quantidade)
+        }
+      />
+
+      {/* Linhas da proposta — mesmo editor que /propostas/nova */}
+      <LinhasEditor
+        linhas={revisaoAtiva.linhas}
+        onLinhasChange={handleLinhasChange}
+        podeEditar={podeEditar}
+        fatorVenda={1.3}
+        onAddLinhaLivre={handleAddLinhaLivre}
+        onRemoveLinha={handleRemoverLinha}
+        onInsertImportedLines={handleInsertImportedLines}
+        onSelectArtigoCatalogo={handleSelectArtigo}
+      />
 
       {/* Totais */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">

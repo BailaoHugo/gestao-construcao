@@ -366,25 +366,25 @@ export default function NovaPropostaPage() {
         </div>
       </section>
 
-      {/* Linhas da proposta — componente partilhado com /propostas/[id] — e Maria v1 */}
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
-        <LinhasEditor
-          linhas={linhas}
-          onLinhasChange={setLinhas}
-          podeEditar={true}
-          fatorVenda={fatorVenda}
-          onAddLinhaLivre={handleAddLinhaLivre}
-          onRemoveLinha={handleRemoverLinha}
-          onInsertImportedLines={handleInsertImportedLines}
-          onSelectArtigoCatalogo={handleSelectArtigo}
-        />
-        <MariaPanel
-          podeEditar={true}
-          onInsertArtigo={(artigo, quantidade) =>
-            handleAddLinhaFromCatalogo(artigo, quantidade)
-          }
-        />
-      </section>
+      {/* Maria v1 — entre folha de rosto e linhas */}
+      <MariaPanel
+        podeEditar={true}
+        onInsertArtigo={(artigo, quantidade) =>
+          handleAddLinhaFromCatalogo(artigo, quantidade)
+        }
+      />
+
+      {/* Linhas da proposta — componente partilhado com /propostas/[id] */}
+      <LinhasEditor
+        linhas={linhas}
+        onLinhasChange={setLinhas}
+        podeEditar={true}
+        fatorVenda={fatorVenda}
+        onAddLinhaLivre={handleAddLinhaLivre}
+        onRemoveLinha={handleRemoverLinha}
+        onInsertImportedLines={handleInsertImportedLines}
+        onSelectArtigoCatalogo={handleSelectArtigo}
+      />
 
       {/* Totais e ações */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
