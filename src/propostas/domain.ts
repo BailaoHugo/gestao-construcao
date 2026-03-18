@@ -26,18 +26,24 @@ export interface PropostaFolhaRosto {
 
 export interface PropostaLinha {
   id: string;
+  /** Ordem de exibição na revisão (opcional; backend pode derivar do array). */
+  ordem?: number | null;
   artigoId?: string | null;
   codigoArtigo?: string | null;
-  origem: "CATALOGO" | "LIVRE" | "IMPORTADA";
+  origem: "CATALOGO" | "LIVRE" | "IMPORTADA" | "manual";
   descricao: string;
   unidade: string;
-  grandeCapitulo?: string;
-  capitulo?: string;
+  grandeCapitulo?: string | null;
+  capitulo?: string | null;
+  /** Coeficiente de venda (ex.: 1.30). Default em BD: 1.30. */
+  k?: number | null;
   quantidade: number;
   precoCustoUnitario: number;
   totalCustoLinha: number;
   precoVendaUnitario: number;
   totalVendaLinha: number;
+  /** Observações da linha (texto livre). */
+  observacoes?: string | null;
 }
 
 export interface PropostaRevisao {

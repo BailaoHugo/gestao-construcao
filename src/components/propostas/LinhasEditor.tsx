@@ -119,6 +119,8 @@ export default function LinhasEditor({
     };
   }, [catalogoQuery]);
 
+  const K_DEFAULT = 1.3;
+
   const handleLinhaChange = (id: string, patch: Partial<PropostaLinha>) => {
     if (!podeEditar) return;
     const nextLinhas = linhas.map((linha) => {
@@ -128,9 +130,12 @@ export default function LinhasEditor({
       const precoCusto = Number.isFinite(next.precoCustoUnitario)
         ? next.precoCustoUnitario
         : 0;
-      const precoVenda = Number.isFinite(next.precoVendaUnitario)
-        ? next.precoVendaUnitario
-        : 0;
+      const kEffective =
+        next.k !== null && next.k !== undefined && Number.isFinite(next.k)
+          ? Number(next.k)
+          : K_DEFAULT;
+      const precoVenda = precoCusto * kEffective;
+      next.precoVendaUnitario = precoVenda;
       next.totalCustoLinha = quantidade * precoCusto;
       next.totalVendaLinha = quantidade * precoVenda;
       return next;
@@ -308,9 +313,14 @@ export default function LinhasEditor({
           <thead className="bg-slate-50">
             <tr className="text-[11px] uppercase tracking-wide text-slate-500">
               <th className="px-3 py-2">Descrição</th>
+              <th className="w-0 px-2 py-2 text-center" title="Código artigo">
+                <span className="text-[10px] font-normal text-slate-400">Cód.</span>
+              </th>
               <th className="px-3 py-2 text-right">Qtd.</th>
               <th className="px-3 py-2">Unid.</th>
-              <th className="px-3 py-2">Capítulo</th>
+              <th className="px-3 py-2">Grande Cap.</th>
+              <th className="px-3 py-2">Cap.</th>
+              <th className="px-3 py-2 text-right">K</th>
               <th className="px-3 py-2 text-right">PU Custo</th>
               <th className="px-3 py-2 text-right">Total Custo</th>
               <th className="px-3 py-2 text-right">PU Venda</th>
@@ -323,7 +333,7 @@ export default function LinhasEditor({
             {linhas.length === 0 ? (
               <tr>
                 <td
-                  colSpan={podeEditar ? 10 : 9}
+                  colSpan={podeEditar ? 13 : 12}
                   className="px-3 py-6 text-center text-[11px] text-slate-400"
                 >
                   Ainda não adicionou linhas. Use &quot;Adicionar linha
@@ -337,11 +347,6 @@ export default function LinhasEditor({
                   className="border-b border-slate-100 last:border-0"
                 >
                   <td className="px-3 py-2 text-[11px] text-slate-800">
-                    {linha.codigoArtigo && (
-                      <div className="mb-0.5 font-mono text-[10px] text-slate-500">
-                        {linha.codigoArtigo}
-                      </div>
-                    )}
                     {podeEditar ? (
                       <input
                         type="text"
@@ -356,6 +361,24 @@ export default function LinhasEditor({
                       />
                     ) : (
                       <div>{linha.descricao}</div>
+                    )}
+                  </td>
+                  <td className="w-0 max-w-[4rem] px-2 py-2 text-center font-mono text-[10px] text-slate-400">
+                    {podeEditar ? (
+                      <input
+                        type="text"
+                        className="w-full min-w-0 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
+                        value={linha.codigoArtigo ?? ""}
+                        onChange={(e) =>
+                          handleLinhaChange(linha.id, {
+                            codigoArtigo: e.target.value.trim() || null,
+                          })
+                        }
+                        placeholder="—"
+                        title="Código artigo"
+                      />
+                    ) : (
+                      linha.codigoArtigo ?? "—"
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
@@ -393,36 +416,64 @@ export default function LinhasEditor({
                       linha.unidade
                     )}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
+                  <td className="whitespace-nowrap px-2 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
-                      <div className="flex flex-col gap-1">
-                        <input
-                          type="text"
-                          className="w-14 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
-                          value={linha.grandeCapitulo ?? ""}
-                          onChange={(e) =>
-                            handleLinhaChange(linha.id, {
-                              grandeCapitulo: e.target.value,
-                            })
-                          }
-                          placeholder="GC"
-                        />
-                        <input
-                          type="text"
-                          className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
-                          value={linha.capitulo ?? ""}
-                          onChange={(e) =>
-                            handleLinhaChange(linha.id, {
-                              capitulo: e.target.value,
-                            })
-                          }
-                          placeholder="Cap."
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        className="w-14 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
+                        value={linha.grandeCapitulo ?? ""}
+                        onChange={(e) =>
+                          handleLinhaChange(linha.id, {
+                            grandeCapitulo: e.target.value.trim() || null,
+                          })
+                        }
+                        placeholder="—"
+                        title="Grande capítulo"
+                      />
                     ) : (
-                      linha.capitulo && linha.capitulo.trim().length > 0
-                        ? linha.capitulo
-                        : "—"
+                      (linha.grandeCapitulo && linha.grandeCapitulo.trim()) ? linha.grandeCapitulo : "—"
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-2 text-[11px] text-slate-800">
+                    {podeEditar ? (
+                      <input
+                        type="text"
+                        className="w-20 rounded border border-slate-200 bg-white px-1 py-0.5 text-center text-[10px] outline-none focus:border-slate-400"
+                        value={linha.capitulo ?? ""}
+                        onChange={(e) =>
+                          handleLinhaChange(linha.id, {
+                            capitulo: e.target.value.trim() || null,
+                          })
+                        }
+                        placeholder="—"
+                        title="Capítulo"
+                      />
+                    ) : (
+                      (linha.capitulo && linha.capitulo.trim().length > 0) ? linha.capitulo : "—"
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-2 text-right text-[11px] text-slate-800">
+                    {podeEditar ? (
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        className="w-14 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
+                        value={linha.k ?? K_DEFAULT}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          const num = v === "" ? null : Number(v);
+                          handleLinhaChange(linha.id, {
+                            k: num === null || !Number.isFinite(num) ? undefined : num,
+                          });
+                        }}
+                        placeholder="1.30"
+                        title="Coeficiente K (pu_venda = pu_custo × K)"
+                      />
+                    ) : (
+                      (linha.k != null && Number.isFinite(linha.k))
+                        ? Number(linha.k).toFixed(2)
+                        : "1.30"
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
@@ -447,22 +498,7 @@ export default function LinhasEditor({
                     {formatCurrencyPt(linha.totalCustoLinha)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {podeEditar ? (
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        className="w-24 rounded border border-slate-200 bg-white px-1 py-0.5 text-right text-[11px] outline-none focus:border-slate-400"
-                        value={linha.precoVendaUnitario}
-                        onChange={(e) =>
-                          handleLinhaChange(linha.id, {
-                            precoVendaUnitario: Number(e.target.value) || 0,
-                          })
-                        }
-                      />
-                    ) : (
-                      formatCurrencyPt(linha.precoVendaUnitario)
-                    )}
+                    {formatCurrencyPt(linha.precoVendaUnitario)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {formatCurrencyPt(linha.totalVendaLinha)}

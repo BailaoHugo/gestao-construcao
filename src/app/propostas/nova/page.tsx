@@ -33,6 +33,7 @@ function createEmptyLinha(): PropostaLinha {
     descricao: "",
     unidade: "",
     quantidade: 1,
+    k: 1.3,
     precoCustoUnitario: 0,
     totalCustoLinha: 0,
     precoVendaUnitario: 0,
@@ -87,6 +88,7 @@ export default function NovaPropostaPage() {
         grandeCapitulo: "",
         capitulo: l.capitulo ?? "",
         quantidade,
+        k: 1.3,
         precoCustoUnitario,
         totalCustoLinha:
           l.total_custo_linha ?? quantidade * precoCustoUnitario,
@@ -133,6 +135,7 @@ export default function NovaPropostaPage() {
       grandeCapitulo: artigo.grande_capitulo ?? "",
       capitulo: artigo.capitulo ?? "",
       quantidade,
+      k: 1.3,
       precoCustoUnitario: precoCusto,
       totalCustoLinha: quantidade * precoCusto,
       precoVendaUnitario: precoVenda,

@@ -60,6 +60,8 @@ type LinhaRow = {
   total_venda_linha: string | number | null;
   grande_capitulo: string | null;
   capitulo: string | null;
+  k: string | number | null;
+  observacoes: string | null;
 };
 
 export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
@@ -189,7 +191,9 @@ export async function loadPropostaCompleta(
           preco_venda_unitario,
           total_venda_linha,
           grande_capitulo,
-          capitulo
+          capitulo,
+          k,
+          observacoes
         from proposta_linhas
         where revisao_id = any($1::uuid[])
         order by revisao_id, ordem, created_at
@@ -215,18 +219,24 @@ export async function loadPropostaCompleta(
 
       const linha: PropostaLinha = {
         id: row.id,
+        ordem: row.ordem,
         artigoId: row.artigo_id,
         codigoArtigo: row.codigo_artigo ?? null,
         origem: row.origem as PropostaLinha["origem"],
         descricao: row.descricao,
         unidade: row.unidade ?? "",
-        grandeCapitulo: row.grande_capitulo ?? "",
-        capitulo: row.capitulo ?? "",
+        grandeCapitulo: row.grande_capitulo ?? null,
+        capitulo: row.capitulo ?? null,
+        k:
+          row.k !== null && row.k !== undefined
+            ? Number(row.k)
+            : undefined,
         quantidade,
         precoCustoUnitario: precoCusto,
         totalCustoLinha: totalCusto,
         precoVendaUnitario: precoVenda,
         totalVendaLinha: totalVenda,
+        observacoes: row.observacoes ?? null,
       };
       const list = linhasByRevisao.get(row.revisao_id) ?? [];
       list.push(linha);
@@ -447,6 +457,8 @@ export async function updatePropostaWithRevisao(
             total_venda_linha,
             grande_capitulo,
             capitulo,
+            k,
+            observacoes,
             created_at,
             updated_at
           )
@@ -466,6 +478,8 @@ export async function updatePropostaWithRevisao(
             $12,
             $13,
             $14,
+            $15,
+            $16,
             now(),
             now()
           )
@@ -473,7 +487,7 @@ export async function updatePropostaWithRevisao(
         [
           revisaoId,
           ordem++,
-          linha.origem ?? "LIVRE",
+          linha.origem ?? "manual",
           linha.artigoId ?? null,
           linha.codigoArtigo ?? null,
           linha.descricao,
@@ -485,6 +499,8 @@ export async function updatePropostaWithRevisao(
           linha.totalVendaLinha,
           linha.grandeCapitulo ?? null,
           linha.capitulo ?? null,
+          linha.k ?? 1.3,
+          linha.observacoes ?? null,
         ],
       );
     }
@@ -630,18 +646,20 @@ export async function createPropostaWithRevisao(
             total_venda_linha,
             grande_capitulo,
             capitulo,
+            k,
+            observacoes,
             created_at,
             updated_at
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
         `,
         [
           linhaId,
           revisaoId,
           ordem++,
-          linha.origem,
-          null,
+          linha.origem ?? "manual",
           linha.artigoId ?? null,
+          linha.codigoArtigo ?? null,
           linha.descricao,
           linha.unidade || null,
           linha.quantidade,
@@ -653,6 +671,8 @@ export async function createPropostaWithRevisao(
           linha.totalVendaLinha,
           linha.grandeCapitulo ?? null,
           linha.capitulo ?? null,
+          linha.k ?? 1.3,
+          linha.observacoes ?? null,
           now,
           now,
         ],
