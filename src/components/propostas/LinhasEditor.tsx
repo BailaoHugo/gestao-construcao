@@ -8,6 +8,10 @@ import {
   parseImportedLines,
   type ParsedImportedLine,
 } from "@/lib/propostas/parseImportedLines";
+import {
+  calcularDerivadosLinha,
+  K_DEFAULT,
+} from "@/lib/propostas/linhaDerivados";
 
 export type CatalogoArtigo = {
   id: string;
@@ -119,29 +123,59 @@ export default function LinhasEditor({
     };
   }, [catalogoQuery]);
 
-  const K_DEFAULT = 1.3;
-
   const handleLinhaChange = (id: string, patch: Partial<PropostaLinha>) => {
     if (!podeEditar) return;
     const nextLinhas = linhas.map((linha) => {
       if (linha.id !== id) return linha;
       const next: PropostaLinha = { ...linha, ...patch };
-      const quantidade = Number.isFinite(next.quantidade) ? next.quantidade : 0;
-      const precoCusto = Number.isFinite(next.precoCustoUnitario)
-        ? next.precoCustoUnitario
-        : 0;
-      const kEffective =
-        next.k !== null && next.k !== undefined && Number.isFinite(next.k)
-          ? Number(next.k)
-          : K_DEFAULT;
-      const precoVenda = precoCusto * kEffective;
-      next.precoVendaUnitario = precoVenda;
-      next.totalCustoLinha = quantidade * precoCusto;
-      next.totalVendaLinha = quantidade * precoVenda;
+
+      const derivados = calcularDerivadosLinha(next, K_DEFAULT);
+      next.precoVendaUnitario = derivados.precoVendaUnitario;
+      next.totalCustoLinha = derivados.totalCustoLinha;
+      next.totalVendaLinha = derivados.totalVendaLinha;
       return next;
     });
     onLinhasChange(nextLinhas);
   };
+
+  // Normaliza valores derivados quando uma proposta já existente é carregada.
+  // Isto garante que (PU Venda, totais e margem) ficam consistentes mesmo se os campos
+  // persistidos na BD estiverem incompletos/desatualizados.
+  useEffect(() => {
+    if (!podeEditar) return;
+
+    const EPS = 1e-6;
+
+    const normalizadas = linhas.map((linha) => {
+      const derivados = calcularDerivadosLinha(linha, K_DEFAULT);
+      return {
+        ...linha,
+        k: linha.k ?? derivados.kEffective,
+        precoVendaUnitario: derivados.precoVendaUnitario,
+        totalCustoLinha: derivados.totalCustoLinha,
+        totalVendaLinha: derivados.totalVendaLinha,
+      };
+    });
+
+    const mudou = normalizadas.some((n, idx) => {
+      const o = linhas[idx];
+      if (!o) return true;
+      const kChanged = (o.k ?? K_DEFAULT) !== (n.k ?? K_DEFAULT);
+      const totalCustoChanged =
+        Math.abs((o.totalCustoLinha ?? 0) - (n.totalCustoLinha ?? 0)) >
+        EPS;
+      const totalVendaChanged =
+        Math.abs((o.totalVendaLinha ?? 0) - (n.totalVendaLinha ?? 0)) >
+        EPS;
+      const precoVendaChanged =
+        Math.abs(
+          (o.precoVendaUnitario ?? 0) - (n.precoVendaUnitario ?? 0),
+        ) > EPS;
+      return kChanged || totalCustoChanged || totalVendaChanged || precoVendaChanged;
+    });
+
+    if (mudou) onLinhasChange(normalizadas);
+  }, [linhas, podeEditar, onLinhasChange]);
 
   const handleSelectArtigo = (artigo: CatalogoArtigo) => {
     onSelectArtigoCatalogo(artigo);
@@ -341,11 +375,19 @@ export default function LinhasEditor({
                 </td>
               </tr>
             ) : (
-              linhas.map((linha) => (
-                <tr
-                  key={linha.id}
-                  className="border-b border-slate-100 last:border-0"
-                >
+              linhas.map((linha) => {
+                const derivados = calcularDerivadosLinha(linha, K_DEFAULT);
+                const margemValor = derivados.totalVendaLinha - derivados.totalCustoLinha;
+                const hasVenda = derivados.totalVendaLinha > 0;
+                const pct = hasVenda
+                  ? (margemValor / derivados.totalVendaLinha) * 100
+                  : null;
+
+                return (
+                  <tr
+                    key={linha.id}
+                    className="border-b border-slate-100 last:border-0"
+                  >
                   <td className="px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -495,27 +537,18 @@ export default function LinhasEditor({
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalCustoLinha)}
+                    {formatCurrencyPt(derivados.totalCustoLinha)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.precoVendaUnitario)}
+                    {formatCurrencyPt(derivados.precoVendaUnitario)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {formatCurrencyPt(linha.totalVendaLinha)}
+                    {formatCurrencyPt(derivados.totalVendaLinha)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
-                    {(() => {
-                      const margemValor =
-                        linha.totalVendaLinha - linha.totalCustoLinha;
-                      if (!Number.isFinite(margemValor)) return "—";
-                      const hasVenda = linha.totalVendaLinha > 0;
-                      const pct = hasVenda
-                        ? (margemValor / linha.totalVendaLinha) * 100
-                        : null;
-                      return pct !== null
-                        ? `${formatCurrencyPt(margemValor)} (${pct.toFixed(1)}%)`
-                        : formatCurrencyPt(margemValor);
-                    })()}
+                    {pct !== null
+                      ? `${formatCurrencyPt(margemValor)} (${pct.toFixed(1)}%)`
+                      : formatCurrencyPt(margemValor)}
                   </td>
                   {podeEditar && (
                     <td className="whitespace-nowrap px-3 py-2 text-right">
@@ -528,8 +561,9 @@ export default function LinhasEditor({
                       </button>
                     </td>
                   )}
-                </tr>
-              ))
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
