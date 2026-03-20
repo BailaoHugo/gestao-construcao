@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PropostaFolhaRosto, PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
@@ -50,6 +50,13 @@ export default function NovaPropostaPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fatorVenda, setFatorVenda] = useState(1.3);
+  const errorBannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error && errorBannerRef.current) {
+      errorBannerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [error]);
 
   const totais = useMemo(() => {
     const totalCusto = linhas.reduce(
@@ -199,6 +206,24 @@ export default function NovaPropostaPage() {
           Rascunho
         </span>
       </header>
+
+      {error && (
+        <div
+          ref={errorBannerRef}
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
+        >
+          <p className="font-medium">Não foi possível gravar</p>
+          <p className="mt-1 text-red-700">{error}</p>
+          <p className="mt-2 text-[11px] text-red-600/90">
+            Se aparecer erro de coluna ou permissão, confirma no Supabase que as
+            migrations estão aplicadas e que{" "}
+            <code className="rounded bg-red-100 px-1">DATABASE_URL</code> no{" "}
+            <code className="rounded bg-red-100 px-1">.env.local</code> está
+            correto.
+          </p>
+        </div>
+      )}
 
       {/* Folha de rosto */}
       <section className="space-y-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">

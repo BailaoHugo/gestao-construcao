@@ -58,6 +58,147 @@ function highlightMatch(text: string, query: string) {
   );
 }
 
+type TotaisLinhas = {
+  totalCusto: number;
+  totalVenda: number;
+  margem: number;
+};
+
+type RenderItem =
+  | { type: "grandeTitle"; grandeCapitulo: string | null }
+  | { type: "capTitle"; capitulo: string | null }
+  | {
+      type: "capSubtotal";
+      capitulo: string | null;
+      totais: TotaisLinhas;
+    }
+  | {
+      type: "grandeSubtotal";
+      grandeCapitulo: string | null;
+      totais: TotaisLinhas;
+    }
+  | { type: "totalGeral"; totais: TotaisLinhas }
+  | { type: "linha"; linha: PropostaLinha };
+
+function normalizarCapitulo(v: string | null | undefined): string | null {
+  const t = (v ?? "").trim();
+  return t ? t : null;
+}
+
+function somarTotaisLinhas(linhas: PropostaLinha[]): TotaisLinhas {
+  let totalCusto = 0;
+  let totalVenda = 0;
+
+  for (const linha of linhas) {
+    const derivados = calcularDerivadosLinha(linha, K_DEFAULT);
+    totalCusto += derivados.totalCustoLinha;
+    totalVenda += derivados.totalVendaLinha;
+  }
+
+  return {
+    totalCusto,
+    totalVenda,
+    margem: totalVenda - totalCusto,
+  };
+}
+
+function agruparLinhasPorGrandeECapitulo(
+  linhas: PropostaLinha[],
+): RenderItem[] {
+  const nilKey = "__NULL__";
+
+  const linhasComOrdem = linhas
+    .map((linha, idx) => ({
+      linha,
+      ordem: Number.isFinite(linha.ordem)
+        ? (linha.ordem as number)
+        : idx + 1,
+    }))
+    .sort((a, b) => a.ordem - b.ordem);
+
+  type CapGroup = {
+    capitulo: string | null;
+    linhas: PropostaLinha[];
+  };
+
+  type GrandeGroup = {
+    grandeCapitulo: string | null;
+    capitulos: Map<string, CapGroup>;
+    ordemCaps: string[]; // ordem de inserção
+  };
+
+  const grandes = new Map<string, GrandeGroup>();
+  const ordemGrandes: string[] = [];
+
+  const grandeKey = (grande: string | null) =>
+    grande === null ? nilKey : `G:${grande}`;
+  const capKey = (cap: string | null) =>
+    cap === null ? nilKey : `C:${cap}`;
+
+  for (const { linha } of linhasComOrdem) {
+    const grande = normalizarCapitulo(linha.grandeCapitulo);
+    const cap = normalizarCapitulo(linha.capitulo);
+
+    const gKey = grandeKey(grande);
+    const cKey = capKey(cap);
+
+    let g = grandes.get(gKey);
+    if (!g) {
+      g = {
+        grandeCapitulo: grande,
+        capitulos: new Map<string, CapGroup>(),
+        ordemCaps: [],
+      };
+      grandes.set(gKey, g);
+      ordemGrandes.push(gKey);
+    }
+
+    let c = g.capitulos.get(cKey);
+    if (!c) {
+      c = { capitulo: cap, linhas: [] };
+      g.capitulos.set(cKey, c);
+      g.ordemCaps.push(cKey);
+    }
+
+    c.linhas.push(linha);
+  }
+
+  const itens: RenderItem[] = [];
+
+  for (const gKey of ordemGrandes) {
+    const g = grandes.get(gKey);
+    if (!g) continue;
+
+    itens.push({ type: "grandeTitle", grandeCapitulo: g.grandeCapitulo });
+
+    for (const cKey of g.ordemCaps) {
+      const c = g.capitulos.get(cKey);
+      if (!c) continue;
+
+      itens.push({ type: "capTitle", capitulo: c.capitulo });
+
+      for (const linha of c.linhas) {
+        itens.push({ type: "linha", linha });
+      }
+
+      itens.push({
+        type: "capSubtotal",
+        capitulo: c.capitulo,
+        totais: somarTotaisLinhas(c.linhas),
+      });
+    }
+
+    itens.push({
+      type: "grandeSubtotal",
+      grandeCapitulo: g.grandeCapitulo,
+      totais: somarTotaisLinhas(g.ordemCaps.flatMap((k) => g.capitulos.get(k)?.linhas ?? [])),
+    });
+  }
+
+  itens.push({ type: "totalGeral", totais: somarTotaisLinhas(linhas) });
+  return itens;
+}
+
 export default function LinhasEditor({
   linhas,
   onLinhasChange,
@@ -176,6 +317,10 @@ export default function LinhasEditor({
 
     if (mudou) onLinhasChange(normalizadas);
   }, [linhas, podeEditar, onLinhasChange]);
+
+  const colSpanTotal = podeEditar ? 13 : 12;
+
+  const renderItems = agruparLinhasPorGrandeECapitulo(linhas);
 
   const handleSelectArtigo = (artigo: CatalogoArtigo) => {
     onSelectArtigoCatalogo(artigo);
@@ -375,7 +520,103 @@ export default function LinhasEditor({
                 </td>
               </tr>
             ) : (
-              linhas.map((linha) => {
+              renderItems.map((item, idx) => {
+                if (item.type !== "linha") {
+                  switch (item.type) {
+                    case "grandeTitle":
+                      return (
+                        <tr
+                          key={`g-${idx}`}
+                          className="bg-slate-50"
+                        >
+                          <td
+                            colSpan={colSpanTotal}
+                            className="px-3 py-2 text-[11px] font-semibold text-slate-900"
+                          >
+                            Grande Capítulo:{" "}
+                            {item.grandeCapitulo ??
+                              "Sem Grande Capítulo"}
+                          </td>
+                        </tr>
+                      );
+                    case "capTitle":
+                      return (
+                        <tr
+                          key={`c-${idx}`}
+                          className="bg-slate-50/60"
+                        >
+                          <td
+                            colSpan={colSpanTotal}
+                            className="px-3 py-1.5 text-[11px] font-medium text-slate-800"
+                          >
+                            Capítulo: {item.capitulo ?? "Sem Capítulo"}
+                          </td>
+                        </tr>
+                      );
+                    case "capSubtotal":
+                      return (
+                        <tr
+                          key={`cs-${idx}`}
+                          className="bg-slate-50"
+                        >
+                          <td
+                            colSpan={colSpanTotal}
+                            className="px-3 py-2 text-[11px] text-slate-800"
+                          >
+                            Subtotal Cap.:{" "}
+                            <span className="font-semibold">
+                              {item.capitulo ?? "Sem Capítulo"}
+                            </span>{" "}
+                            Custo {formatCurrencyPt(item.totais.totalCusto)} ·
+                            Venda {formatCurrencyPt(item.totais.totalVenda)} ·
+                            Margem {formatCurrencyPt(item.totais.margem)}
+                          </td>
+                        </tr>
+                      );
+                    case "grandeSubtotal":
+                      return (
+                        <tr
+                          key={`gs-${idx}`}
+                          className="bg-slate-100"
+                        >
+                          <td
+                            colSpan={colSpanTotal}
+                            className="px-3 py-2 text-[11px] font-semibold text-slate-900"
+                          >
+                            Subtotal GC:{" "}
+                            <span className="font-bold">
+                              {item.grandeCapitulo ??
+                                "Sem Grande Capítulo"}
+                            </span>{" "}
+                            Custo {formatCurrencyPt(item.totais.totalCusto)} ·
+                            Venda {formatCurrencyPt(item.totais.totalVenda)} ·
+                            Margem {formatCurrencyPt(item.totais.margem)}
+                          </td>
+                        </tr>
+                      );
+                    case "totalGeral":
+                      return (
+                        <tr
+                          key={`tg-${idx}`}
+                          className="bg-slate-200"
+                        >
+                          <td
+                            colSpan={colSpanTotal}
+                            className="px-3 py-2 text-[11px] font-bold text-slate-900"
+                          >
+                            Total Geral: Custo{" "}
+                            {formatCurrencyPt(item.totais.totalCusto)} ·
+                            Venda {formatCurrencyPt(item.totais.totalVenda)} ·
+                            Margem {formatCurrencyPt(item.totais.margem)}
+                          </td>
+                        </tr>
+                      );
+                    default:
+                      return null;
+                  }
+                }
+
+                const linha = item.linha;
                 const derivados = calcularDerivadosLinha(linha, K_DEFAULT);
                 const margemValor = derivados.totalVendaLinha - derivados.totalCustoLinha;
                 const hasVenda = derivados.totalVendaLinha > 0;
