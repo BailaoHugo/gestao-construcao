@@ -9,6 +9,7 @@ import LinhasEditor, {
 } from "@/components/propostas/LinhasEditor";
 import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
+import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
@@ -407,25 +408,34 @@ export default function NovaPropostaPage() {
         </div>
       </section>
 
-      {/* Maria v1 — entre folha de rosto e linhas */}
-      <MariaPanel
-        podeEditar={true}
-        onInsertArtigo={(artigo, quantidade) =>
-          handleAddLinhaFromCatalogo(artigo, quantidade)
-        }
-      />
+      <div className="grid gap-6 lg:grid-cols-[340px,1fr] lg:items-start">
+        <div className="space-y-6">
+          {/* Maria v1 — entre folha de rosto e linhas */}
+          <MariaPanel
+            podeEditar={true}
+            onInsertArtigo={(artigo, quantidade) =>
+              handleAddLinhaFromCatalogo(artigo, quantidade)
+            }
+          />
 
-      {/* Linhas da proposta — componente partilhado com /propostas/[id] */}
-      <LinhasEditor
-        linhas={linhas}
-        onLinhasChange={setLinhas}
-        podeEditar={true}
-        fatorVenda={fatorVenda}
-        onAddLinhaLivre={handleAddLinhaLivre}
-        onRemoveLinha={handleRemoverLinha}
-        onInsertImportedLines={handleInsertImportedLines}
-        onSelectArtigoCatalogo={handleSelectArtigo}
-      />
+          <CatalogoLateralPanel
+            podeEditar={true}
+            onSelectArtigo={handleSelectArtigo}
+          />
+        </div>
+
+        {/* Linhas da proposta — componente partilhado com /propostas/[id] */}
+        <LinhasEditor
+          linhas={linhas}
+          onLinhasChange={setLinhas}
+          podeEditar={true}
+          fatorVenda={fatorVenda}
+          onAddLinhaLivre={handleAddLinhaLivre}
+          onRemoveLinha={handleRemoverLinha}
+          onInsertImportedLines={handleInsertImportedLines}
+          onSelectArtigoCatalogo={handleSelectArtigo}
+        />
+      </div>
 
       {/* Totais e ações */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">

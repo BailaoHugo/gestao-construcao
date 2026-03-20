@@ -2,6 +2,15 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { loadPropostaCompleta } from "@/propostas/db";
 import { formatCurrencyPt, formatDatePt } from "@/propostas/format";
+import type { PropostaLinha } from "@/propostas/domain";
+import {
+  calcularDerivadosLinha,
+  K_DEFAULT,
+} from "@/lib/propostas/linhaDerivados";
+import {
+  agruparLinhasPorGrandeECapitulo,
+  type TotaisLinhas,
+} from "@/lib/propostas/agruparLinhasProposta";
 
 export const dynamic = "force-dynamic";
 
@@ -18,47 +27,77 @@ export default async function PropostaPrintPage({
   }
 
   const { revisaoAtual: rev } = proposta;
+  const renderItems = agruparLinhasPorGrandeECapitulo(rev.linhas);
+  const ZEROS: TotaisLinhas = { totalCusto: 0, totalVenda: 0, margem: 0 };
 
-  const gruposPorCapitulo: {
-    capitulo: string;
+  type CapituloPrint = {
+    capitulo: string | null;
+    linhas: PropostaLinha[];
+    totais: TotaisLinhas;
+  };
+
+  type GrandeCapituloPrint = {
     grandeCapitulo: string | null;
-    linhas: typeof rev.linhas;
-    subtotal: number;
-  }[] = [];
+    capitulos: CapituloPrint[];
+    totais: TotaisLinhas;
+  };
 
-  for (const linha of rev.linhas) {
-    const capituloTrim = (linha.capitulo ?? "").trim();
-    const grandeTrim = (linha.grandeCapitulo ?? "").trim();
-    const capitulo =
-      capituloTrim.length > 0 ? capituloTrim : "Sem capítulo";
-    const grandeCapitulo =
-      grandeTrim.length > 0 ? grandeTrim : null;
+  const gruposPrint: GrandeCapituloPrint[] = [];
+  let currentGrande: GrandeCapituloPrint | null = null;
+  let currentCapitulo: CapituloPrint | null = null;
+  let totalGeral: TotaisLinhas | null = null;
 
-    let grupo = gruposPorCapitulo.find((g) => g.capitulo === capitulo);
-    if (!grupo) {
-      grupo = {
-        capitulo,
-        grandeCapitulo,
-        linhas: [],
-        subtotal: 0,
-      };
-      gruposPorCapitulo.push(grupo);
-    }
-
-    grupo.linhas.push(linha);
-    grupo.subtotal += linha.totalVendaLinha;
-
-    if (!grupo.grandeCapitulo && grandeCapitulo) {
-      grupo.grandeCapitulo = grandeCapitulo;
+  for (const item of renderItems) {
+    switch (item.type) {
+      case "grandeTitle": {
+        currentGrande = {
+          grandeCapitulo: item.grandeCapitulo,
+          capitulos: [],
+          totais: ZEROS,
+        };
+        break;
+      }
+      case "capTitle": {
+        currentCapitulo = {
+          capitulo: item.capitulo,
+          linhas: [],
+          totais: ZEROS,
+        };
+        break;
+      }
+      case "linha": {
+        currentCapitulo?.linhas.push(item.linha);
+        break;
+      }
+      case "capSubtotal": {
+        if (!currentGrande || !currentCapitulo) break;
+        currentCapitulo.totais = item.totais;
+        currentGrande.capitulos.push(currentCapitulo);
+        currentCapitulo = null;
+        break;
+      }
+      case "grandeSubtotal": {
+        if (!currentGrande) break;
+        currentGrande.totais = item.totais;
+        gruposPrint.push(currentGrande);
+        currentGrande = null;
+        break;
+      }
+      case "totalGeral": {
+        totalGeral = item.totais;
+        break;
+      }
     }
   }
 
+  const totalGeralValor = totalGeral?.totalVenda ?? rev.totalVenda;
+
   return (
-    <div className="print-page text-xs text-slate-800">
+    <div className="print-page text-[11px] text-slate-800">
       <div className="mx-auto max-w-[180mm] space-y-6">
-        {/* Cabeçalho com logo e título */}
-        <header className="print-section flex items-start justify-between border-b border-slate-200 pb-4">
-          <div className="flex items-center gap-3">
+        {/* Cabeçalho */}
+        <header className="print-section flex items-start justify-between gap-6 border-b border-slate-200 pb-4">
+          <div className="flex items-start gap-3">
             <Image
               src="/logo-ennova.png"
               alt="Ennova - Engenharia e Gestão de Obra"
@@ -66,179 +105,140 @@ export default async function PropostaPrintPage({
               height={66}
               className="h-16 w-auto object-contain"
             />
+            <div className="pt-1">
+              <div className="text-sm font-semibold tracking-tight text-slate-900">
+                Proposta comercial
+              </div>
+              <div className="mt-1 text-[11px] text-slate-600">
+                Ref. {proposta.codigo} · Revisão R{rev.numeroRevisao}
+              </div>
+              <div className="mt-1 text-[11px] text-slate-600">
+                Data: {formatDatePt(rev.folhaRosto.dataProposta)}
+              </div>
+            </div>
           </div>
-          <div className="text-right text-[11px] text-slate-700">
-            <div className="text-sm font-semibold tracking-tight text-slate-900">
-              Proposta comercial
+
+          <div className="min-w-[160px] text-right">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              Cliente
             </div>
-            <div className="text-[11px] text-slate-600">
-              Ref. {proposta.codigo} · Revisão R{rev.numeroRevisao}
+            <div className="mt-1 text-[11px] text-slate-900 font-medium">
+              {rev.folhaRosto.clienteNome}
             </div>
-            <div className="text-[11px] text-slate-600">
-              Data: {formatDatePt(rev.folhaRosto.dataProposta)}
-            </div>
+            {rev.folhaRosto.clienteEmail && (
+              <div className="mt-1 text-[11px] text-slate-600">
+                {rev.folhaRosto.clienteEmail}
+              </div>
+            )}
+            {rev.folhaRosto.clienteContacto && (
+              <div className="mt-1 text-[11px] text-slate-600">
+                {rev.folhaRosto.clienteContacto}
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Blocos de informação + resumo */}
-        <section className="print-section mt-4 grid gap-4 border-b border-slate-200 pb-4 md:grid-cols-3">
-          <div className="space-y-1">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              Cliente
-            </h2>
-            <div>{rev.folhaRosto.clienteNome}</div>
-            {rev.folhaRosto.clienteEmail && (
-              <div>{rev.folhaRosto.clienteEmail}</div>
-            )}
-            {rev.folhaRosto.clienteContacto && (
-              <div>{rev.folhaRosto.clienteContacto}</div>
-            )}
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              Obra
-            </h2>
-            {rev.folhaRosto.obraNome && <div>{rev.folhaRosto.obraNome}</div>}
-            {rev.folhaRosto.obraMorada && (
-              <div className="text-[11px] text-slate-700">
-                {rev.folhaRosto.obraMorada}
-              </div>
-            )}
-          </div>
-          <div className="space-y-1 rounded border border-slate-200 bg-slate-50 p-3 text-[11px]">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-              Resumo
-            </h2>
-            <dl className="mt-1 space-y-0.5">
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-500">Referência</dt>
-                <dd className="font-medium text-slate-800">
-                  {proposta.codigo}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-500">Revisão</dt>
-                <dd className="font-medium text-slate-800">
-                  R{rev.numeroRevisao}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-500">Data</dt>
-                <dd className="font-medium text-slate-800">
-                  {formatDatePt(rev.folhaRosto.dataProposta)}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <dt className="text-slate-500">Validade</dt>
-                <dd className="font-medium text-slate-800">
-                  {rev.folhaRosto.validadeTexto ??
-                    (rev.folhaRosto.validadeDias
-                      ? `${rev.folhaRosto.validadeDias} dias`
-                      : "—")}
-                </dd>
-              </div>
-              <div className="mt-1 flex items-center justify-between gap-2 border-t border-slate-200 pt-1.5">
-                <dt className="text-slate-600">Total</dt>
-                <dd className="text-sm font-semibold text-slate-900">
-                  {formatCurrencyPt(rev.totalVenda)}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </section>
+        {/* Corpo: grande capítulo -> capítulo -> linhas + subtotais */}
+        <section className="space-y-5">
+          {gruposPrint.map((g, idx) => (
+            <div key={`gc-${idx}`} className="space-y-3 print-section">
+              <h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-900">
+                Grande Capítulo: {g.grandeCapitulo ?? "Sem Grande Capítulo"}
+              </h2>
 
-        {/* Tabela de linhas por capítulo */}
-        <section className="print-section mt-4 space-y-3">
-          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-            Detalhe da proposta
-          </h2>
-          {gruposPorCapitulo.map((grupo) => (
-            <div key={grupo.capitulo} className="space-y-1">
-              <div className="flex items-baseline justify-between gap-2">
-                <h3 className="text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                  CAP. {grupo.capitulo}
-                </h3>
-                {grupo.grandeCapitulo && (
-                  <span className="text-[10px] text-slate-500">
-                    Grande capítulo {grupo.grandeCapitulo}
-                  </span>
-                )}
-              </div>
-              <table className="min-w-full border-collapse text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-50">
-                  <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-                    <th className="px-3 py-2">Descrição</th>
-                    <th className="px-3 py-2 text-right">Qtd.</th>
-                    <th className="px-3 py-2">Unid.</th>
-                    <th className="px-3 py-2 text-right">PU</th>
-                    <th className="px-3 py-2 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {grupo.linhas.map((linha) => (
-                    <tr
-                      key={linha.id}
-                      className="border-b border-slate-100 last:border-0"
-                    >
-                      <td className="px-3 py-2 align-top text-[11px] text-slate-800">
-                        {linha.descricao}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                        {linha.quantidade}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-800">
-                        {linha.unidade}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                        {formatCurrencyPt(linha.precoVendaUnitario)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-right text-[11px] text-slate-800">
-                        {formatCurrencyPt(linha.totalVendaLinha)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-1 flex justify-end text-[10px] text-slate-600">
-                <span className="mr-2">Subtotal capítulo</span>
-                <span className="font-semibold text-slate-900">
-                  {formatCurrencyPt(grupo.subtotal)}
-                </span>
+              {g.capitulos.map((c, cIdx) => (
+                <div
+                  key={`c-${idx}-${cIdx}`}
+                  className="space-y-2 print-section"
+                >
+                  <h3 className="text-[11px] font-semibold text-slate-900">
+                    Capítulo: {c.capitulo ?? "Sem Capítulo"}
+                  </h3>
+
+                  <table className="w-full border-collapse text-left text-[10px]">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50">
+                        <th className="px-3 py-2 font-semibold text-slate-700 text-[10px]">
+                          Descrição
+                        </th>
+                        <th className="px-3 py-2 text-right font-semibold text-slate-700 text-[10px]">
+                          Qtd.
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-slate-700 text-[10px]">
+                          Unid.
+                        </th>
+                        <th className="px-3 py-2 text-right font-semibold text-slate-700 text-[10px]">
+                          PU venda
+                        </th>
+                        <th className="px-3 py-2 text-right font-semibold text-slate-700 text-[10px]">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {c.linhas.map((linha) => {
+                        const derivados = calcularDerivadosLinha(
+                          linha,
+                          K_DEFAULT,
+                        );
+                        return (
+                          <tr
+                            key={linha.id}
+                            className="border-b border-slate-100 last:border-0"
+                          >
+                            <td className="px-3 py-2 align-top text-slate-800">
+                              {linha.descricao}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-slate-800">
+                              {linha.quantidade}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-2 text-slate-800">
+                              {linha.unidade}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-2 text-right text-slate-800">
+                              {formatCurrencyPt(derivados.precoVendaUnitario)}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-2 text-right font-medium text-slate-900">
+                              {formatCurrencyPt(derivados.totalVendaLinha)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  <div className="flex justify-end rounded border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] text-slate-700">
+                    <span className="mr-2">Subtotal Capítulo</span>
+                    <span className="font-semibold text-slate-900">
+                      {formatCurrencyPt(c.totais.totalVenda)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="flex justify-end rounded border border-slate-200 bg-slate-100 px-3 py-2 text-[11px] font-semibold text-slate-900">
+                Subtotal Grande Capítulo:{" "}
+                {formatCurrencyPt(g.totais.totalVenda)}
               </div>
             </div>
           ))}
         </section>
 
-        {/* Totais */}
-        <section className="print-section mt-6 flex justify-end">
-          <div className="w-full max-w-xs rounded border border-slate-300 bg-slate-50 p-3 text-[11px]">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-slate-700">Total proposta</span>
-              <span className="text-base font-semibold text-slate-900">
-                {formatCurrencyPt(rev.totalVenda)}
-              </span>
-            </div>
+        {/* Total geral + nota final */}
+        <section className="print-section">
+          <div className="flex justify-end rounded border border-slate-300 bg-slate-100 px-4 py-3 text-[11px]">
+            <span className="mr-2 font-medium text-slate-700">
+              Total geral
+            </span>
+            <span className="text-base font-bold text-slate-900">
+              {formatCurrencyPt(totalGeralValor)}
+            </span>
           </div>
-        </section>
 
-        {/* Notas finais / condições */}
-        <section className="print-section mt-4 text-[10px] text-slate-500">
-          {rev.folhaRosto.notas && (
-            <p className="mb-2 whitespace-pre-line">{rev.folhaRosto.notas}</p>
-          )}
-          <p>
-            Esta proposta é válida pelo período indicado, salvo erro ou omissão.
-            Os trabalhos serão executados de acordo com as boas práticas de
-            construção e a legislação em vigor. Quaisquer alterações ao escopo
-            inicial poderão implicar revisão de preços.
+          <p className="mt-3 text-[10px] text-slate-600">
+            Acresce IVA à taxa legal em vigor.
           </p>
         </section>
-
-        {/* Rodapé */}
-        <footer className="print-section mt-8 flex items-center justify-between border-t border-slate-200 pt-3 text-[9px] text-slate-500">
-          <span>ENNova · Empresa de Construção</span>
-          <span>exemplo@ennova.pt · +351 900 000 000 · www.exemplo.pt</span>
-        </footer>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   calcularDerivadosLinha,
   K_DEFAULT,
 } from "@/lib/propostas/linhaDerivados";
+import { agruparLinhasPorGrandeECapitulo } from "@/lib/propostas/agruparLinhasProposta";
 
 export type CatalogoArtigo = {
   id: string;
@@ -58,147 +59,6 @@ function highlightMatch(text: string, query: string) {
   );
 }
 
-type TotaisLinhas = {
-  totalCusto: number;
-  totalVenda: number;
-  margem: number;
-};
-
-type RenderItem =
-  | { type: "grandeTitle"; grandeCapitulo: string | null }
-  | { type: "capTitle"; capitulo: string | null }
-  | {
-      type: "capSubtotal";
-      capitulo: string | null;
-      totais: TotaisLinhas;
-    }
-  | {
-      type: "grandeSubtotal";
-      grandeCapitulo: string | null;
-      totais: TotaisLinhas;
-    }
-  | { type: "totalGeral"; totais: TotaisLinhas }
-  | { type: "linha"; linha: PropostaLinha };
-
-function normalizarCapitulo(v: string | null | undefined): string | null {
-  const t = (v ?? "").trim();
-  return t ? t : null;
-}
-
-function somarTotaisLinhas(linhas: PropostaLinha[]): TotaisLinhas {
-  let totalCusto = 0;
-  let totalVenda = 0;
-
-  for (const linha of linhas) {
-    const derivados = calcularDerivadosLinha(linha, K_DEFAULT);
-    totalCusto += derivados.totalCustoLinha;
-    totalVenda += derivados.totalVendaLinha;
-  }
-
-  return {
-    totalCusto,
-    totalVenda,
-    margem: totalVenda - totalCusto,
-  };
-}
-
-function agruparLinhasPorGrandeECapitulo(
-  linhas: PropostaLinha[],
-): RenderItem[] {
-  const nilKey = "__NULL__";
-
-  const linhasComOrdem = linhas
-    .map((linha, idx) => ({
-      linha,
-      ordem: Number.isFinite(linha.ordem)
-        ? (linha.ordem as number)
-        : idx + 1,
-    }))
-    .sort((a, b) => a.ordem - b.ordem);
-
-  type CapGroup = {
-    capitulo: string | null;
-    linhas: PropostaLinha[];
-  };
-
-  type GrandeGroup = {
-    grandeCapitulo: string | null;
-    capitulos: Map<string, CapGroup>;
-    ordemCaps: string[]; // ordem de inserção
-  };
-
-  const grandes = new Map<string, GrandeGroup>();
-  const ordemGrandes: string[] = [];
-
-  const grandeKey = (grande: string | null) =>
-    grande === null ? nilKey : `G:${grande}`;
-  const capKey = (cap: string | null) =>
-    cap === null ? nilKey : `C:${cap}`;
-
-  for (const { linha } of linhasComOrdem) {
-    const grande = normalizarCapitulo(linha.grandeCapitulo);
-    const cap = normalizarCapitulo(linha.capitulo);
-
-    const gKey = grandeKey(grande);
-    const cKey = capKey(cap);
-
-    let g = grandes.get(gKey);
-    if (!g) {
-      g = {
-        grandeCapitulo: grande,
-        capitulos: new Map<string, CapGroup>(),
-        ordemCaps: [],
-      };
-      grandes.set(gKey, g);
-      ordemGrandes.push(gKey);
-    }
-
-    let c = g.capitulos.get(cKey);
-    if (!c) {
-      c = { capitulo: cap, linhas: [] };
-      g.capitulos.set(cKey, c);
-      g.ordemCaps.push(cKey);
-    }
-
-    c.linhas.push(linha);
-  }
-
-  const itens: RenderItem[] = [];
-
-  for (const gKey of ordemGrandes) {
-    const g = grandes.get(gKey);
-    if (!g) continue;
-
-    itens.push({ type: "grandeTitle", grandeCapitulo: g.grandeCapitulo });
-
-    for (const cKey of g.ordemCaps) {
-      const c = g.capitulos.get(cKey);
-      if (!c) continue;
-
-      itens.push({ type: "capTitle", capitulo: c.capitulo });
-
-      for (const linha of c.linhas) {
-        itens.push({ type: "linha", linha });
-      }
-
-      itens.push({
-        type: "capSubtotal",
-        capitulo: c.capitulo,
-        totais: somarTotaisLinhas(c.linhas),
-      });
-    }
-
-    itens.push({
-      type: "grandeSubtotal",
-      grandeCapitulo: g.grandeCapitulo,
-      totais: somarTotaisLinhas(g.ordemCaps.flatMap((k) => g.capitulos.get(k)?.linhas ?? [])),
-    });
-  }
-
-  itens.push({ type: "totalGeral", totais: somarTotaisLinhas(linhas) });
-  return itens;
-}
-
 export default function LinhasEditor({
   linhas,
   onLinhasChange,
@@ -217,6 +77,7 @@ export default function LinhasEditor({
   const [catalogoDropdownVisivel, setCatalogoDropdownVisivel] = useState(false);
   const [catalogoHighlightedIndex, setCatalogoHighlightedIndex] =
     useState<number>(-1);
+  const catalogoWrapRef = useRef<HTMLDivElement | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const catalogoDebounceRef = useRef<number | null>(null);
   const catalogoInputRef = useRef<HTMLInputElement | null>(null);
@@ -335,6 +196,26 @@ export default function LinhasEditor({
     });
   };
 
+  function hideCatalogoDropdown() {
+    setCatalogoDropdownVisivel(false);
+    setCatalogoHighlightedIndex(-1);
+  }
+
+  useEffect(() => {
+    if (!catalogoDropdownVisivel) return;
+
+    function onDocMouseDown(e: MouseEvent) {
+      const wrapper = catalogoWrapRef.current;
+      if (!wrapper) return;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (!wrapper.contains(target)) hideCatalogoDropdown();
+    }
+
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [catalogoDropdownVisivel]);
+
   return (
     <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -348,7 +229,7 @@ export default function LinhasEditor({
         )}
         {podeEditar && (
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <div className="relative">
+            <div className="relative" ref={catalogoWrapRef}>
               <input
                 type="text"
                 ref={catalogoInputRef}
@@ -427,14 +308,10 @@ export default function LinhasEditor({
                       <li
                         key={artigo.id}
                         className={`cursor-pointer border-b border-slate-100 px-3 py-2 last:border-0 hover:bg-slate-50 ${
-                          index === catalogoHighlightedIndex
-                            ? "bg-slate-100"
-                            : ""
+                          index === catalogoHighlightedIndex ? "bg-slate-100" : ""
                         }`}
                         onClick={() => handleSelectArtigo(artigo)}
-                        onMouseEnter={() =>
-                          setCatalogoHighlightedIndex(index)
-                        }
+                        onMouseEnter={() => setCatalogoHighlightedIndex(index)}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-mono text-[10px] text-emerald-700">
@@ -491,7 +368,7 @@ export default function LinhasEditor({
         <table className="min-w-full border-collapse text-left text-xs">
           <thead className="bg-slate-50">
             <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="px-3 py-2">Descrição</th>
+              <th className="min-w-[260px] px-3 py-2">Descrição</th>
               <th className="w-0 px-2 py-2 text-center" title="Código artigo">
                 <span className="text-[10px] font-normal text-slate-400">Cód.</span>
               </th>
@@ -629,11 +506,11 @@ export default function LinhasEditor({
                     key={linha.id}
                     className="border-b border-slate-100 last:border-0"
                   >
-                  <td className="px-3 py-2 text-[11px] text-slate-800">
+                  <td className="min-w-[260px] px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
                         type="text"
-                        className="w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                        className="w-full min-w-[260px] rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
                         value={linha.descricao}
                         onChange={(e) =>
                           handleLinhaChange(linha.id, {

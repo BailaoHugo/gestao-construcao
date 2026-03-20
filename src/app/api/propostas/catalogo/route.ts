@@ -18,6 +18,12 @@ export async function GET(req: NextRequest) {
   const raw = searchParams.get("q")?.trim() ?? "";
   const q = raw;
 
+  const rawLimit = searchParams.get("limit");
+  const parsedLimit = rawLimit ? Number(rawLimit) : 20;
+  const limit = Number.isFinite(parsedLimit)
+    ? Math.max(1, Math.min(parsedLimit, 2000))
+    : 20;
+
   try {
     // Se não houver termo de pesquisa, devolver rápido a lista base ordenada por capítulo/código.
     if (!q) {
@@ -36,7 +42,7 @@ export async function GET(req: NextRequest) {
         from artigos
         where ativo = true
         order by grande_capitulo, capitulo, codigo
-        limit 20
+        limit ${limit}
         `,
       );
 
@@ -91,7 +97,7 @@ export async function GET(req: NextRequest) {
         grande_capitulo,
         capitulo,
         codigo
-      limit 20
+      limit ${limit}
       `,
       [
         `${q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}%`,
