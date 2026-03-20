@@ -41,3 +41,23 @@ yarn-error.log*
 next-env.d.ts
 *.save
 supabase/.temp/
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build extra
+dist/
+
+# Uploads temporários (se vier a existir)
+uploads/tmp/
