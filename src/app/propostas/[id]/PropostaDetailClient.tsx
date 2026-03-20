@@ -44,6 +44,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fatorVenda, setFatorVenda] = useState(1.3);
 
   const revisaoAtiva = useMemo(() => {
     return (
@@ -237,66 +238,87 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Proposta {proposta.codigo}
-          </h1>
-          <p className="text-sm text-slate-500">
-            Revisão R{revisaoAtiva.numeroRevisao} ·{" "}
-            <span className="font-medium">
-              {formatEstadoLabel(revisaoAtiva.estado)}
+        {podeEditar ? (
+          <>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                Nova proposta
+              </h1>
+              <p className="max-w-2xl text-sm text-slate-500">
+                Preencha a folha de rosto e as linhas da proposta. Ao gravar, os
+                dados são guardados na base de dados (Supabase).
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
+              Rascunho
             </span>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/propostas/${proposta.id}/print`}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            Imprimir / PDF
-          </Link>
-          <span
-            className={`rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white ${
-              revisaoAtiva.estado === "EMITIDA"
-                ? "bg-emerald-700"
-                : "bg-slate-900"
-            }`}
-          >
-            {formatEstadoLabel(revisaoAtiva.estado)}
-          </span>
-          {revisaoAtiva.estado === "EMITIDA" && (
-            <button
-              type="button"
-              onClick={handleCriarNovaRevisao}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-            >
-              Criar nova revisão
-            </button>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                Proposta {proposta.codigo}
+              </h1>
+              <p className="text-sm text-slate-500">
+                Revisão R{revisaoAtiva.numeroRevisao} ·{" "}
+                <span className="font-medium">
+                  {formatEstadoLabel(revisaoAtiva.estado)}
+                </span>
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/propostas/${proposta.id}/print`}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                Imprimir / PDF
+              </Link>
+              <span
+                className={`rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white ${
+                  revisaoAtiva.estado === "EMITIDA"
+                    ? "bg-emerald-700"
+                    : "bg-slate-900"
+                }`}
+              >
+                {formatEstadoLabel(revisaoAtiva.estado)}
+              </span>
+              {revisaoAtiva.estado === "EMITIDA" && (
+                <button
+                  type="button"
+                  onClick={handleCriarNovaRevisao}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  Criar nova revisão
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </header>
 
       {/* Selector de revisões */}
-      <section className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm text-[11px]">
-        <span className="font-medium text-slate-700">Revisões:</span>
-        {proposta.todasRevisoes.map((rev) => {
-          const ativo = rev.id === revisaoAtiva.id;
-          return (
-            <button
-              key={rev.id}
-              type="button"
-              onClick={() => setRevisaoAtivaId(rev.id)}
-              className={`rounded-full border px-3 py-1 text-[11px] ${
-                ativo
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
-            </button>
-          );
-        })}
-      </section>
+      {!podeEditar && (
+        <section className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm text-[11px]">
+          <span className="font-medium text-slate-700">Revisões:</span>
+          {proposta.todasRevisoes.map((rev) => {
+            const ativo = rev.id === revisaoAtiva.id;
+            return (
+              <button
+                key={rev.id}
+                type="button"
+                onClick={() => setRevisaoAtivaId(rev.id)}
+                className={`rounded-full border px-3 py-1 text-[11px] ${
+                  ativo
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
+              </button>
+            );
+          })}
+        </section>
+      )}
 
       {/* Folha de rosto */}
       <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -437,7 +459,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         linhas={revisaoAtiva.linhas}
         onLinhasChange={handleLinhasChange}
         podeEditar={podeEditar}
-        fatorVenda={1.3}
+        fatorVenda={fatorVenda}
         onAddLinhaLivre={handleAddLinhaLivre}
         onRemoveLinha={handleRemoverLinha}
         onInsertImportedLines={handleInsertImportedLines}
@@ -472,8 +494,26 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </span>
             </span>
           </div>
+          {podeEditar && (
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-slate-700">Fator venda:</span>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                className="w-20 rounded border border-slate-200 px-2 py-1 text-right text-[11px] text-slate-800 outline-none focus:border-slate-400"
+                value={fatorVenda}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setFatorVenda(Number.isFinite(v) && v > 0 ? v : 1.3);
+                }}
+              />
+            </div>
+          )}
           <p className="text-[11px] text-slate-500">
-            Estes valores são calculados a partir das linhas da revisão ativa.
+            {podeEditar
+              ? "Os totais de custo e venda são calculados automaticamente a partir das linhas; a margem é apenas informativa neste MVP."
+              : "Estes valores são calculados a partir das linhas da revisão ativa."}
           </p>
           {error && (
             <p className="text-[11px] text-red-600">
@@ -489,7 +529,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               disabled={isSaving}
               className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500"
             >
-              {isSaving ? "A gravar alterações…" : "Guardar alterações"}
+              {isSaving ? "A gravar…" : "Guardar"}
             </button>
           </div>
         )}
