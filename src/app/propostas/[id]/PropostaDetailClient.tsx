@@ -249,9 +249,17 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 dados são guardados na base de dados (Supabase).
               </p>
             </div>
-            <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
-              Rascunho
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/propostas/${proposta.id}/print`}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                Imprimir / PDF
+              </Link>
+              <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
+                Rascunho
+              </span>
+            </div>
           </>
         ) : (
           <>

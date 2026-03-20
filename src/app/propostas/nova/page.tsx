@@ -190,6 +190,10 @@ export default function NovaPropostaPage() {
     }
   };
 
+  const handlePrint = () => {
+    if (typeof window !== "undefined") window.print();
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-4">
@@ -202,9 +206,18 @@ export default function NovaPropostaPage() {
             dados são guardados na base de dados (Supabase).
           </p>
         </div>
-        <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
-          Rascunho
-        </span>
+        <div className="flex flex-wrap items-center gap-2 no-print">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-slate-800"
+          >
+            Imprimir / PDF
+          </button>
+          <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
+            Rascunho
+          </span>
+        </div>
       </header>
 
       {error && (
