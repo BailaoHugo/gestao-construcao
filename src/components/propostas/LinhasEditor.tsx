@@ -35,6 +35,8 @@ type LinhasEditorProps = {
   onRemoveLinha: (id: string) => void;
   onInsertImportedLines: (linhas: ParsedImportedLine[]) => void;
   onSelectArtigoCatalogo: (artigo: CatalogoArtigo) => void;
+  /** Sem cartão próprio (ex.: dentro de CollapsibleSection) */
+  embed?: boolean;
 };
 
 function highlightMatch(text: string, query: string) {
@@ -68,6 +70,7 @@ export default function LinhasEditor({
   onRemoveLinha,
   onInsertImportedLines,
   onSelectArtigoCatalogo,
+  embed = false,
 }: LinhasEditorProps) {
   const [catalogoQuery, setCatalogoQuery] = useState("");
   const [catalogoResultados, setCatalogoResultados] = useState<
@@ -216,14 +219,24 @@ export default function LinhasEditor({
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, [catalogoDropdownVisivel]);
 
+  const shellClass = embed
+    ? "space-y-3"
+    : "space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm";
+
   return (
-    <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-slate-900">
-          Linhas da proposta
-        </h2>
+    <section className={shellClass}>
+      <div
+        className={`flex flex-wrap items-center gap-3 ${embed ? "justify-end" : "justify-between"}`}
+      >
+        {!embed && (
+          <h2 className="text-sm font-semibold text-slate-900">
+            Linhas da proposta
+          </h2>
+        )}
         {!podeEditar && (
-          <p className="text-[11px] text-slate-500">
+          <p
+            className={`text-[11px] text-slate-500 ${embed ? "w-full" : ""}`}
+          >
             Esta revisão está emitida e não pode ser editada diretamente.
           </p>
         )}
@@ -695,3 +708,4 @@ export default function LinhasEditor({
     </section>
   );
 }
+

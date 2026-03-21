@@ -13,6 +13,7 @@ import LinhasEditor, {
 import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
+import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
 
 function computeTotal(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
@@ -21,6 +22,8 @@ function computeTotal(linhas: PropostaLinha[]): number {
 function computeTotalCusto(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalCustoLinha, 0);
 }
+
+type CatalogoLinhasLayout = "split" | "catalogoFull" | "linhasFull";
 
 function createEmptyLinha(): PropostaLinha {
   return {
@@ -46,6 +49,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fatorVenda, setFatorVenda] = useState(1.3);
+  const [catalogoLinhasLayout, setCatalogoLinhasLayout] =
+    useState<CatalogoLinhasLayout>("split");
 
   const revisaoAtiva = useMemo(() => {
     return (
@@ -329,9 +334,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </section>
       )}
 
-      {/* Folha de rosto */}
-      <section className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">Folha de rosto</h2>
+      <CollapsibleSection title="Folha de rosto">
+        <div className="space-y-3">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3 text-xs text-slate-700">
             <div>
@@ -453,26 +457,93 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             </div>
           </div>
         </div>
-      </section>
+        </div>
+      </CollapsibleSection>
 
-      <MariaPanel
-        podeEditar={podeEditar}
-        onInsertArtigo={(artigo, quantidade) =>
-          handleAddLinhaFromCatalogo(artigo, quantidade)
+      <CollapsibleSection
+        title="Maria Orcamentista (em formação)"
+        subtitle="Assistente local para pesquisar e inserir linhas do catálogo."
+      >
+        <MariaPanel
+          embed
+          podeEditar={podeEditar}
+          onInsertArtigo={(artigo, quantidade) =>
+            handleAddLinhaFromCatalogo(artigo, quantidade)
+          }
+        />
+      </CollapsibleSection>
+
+      <div
+        className={
+          catalogoLinhasLayout === "split"
+            ? "flex flex-col gap-6 md:flex-row md:items-start"
+            : "flex flex-col gap-6"
         }
-      />
-
-      <div className="flex flex-col gap-6 md:flex-row md:items-start">
-        <div className="w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]">
-          <CatalogoLateralPanel
-            podeEditar={podeEditar}
-            onSelectArtigo={handleSelectArtigo}
-          />
+      >
+        <div
+          className={
+            catalogoLinhasLayout === "split"
+              ? "w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]"
+              : catalogoLinhasLayout === "linhasFull"
+                ? "order-2 w-full"
+                : "order-1 w-full"
+          }
+        >
+          <CollapsibleSection
+            title="Catálogo"
+            headerActions={
+              <button
+                type="button"
+                onClick={() =>
+                  setCatalogoLinhasLayout((prev) =>
+                    prev === "catalogoFull" ? "split" : "catalogoFull",
+                  )
+                }
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                {catalogoLinhasLayout === "catalogoFull"
+                  ? "Vista dividida"
+                  : "Largura total"}
+              </button>
+            }
+          >
+            <CatalogoLateralPanel
+              embed
+              podeEditar={podeEditar}
+              onSelectArtigo={handleSelectArtigo}
+            />
+          </CollapsibleSection>
         </div>
 
-        <div className="min-w-0 flex-1">
-        {/* Linhas da proposta — mesmo editor que /propostas/nova */}
+        <div
+          className={
+            catalogoLinhasLayout === "split"
+              ? "min-w-0 flex-1"
+              : catalogoLinhasLayout === "linhasFull"
+                ? "order-1 w-full"
+                : "order-2 w-full"
+          }
+        >
+        <CollapsibleSection
+          title="Linhas da proposta"
+          headerActions={
+            <button
+              type="button"
+              onClick={() =>
+                setCatalogoLinhasLayout((prev) =>
+                  prev === "linhasFull" ? "split" : "linhasFull",
+                )
+              }
+              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              {catalogoLinhasLayout === "linhasFull"
+                ? "Vista dividida"
+                : "Largura total"}
+            </button>
+          }
+        >
         <LinhasEditor
+          embed
           linhas={revisaoAtiva.linhas}
           onLinhasChange={handleLinhasChange}
           podeEditar={podeEditar}
@@ -482,6 +553,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           onInsertImportedLines={handleInsertImportedLines}
           onSelectArtigoCatalogo={handleSelectArtigo}
         />
+        </CollapsibleSection>
         </div>
       </div>
 

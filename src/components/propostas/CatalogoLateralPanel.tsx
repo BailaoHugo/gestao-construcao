@@ -17,9 +17,12 @@ function normalize(v: string | null | undefined): string | null {
 export function CatalogoLateralPanel({
   podeEditar,
   onSelectArtigo,
+  embed = false,
 }: {
   podeEditar: boolean;
   onSelectArtigo: (artigo: CatalogoArtigo) => void;
+  /** Sem cartão / título próprio (ex.: dentro de CollapsibleSection) */
+  embed?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
@@ -89,18 +92,25 @@ export function CatalogoLateralPanel({
     }));
   }, [resultados]);
 
+  const Shell = embed ? "div" : "aside";
+  const shellClass = embed
+    ? "space-y-3 text-xs"
+    : "space-y-3 rounded-xl border border-slate-100 bg-white p-4 text-xs shadow-sm";
+
   return (
-    <aside className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 text-xs shadow-sm">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900">Catálogo</h2>
-        {loading ? (
-          <span className="text-[10px] text-slate-500">A carregar…</span>
-        ) : (
-          <span className="text-[10px] text-slate-500">
-            {resultados.length} itens
-          </span>
-        )}
-      </div>
+    <Shell className={shellClass}>
+      {!embed && (
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">Catálogo</h2>
+          {loading ? (
+            <span className="text-[10px] text-slate-500">A carregar…</span>
+          ) : (
+            <span className="text-[10px] text-slate-500">
+              {resultados.length} itens
+            </span>
+          )}
+        </div>
+      )}
 
       <input
         type="text"
@@ -186,7 +196,7 @@ export function CatalogoLateralPanel({
           ))
         )}
       </div>
-    </aside>
+    </Shell>
   );
 }
 

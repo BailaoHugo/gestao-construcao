@@ -9,6 +9,8 @@ import { formatCurrencyPt } from "@/propostas/format";
 type MariaPanelProps = {
   podeEditar: boolean;
   onInsertArtigo: (artigo: CatalogoArtigo, quantidade?: number) => void;
+  /** Sem cartão próprio (ex.: dentro de CollapsibleSection) */
+  embed?: boolean;
 };
 
 type HistoricoItem = {
@@ -18,7 +20,11 @@ type HistoricoItem = {
   timestamp: string;
 };
 
-export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
+export function MariaPanel({
+  podeEditar,
+  onInsertArtigo,
+  embed = false,
+}: MariaPanelProps) {
   const [mensagem, setMensagem] = useState("");
   const [historico, setHistorico] = useState<HistoricoItem[]>([]);
   const [resultados, setResultados] = useState<MariaResultadoArtigo[]>([]);
@@ -140,16 +146,25 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
     onInsertArtigo(artigoCatalogo, quantidade || 1);
   };
 
+  const Shell = embed ? "div" : "aside";
+  const shellClass = embed
+    ? "space-y-3 text-xs"
+    : "space-y-3 rounded-xl border border-slate-100 bg-white p-4 text-xs shadow-sm";
+
   return (
-    <aside className="space-y-3 rounded-xl border border-slate-100 bg-white p-4 text-xs shadow-sm">
-      <header className="flex items-center justify-between gap-2">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900">Maria v1</h2>
-          <p className="text-[11px] text-slate-500">
-            Assistente local para pesquisar e inserir linhas do catálogo.
-          </p>
-        </div>
-      </header>
+    <Shell className={shellClass}>
+      {!embed && (
+        <header className="flex items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              Maria Orcamentista (em formação)
+            </h2>
+            <p className="text-[11px] text-slate-500">
+              Assistente local para pesquisar e inserir linhas do catálogo.
+            </p>
+          </div>
+        </header>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-2">
         <label className="block text-[11px] font-medium text-slate-700">
@@ -285,7 +300,7 @@ export function MariaPanel({ podeEditar, onInsertArtigo }: MariaPanelProps) {
           Sem resultados para este pedido.
         </p>
       )}
-    </aside>
+    </Shell>
   );
 }
 
