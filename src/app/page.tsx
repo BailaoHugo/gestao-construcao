@@ -20,21 +20,12 @@ export default function Home() {
 
         <section className="grid gap-5 md:grid-cols-3">
           <ModuleCard
-            title="Orçamentos"
-            description="Criar, importar e consultar orçamentos de obras com seleção hierárquica."
+            title="Catálogo"
+            description="Base de dados de artigos, capítulos e códigos do sistema."
             actionLabel="Abrir módulo"
-            href="/orcamentos"
-            icon={<span className="text-lg font-semibold">€</span>}
-            iconVariant="emerald"
-          />
-
-          <ModuleCard
-            title="Obras"
-            description="Planeamento, acompanhamento e controlo de obras. Registo de despesas e facturas."
-            actionLabel="Abrir módulo"
-            href="/obras"
-            icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
-            iconVariant="amber"
+            href="/catalogo"
+            icon={<span className="text-xs font-semibold tracking-tight">CT</span>}
+            iconVariant="blue"
           />
 
           <ModuleCard
@@ -47,12 +38,12 @@ export default function Home() {
           />
 
           <ModuleCard
-            title="Catálogo"
-            description="Base de dados de artigos, capítulos e códigos do sistema."
+            title="Obras"
+            description="Planeamento, acompanhamento e controlo de obras. Registo de despesas e facturas."
             actionLabel="Abrir módulo"
-            href="/catalogo"
-            icon={<span className="text-xs font-semibold tracking-tight">CT</span>}
-            iconVariant="blue"
+            href="/obras"
+            icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
+            iconVariant="amber"
           />
 
           <ModuleCard
