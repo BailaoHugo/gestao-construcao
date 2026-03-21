@@ -464,26 +464,42 @@ export default function CatalogoPage() {
             A carregar…
           </div>
         ) : (
-          <div className="overflow-auto rounded-lg border border-slate-100">
+          <div className="max-h-[min(70vh,720px)] overflow-auto rounded-lg border border-slate-100">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="bg-slate-50">
+              <thead>
                 <tr className="text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-3 py-2 font-medium">Grande Capítulo</th>
-                  <th className="px-3 py-2 font-medium">Capítulo</th>
-                  <th className="px-3 py-2 font-medium">Código</th>
-                  <th className="px-3 py-2 font-medium">Descrição</th>
-                  <th className="px-3 py-2 font-medium">Unidade</th>
-                  <th className="px-3 py-2 font-medium text-right">PU Custo</th>
-                  <th className="px-3 py-2 font-medium text-right">PU Venda</th>
-                  <th className="px-3 py-2 font-medium">Ativo</th>
-                  <th className="px-3 py-2 font-medium" />
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Grande Capítulo
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Capítulo
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Código
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Descrição
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Unidade
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 text-right font-medium shadow-sm">
+                    PU Custo
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 text-right font-medium shadow-sm">
+                    PU Venda
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm">
+                    Ativo
+                  </th>
+                  <th className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50 px-3 py-2 font-medium shadow-sm" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {artigos.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={9}
                       className="px-3 py-6 text-center text-slate-500"
                     >
                       Nenhum artigo encontrado.
