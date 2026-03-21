@@ -2,6 +2,23 @@ import type { PropostaLinha } from "@/propostas/domain";
 
 export const K_DEFAULT = 1.3;
 
+/**
+ * K tal que `precoCustoUnitario × K = precoVendaUnitario` (ex.: linhas importadas).
+ * Se o custo unitário for ≤ 0 ou inválido, usa-se `kDefault`.
+ */
+export function kApartirDePrecosUnitarios(
+  precoCustoUnitario: number,
+  precoVendaUnitario: number,
+  kDefault: number = K_DEFAULT,
+): number {
+  const c = Number(precoCustoUnitario);
+  const v = Number(precoVendaUnitario);
+  if (c > 0 && Number.isFinite(c) && Number.isFinite(v)) {
+    return v / c;
+  }
+  return Number.isFinite(kDefault) && kDefault > 0 ? kDefault : K_DEFAULT;
+}
+
 export type DerivadosLinha = {
   kEffective: number;
   precoVendaUnitario: number;

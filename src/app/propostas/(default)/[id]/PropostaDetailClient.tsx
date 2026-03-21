@@ -11,6 +11,7 @@ import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
 import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
+import { importedParsedLineToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
@@ -130,28 +131,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
 
   const handleInsertImportedLines = (linhasImportadas: ParsedImportedLine[]) => {
     if (!podeEditar) return;
-    const novas: PropostaLinha[] = linhasImportadas.map((l) => {
-      const quantidade = l.quantidade ?? 0;
-      const precoVendaUnitario = l.preco_venda_unitario ?? 0;
-      const precoCustoUnitario = l.preco_custo_unitario ?? 0;
-      return {
-        id: crypto.randomUUID(),
-        artigoId: null,
-        origem: "IMPORTADA",
-        descricao: l.descricao,
-        unidade: l.unidade ?? "",
-        grandeCapitulo: "",
-        capitulo: l.capitulo ?? "",
-        quantidade,
-        k: 1.3,
-        precoCustoUnitario,
-        totalCustoLinha:
-          l.total_custo_linha ?? quantidade * precoCustoUnitario,
-        precoVendaUnitario,
-        totalVendaLinha:
-          l.total_venda_linha ?? quantidade * precoVendaUnitario,
-      };
-    });
+    const novas = linhasImportadas.map(importedParsedLineToPropostaLinha);
     handleLinhasChange([...revisaoAtiva.linhas, ...novas]);
   };
 

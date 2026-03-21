@@ -1,6 +1,5 @@
 import type { PropostaLinha } from "@/propostas/domain";
 import { calcularDerivadosLinha, K_DEFAULT } from "@/lib/propostas/linhaDerivados";
-import { compareChaveCapitulo } from "@/lib/propostas/ordenarCodigoCapitulo";
 
 export type TotaisLinhas = {
   totalCusto: number;
@@ -49,6 +48,9 @@ export function calcularTotaisLinhas(linhas: PropostaLinha[]): TotaisLinhas {
 /**
  * Agrupa linhas por `grandeCapitulo` e depois por `capitulo`, respeitando a
  * propriedade `ordem` quando existe.
+ *
+ * A ordem dos blocos (grandes capítulos e capítulos) segue a ordem das linhas
+ * no array (primeira ocorrência de cada chave), não ordenação alfabética.
  *
  * Retorna uma sequência pronta para renderizar: títulos, linhas e subtotais.
  */
@@ -121,9 +123,7 @@ export function agruparLinhasPorGrandeECapitulo(
 
     itens.push({ type: "grandeTitle", grandeCapitulo: g.grandeCapitulo });
 
-    const capsOrdenados = [...g.ordemCaps].sort(compareChaveCapitulo);
-
-    for (const cKey of capsOrdenados) {
+    for (const cKey of g.ordemCaps) {
       const c = g.capitulos.get(cKey);
       if (!c) continue;
 
@@ -140,7 +140,7 @@ export function agruparLinhasPorGrandeECapitulo(
       });
     }
 
-    const linhasGrande = capsOrdenados.flatMap(
+    const linhasGrande = g.ordemCaps.flatMap(
       (k) => g.capitulos.get(k)?.linhas ?? [],
     );
 

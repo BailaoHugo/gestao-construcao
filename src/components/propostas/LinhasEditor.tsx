@@ -463,12 +463,14 @@ export default function LinhasEditor({
         </div>
       </div>
 
-      <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-100">
+      <div className="max-h-[min(85vh,52rem)] overflow-auto rounded-lg border border-slate-100">
         <table className="min-w-full border-collapse text-left text-xs">
           <thead className="bg-slate-50">
             <tr className="text-[11px] uppercase tracking-wide text-slate-500">
               {colunasVisiveis.descricao && (
-                <th className="min-w-[260px] px-3 py-2">Descrição</th>
+                <th className="min-w-[min(100%,320px)] max-w-xl px-3 py-2">
+                  Descrição
+                </th>
               )}
               {colunasVisiveis.codigo && (
                 <th className="w-0 px-2 py-2 text-center" title="Código artigo">
@@ -632,21 +634,24 @@ export default function LinhasEditor({
                     className="border-b border-slate-100 last:border-0"
                   >
                   {colunasVisiveis.descricao && (
-                  <td className="min-w-[260px] px-3 py-2 text-[11px] text-slate-800">
+                  <td className="min-w-[min(100%,320px)] max-w-xl align-top px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
-                      <input
-                        type="text"
-                        className="w-full min-w-[260px] rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] outline-none focus:border-slate-400"
+                      <textarea
+                        rows={5}
+                        className="max-h-[min(28rem,70vh)] min-h-[5rem] w-full resize-y rounded border border-slate-200 bg-white px-2 py-1.5 text-[11px] leading-snug outline-none focus:border-slate-400"
                         value={linha.descricao}
                         onChange={(e) =>
                           handleLinhaChange(linha.id, {
                             descricao: e.target.value,
                           })
                         }
-                        placeholder="Descrição da linha"
+                        placeholder="Descrição da linha (texto completo; pode usar várias linhas)"
+                        spellCheck
                       />
                     ) : (
-                      <div>{linha.descricao}</div>
+                      <div className="whitespace-pre-wrap break-words leading-snug text-slate-800">
+                        {linha.descricao}
+                      </div>
                     )}
                   </td>
                   )}
