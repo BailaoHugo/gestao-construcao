@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CatalogoArtigo } from "./LinhasEditor";
 import { labelCapitulo, labelGrandeCapitulo } from "@/lib/propostas/catalogoLabels";
+import { compareChaveCapitulo } from "@/lib/propostas/ordenarCodigoCapitulo";
 
 type GrupoCapitulos = {
   grande: string | null;
@@ -87,7 +88,9 @@ export function CatalogoLateralPanel({
     return Array.from(grandes.values()).map((g) => ({
       ...g,
       capitulos: new Map(
-        Array.from(g.capitulos.entries()).sort(([a], [b]) => a.localeCompare(b)),
+        Array.from(g.capitulos.entries()).sort(([a], [b]) =>
+          compareChaveCapitulo(a, b),
+        ),
       ),
     }));
   }, [resultados]);

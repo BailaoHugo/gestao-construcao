@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
 import { ImportarLinhasModal } from "@/components/propostas/ImportarLinhasModal";
@@ -13,6 +13,14 @@ import {
   K_DEFAULT,
 } from "@/lib/propostas/linhaDerivados";
 import { agruparLinhasPorGrandeECapitulo } from "@/lib/propostas/agruparLinhasProposta";
+import {
+  COLUNAS_LINHA_ORDER,
+  COLUNA_LABELS,
+  COLUNAS_OBRIGATORIAS,
+  countColunasVisiveis,
+  loadColunasVisiveis,
+  saveColunasVisiveis,
+} from "@/lib/propostas/linhasEditorColunas";
 
 export type CatalogoArtigo = {
   id: string;
@@ -84,6 +92,28 @@ export default function LinhasEditor({
   const [importModalOpen, setImportModalOpen] = useState(false);
   const catalogoDebounceRef = useRef<number | null>(null);
   const catalogoInputRef = useRef<HTMLInputElement | null>(null);
+  const [colunasVisiveis, setColunasVisiveis] = useState(() =>
+    loadColunasVisiveis(),
+  );
+  const [colunasMenuAberto, setColunasMenuAberto] = useState(false);
+  const colunasWrapRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    saveColunasVisiveis(colunasVisiveis);
+  }, [colunasVisiveis]);
+
+  useEffect(() => {
+    if (!colunasMenuAberto) return;
+    function onDocMouseDown(e: MouseEvent) {
+      const el = colunasWrapRef.current;
+      if (!el) return;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (!el.contains(target)) setColunasMenuAberto(false);
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [colunasMenuAberto]);
 
   useEffect(() => {
     if (catalogoDebounceRef.current !== null) {
@@ -182,7 +212,10 @@ export default function LinhasEditor({
     if (mudou) onLinhasChange(normalizadas);
   }, [linhas, podeEditar, onLinhasChange]);
 
-  const colSpanTotal = podeEditar ? 13 : 12;
+  const colSpanTotal = useMemo(
+    () => countColunasVisiveis(colunasVisiveis) + (podeEditar ? 1 : 0),
+    [colunasVisiveis, podeEditar],
+  );
 
   const renderItems = agruparLinhasPorGrandeECapitulo(linhas);
 
@@ -240,8 +273,9 @@ export default function LinhasEditor({
             Esta revisão está emitida e não pode ser editada diretamente.
           </p>
         )}
-        {podeEditar && (
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          {podeEditar && (
+            <>
             <div className="relative" ref={catalogoWrapRef}>
               <input
                 type="text"
@@ -373,28 +407,106 @@ export default function LinhasEditor({
             >
               Importar linhas
             </button>
-          </div>
-        )}
+            </>
+          )}
+            <div className="relative" ref={colunasWrapRef}>
+              <button
+                type="button"
+                onClick={() => setColunasMenuAberto((o) => !o)}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+                aria-expanded={colunasMenuAberto}
+              >
+                Colunas
+              </button>
+              {colunasMenuAberto && (
+                <div className="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-slate-200 bg-white py-2 text-[11px] shadow-lg">
+                  <p className="border-b border-slate-100 px-3 pb-2 font-semibold text-slate-800">
+                    Colunas visíveis
+                  </p>
+                  <div className="max-h-64 overflow-auto px-2 pt-2">
+                    {COLUNAS_LINHA_ORDER.map((key) => {
+                      const obrig = COLUNAS_OBRIGATORIAS.has(key);
+                      return (
+                        <label
+                          key={key}
+                          className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-50 ${
+                            obrig ? "cursor-default" : ""
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={colunasVisiveis[key]}
+                            disabled={obrig}
+                            onChange={() => {
+                              if (obrig) return;
+                              setColunasVisiveis((prev) => {
+                                const next = { ...prev, [key]: !prev[key] };
+                                if (countColunasVisiveis(next) < 1) return prev;
+                                return next;
+                              });
+                            }}
+                            className="rounded border-slate-300"
+                          />
+                          <span>{COLUNA_LABELS[key]}</span>
+                          {obrig ? (
+                            <span className="ml-auto text-[9px] text-slate-400">
+                              fixo
+                            </span>
+                          ) : null}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+        </div>
       </div>
 
       <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-100">
         <table className="min-w-full border-collapse text-left text-xs">
           <thead className="bg-slate-50">
             <tr className="text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="min-w-[260px] px-3 py-2">Descrição</th>
-              <th className="w-0 px-2 py-2 text-center" title="Código artigo">
-                <span className="text-[10px] font-normal text-slate-400">Cód.</span>
-              </th>
-              <th className="px-3 py-2 text-right">Qtd.</th>
-              <th className="px-3 py-2">Unid.</th>
-              <th className="px-3 py-2">Grande Cap.</th>
-              <th className="px-3 py-2">Cap.</th>
-              <th className="px-3 py-2 text-right">K</th>
-              <th className="px-3 py-2 text-right">PU Custo</th>
-              <th className="px-3 py-2 text-right">Total Custo</th>
-              <th className="px-3 py-2 text-right">PU Venda</th>
-              <th className="px-3 py-2 text-right">Total Venda</th>
-              <th className="px-3 py-2 text-right">Margem</th>
+              {colunasVisiveis.descricao && (
+                <th className="min-w-[260px] px-3 py-2">Descrição</th>
+              )}
+              {colunasVisiveis.codigo && (
+                <th className="w-0 px-2 py-2 text-center" title="Código artigo">
+                  <span className="text-[10px] font-normal text-slate-400">
+                    Cód.
+                  </span>
+                </th>
+              )}
+              {colunasVisiveis.qtd && (
+                <th className="px-3 py-2 text-right">Qtd.</th>
+              )}
+              {colunasVisiveis.unidade && (
+                <th className="px-3 py-2">Unid.</th>
+              )}
+              {colunasVisiveis.grandeCap && (
+                <th className="px-3 py-2">Grande Cap.</th>
+              )}
+              {colunasVisiveis.capitulo && (
+                <th className="px-3 py-2">Cap.</th>
+              )}
+              {colunasVisiveis.k && (
+                <th className="px-3 py-2 text-right">K</th>
+              )}
+              {colunasVisiveis.puCusto && (
+                <th className="px-3 py-2 text-right">PU Custo</th>
+              )}
+              {colunasVisiveis.totalCusto && (
+                <th className="px-3 py-2 text-right">Total Custo</th>
+              )}
+              {colunasVisiveis.puVenda && (
+                <th className="px-3 py-2 text-right">PU Venda</th>
+              )}
+              {colunasVisiveis.totalVenda && (
+                <th className="px-3 py-2 text-right">Total Venda</th>
+              )}
+              {colunasVisiveis.margem && (
+                <th className="px-3 py-2 text-right">Margem</th>
+              )}
               {podeEditar && <th className="px-3 py-2" />}
             </tr>
           </thead>
@@ -402,7 +514,7 @@ export default function LinhasEditor({
             {linhas.length === 0 ? (
               <tr>
                 <td
-                  colSpan={podeEditar ? 13 : 12}
+                  colSpan={colSpanTotal}
                   className="px-3 py-6 text-center text-[11px] text-slate-400"
                 >
                   Ainda não adicionou linhas. Use &quot;Adicionar linha
@@ -519,6 +631,7 @@ export default function LinhasEditor({
                     key={linha.id}
                     className="border-b border-slate-100 last:border-0"
                   >
+                  {colunasVisiveis.descricao && (
                   <td className="min-w-[260px] px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -536,6 +649,8 @@ export default function LinhasEditor({
                       <div>{linha.descricao}</div>
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.codigo && (
                   <td className="w-0 max-w-[4rem] px-2 py-2 text-center font-mono text-[10px] text-slate-400">
                     {podeEditar ? (
                       <input
@@ -554,6 +669,8 @@ export default function LinhasEditor({
                       linha.codigoArtigo ?? "—"
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.qtd && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -572,6 +689,8 @@ export default function LinhasEditor({
                       linha.quantidade
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.unidade && (
                   <td className="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -589,6 +708,8 @@ export default function LinhasEditor({
                       linha.unidade
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.grandeCap && (
                   <td className="whitespace-nowrap px-2 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -607,6 +728,8 @@ export default function LinhasEditor({
                       (linha.grandeCapitulo && linha.grandeCapitulo.trim()) ? linha.grandeCapitulo : "—"
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.capitulo && (
                   <td className="whitespace-nowrap px-2 py-2 text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -625,6 +748,8 @@ export default function LinhasEditor({
                       (linha.capitulo && linha.capitulo.trim().length > 0) ? linha.capitulo : "—"
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.k && (
                   <td className="whitespace-nowrap px-2 py-2 text-right text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -649,6 +774,8 @@ export default function LinhasEditor({
                         : "1.30"
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.puCusto && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {podeEditar ? (
                       <input
@@ -667,20 +794,29 @@ export default function LinhasEditor({
                       formatCurrencyPt(linha.precoCustoUnitario)
                     )}
                   </td>
+                  )}
+                  {colunasVisiveis.totalCusto && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {formatCurrencyPt(derivados.totalCustoLinha)}
                   </td>
+                  )}
+                  {colunasVisiveis.puVenda && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {formatCurrencyPt(derivados.precoVendaUnitario)}
                   </td>
+                  )}
+                  {colunasVisiveis.totalVenda && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {formatCurrencyPt(derivados.totalVendaLinha)}
                   </td>
+                  )}
+                  {colunasVisiveis.margem && (
                   <td className="whitespace-nowrap px-3 py-2 text-right text-[11px] text-slate-800">
                     {pct !== null
                       ? `${formatCurrencyPt(margemValor)} (${pct.toFixed(1)}%)`
                       : formatCurrencyPt(margemValor)}
                   </td>
+                  )}
                   {podeEditar && (
                     <td className="whitespace-nowrap px-3 py-2 text-right">
                       <button
