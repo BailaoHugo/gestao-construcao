@@ -159,3 +159,80 @@ export function agruparLinhasPorGrandeECapitulo(
   return itens;
 }
 
+/** Linha de resumo por capítulo (subcapítulo). */
+export type ResumoCapituloRow = {
+  capitulo: string | null;
+  totais: TotaisLinhas;
+};
+
+/** Bloco grande capítulo com capítulos e subtotal do bloco. */
+export type ResumoGrandeCapituloRow = {
+  grandeCapitulo: string | null;
+  capitulos: ResumoCapituloRow[];
+  totais: TotaisLinhas;
+};
+
+const ZEROS_TOTAIS: TotaisLinhas = {
+  totalCusto: 0,
+  totalVenda: 0,
+  margem: 0,
+};
+
+/**
+ * Estrutura hierárquica para UI: totais por capítulo, por grande capítulo e geral.
+ * Usa a mesma ordenação que `agruparLinhasPorGrandeECapitulo`.
+ */
+export function resumoPorGrandeECapitulo(linhas: PropostaLinha[]): {
+  grupos: ResumoGrandeCapituloRow[];
+  totalGeral: TotaisLinhas;
+} {
+  const renderItems = agruparLinhasPorGrandeECapitulo(linhas);
+
+  const grupos: ResumoGrandeCapituloRow[] = [];
+  let currentGrande: ResumoGrandeCapituloRow | null = null;
+  let currentCapitulo: ResumoCapituloRow | null = null;
+  let totalGeral: TotaisLinhas = { ...ZEROS_TOTAIS };
+
+  for (const item of renderItems) {
+    switch (item.type) {
+      case "grandeTitle": {
+        currentGrande = {
+          grandeCapitulo: item.grandeCapitulo,
+          capitulos: [],
+          totais: { ...ZEROS_TOTAIS },
+        };
+        break;
+      }
+      case "capTitle": {
+        currentCapitulo = {
+          capitulo: item.capitulo,
+          totais: { ...ZEROS_TOTAIS },
+        };
+        break;
+      }
+      case "linha": {
+        break;
+      }
+      case "capSubtotal": {
+        if (!currentGrande || !currentCapitulo) break;
+        currentCapitulo.totais = item.totais;
+        currentGrande.capitulos.push(currentCapitulo);
+        currentCapitulo = null;
+        break;
+      }
+      case "grandeSubtotal": {
+        if (!currentGrande) break;
+        currentGrande.totais = item.totais;
+        grupos.push(currentGrande);
+        currentGrande = null;
+        break;
+      }
+      case "totalGeral": {
+        totalGeral = item.totais;
+        break;
+      }
+    }
+  }
+
+  return { grupos, totalGeral };
+}

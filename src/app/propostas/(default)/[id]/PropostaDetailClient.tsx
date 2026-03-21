@@ -14,6 +14,7 @@ import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
+import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPanel";
 
 function computeTotal(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
@@ -556,6 +557,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </CollapsibleSection>
         </div>
       </div>
+
+      <ResumoCapitulosPanel linhas={revisaoAtiva.linhas} />
 
       {/* Totais */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">

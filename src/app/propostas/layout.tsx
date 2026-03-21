@@ -1,18 +1,13 @@
-import { MainLayout } from "@/components/layout/MainLayout";
-import { TopBar } from "@/components/layout/TopBar";
+import type { ReactNode } from "react";
 
-export default function PropostasLayout({
+/**
+ * Layout mínimo para o segmento /propostas: rotas como /propostas/[id]/print
+ * não herdam TopBar nem o cartão principal — evita barra "Propostas" e ruído na impressão/PDF.
+ */
+export default function PropostasSegmentLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  return (
-    <MainLayout>
-      <TopBar title="Propostas" />
-      <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
-        {children}
-      </main>
-    </MainLayout>
-  );
+  return children;
 }
-

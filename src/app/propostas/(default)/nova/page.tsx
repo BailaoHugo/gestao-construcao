@@ -11,6 +11,7 @@ import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
+import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPanel";
 
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
@@ -509,6 +510,8 @@ export default function NovaPropostaPage() {
         </CollapsibleSection>
         </div>
       </div>
+
+      <ResumoCapitulosPanel linhas={linhas} />
 
       {/* Totais e ações */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">

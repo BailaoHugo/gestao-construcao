@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { loadPropostaCompleta } from "@/propostas/db";
@@ -13,6 +14,22 @@ import {
 } from "@/lib/propostas/agruparLinhasProposta";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const proposta = await loadPropostaCompleta(id);
+  if (!proposta) {
+    return { title: "Proposta" };
+  }
+  return {
+    title: `Proposta ${proposta.codigo} · impressão`,
+    description: `Proposta comercial ${proposta.codigo}`,
+  };
+}
 
 export default async function PropostaPrintPage({
   params,
@@ -93,8 +110,19 @@ export default async function PropostaPrintPage({
   const totalGeralValor = totalGeral?.totalVenda ?? rev.totalVenda;
 
   return (
-    <div className="print-page text-[11px] text-slate-800">
-      <div className="mx-auto max-w-[180mm] space-y-6">
+    <div className="min-h-screen bg-surface px-4 py-6 text-slate-900 print:bg-white print:p-0">
+      <div className="no-print mx-auto mb-4 max-w-[180mm] rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
+        <p className="font-medium">PDF ou impressão sem URL e data</p>
+        <p className="mt-1 text-[13px] leading-snug text-amber-900/95">
+          No diálogo de impressão (Ctrl+P), abra <strong>Mais definições</strong> e{" "}
+          <strong>desative «Cabeçalhos e rodapés»</strong> (Headers and footers).
+          Assim o PDF não inclui o título do separador, a morada da página, a data
+          nem «1 de 2» — isso é gerado pelo navegador, não pela aplicação.
+        </p>
+      </div>
+
+      <div className="print-page mx-auto text-[11px] text-slate-800">
+      <div className="max-w-[180mm] space-y-6">
         {/* Cabeçalho */}
         <header className="print-section flex items-start justify-between gap-6 border-b border-slate-200 pb-4">
           <div className="flex items-start gap-3">
@@ -239,6 +267,7 @@ export default async function PropostaPrintPage({
             Acresce IVA à taxa legal em vigor.
           </p>
         </section>
+      </div>
       </div>
     </div>
   );
