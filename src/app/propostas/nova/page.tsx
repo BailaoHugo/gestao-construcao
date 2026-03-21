@@ -408,22 +408,24 @@ export default function NovaPropostaPage() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[340px,1fr] lg:items-start">
-        <div className="space-y-6">
-          {/* Maria v1 — entre folha de rosto e linhas */}
-          <MariaPanel
-            podeEditar={true}
-            onInsertArtigo={(artigo, quantidade) =>
-              handleAddLinhaFromCatalogo(artigo, quantidade)
-            }
-          />
+      {/* Maria — largura total; catálogo fica ao lado das linhas, não por baixo */}
+      <MariaPanel
+        podeEditar={true}
+        onInsertArtigo={(artigo, quantidade) =>
+          handleAddLinhaFromCatalogo(artigo, quantidade)
+        }
+      />
 
+      {/* Flex: catálogo + linhas lado a lado (grid empilhava em alguns viewports) */}
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]">
           <CatalogoLateralPanel
             podeEditar={true}
             onSelectArtigo={handleSelectArtigo}
           />
         </div>
 
+        <div className="min-w-0 flex-1">
         {/* Linhas da proposta — componente partilhado com /propostas/[id] */}
         <LinhasEditor
           linhas={linhas}
@@ -435,6 +437,7 @@ export default function NovaPropostaPage() {
           onInsertImportedLines={handleInsertImportedLines}
           onSelectArtigoCatalogo={handleSelectArtigo}
         />
+        </div>
       </div>
 
       {/* Totais e ações */}

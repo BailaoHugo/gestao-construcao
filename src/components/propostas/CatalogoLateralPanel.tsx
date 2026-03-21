@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CatalogoArtigo } from "./LinhasEditor";
+import { labelCapitulo, labelGrandeCapitulo } from "@/lib/propostas/catalogoLabels";
 
 type GrupoCapitulos = {
   grande: string | null;
@@ -121,22 +122,45 @@ export function CatalogoLateralPanel({
           grupos.map((g) => (
             <details
               key={g.grande ?? "__NULL__"}
-              open={true}
-              className="group"
+              className="group rounded-lg border border-slate-100 bg-white"
             >
-              <summary className="cursor-pointer select-none rounded-lg bg-slate-50 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-100">
-                {g.grande ?? "Sem Grande Capítulo"}
+              <summary className="list-none cursor-pointer select-none rounded-lg bg-slate-50 px-3 py-2 text-left font-semibold text-slate-700 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex w-full items-center justify-between gap-2">
+                  <span>{labelGrandeCapitulo(g.grande)}</span>
+                  <span
+                    aria-hidden
+                    className="text-[10px] font-normal text-slate-400 transition group-open:rotate-180"
+                  >
+                    ▼
+                  </span>
+                </span>
               </summary>
 
-              <div className="mt-1 space-y-2 pl-3">
+              <div className="mt-1 space-y-1 border-t border-slate-100 p-2 pl-2">
                 {Array.from(g.capitulos.entries()).map(([capKey, arts]) => {
                   const cap = capKey === "__NULL__" ? null : capKey;
                   return (
-                    <div key={capKey} className="space-y-1">
-                      <div className="text-[11px] font-medium text-slate-600">
-                        {cap ?? "Sem Capítulo"} ({arts.length})
-                      </div>
-                      <div className="space-y-1">
+                    <details
+                      key={capKey}
+                      className="group/cap rounded-md border border-slate-100 bg-slate-50/80"
+                    >
+                      <summary className="list-none cursor-pointer select-none px-2 py-1.5 text-left text-[11px] font-medium leading-snug text-slate-600 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                        <span className="inline-flex w-full items-center justify-between gap-2">
+                          <span>
+                            {labelCapitulo(cap)}{" "}
+                            <span className="font-normal text-slate-400">
+                              ({arts.length})
+                            </span>
+                          </span>
+                          <span
+                            aria-hidden
+                            className="text-[9px] text-slate-400 transition group-open/cap:rotate-180"
+                          >
+                            ▼
+                          </span>
+                        </span>
+                      </summary>
+                      <div className="space-y-1 border-t border-slate-100 bg-white px-1 py-2">
                         {arts.map((a) => (
                           <button
                             key={a.id}
@@ -154,7 +178,7 @@ export function CatalogoLateralPanel({
                           </button>
                         ))}
                       </div>
-                    </div>
+                    </details>
                   );
                 })}
               </div>

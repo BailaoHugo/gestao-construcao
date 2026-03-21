@@ -455,22 +455,22 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[340px,1fr] lg:items-start">
-        <div className="space-y-6">
-          {/* Maria v1 — entre folha de rosto e linhas */}
-          <MariaPanel
-            podeEditar={podeEditar}
-            onInsertArtigo={(artigo, quantidade) =>
-              handleAddLinhaFromCatalogo(artigo, quantidade)
-            }
-          />
+      <MariaPanel
+        podeEditar={podeEditar}
+        onInsertArtigo={(artigo, quantidade) =>
+          handleAddLinhaFromCatalogo(artigo, quantidade)
+        }
+      />
 
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]">
           <CatalogoLateralPanel
             podeEditar={podeEditar}
             onSelectArtigo={handleSelectArtigo}
           />
         </div>
 
+        <div className="min-w-0 flex-1">
         {/* Linhas da proposta — mesmo editor que /propostas/nova */}
         <LinhasEditor
           linhas={revisaoAtiva.linhas}
@@ -482,6 +482,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           onInsertImportedLines={handleInsertImportedLines}
           onSelectArtigoCatalogo={handleSelectArtigo}
         />
+        </div>
       </div>
 
       {/* Totais */}
