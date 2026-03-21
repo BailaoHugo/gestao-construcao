@@ -180,14 +180,16 @@ export function CatalogoLateralPanel({
                             type="button"
                             disabled={!podeEditar}
                             onClick={() => onSelectArtigo(a)}
-                            className="w-full truncate rounded-lg border border-slate-200 bg-white px-2 py-1 text-left text-[11px] text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-left text-[11px] leading-snug text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                             title={`${a.codigo} - ${a.descricao}`}
                           >
                             <span className="font-mono text-[10px] text-emerald-700">
                               {a.codigo}
                             </span>
                             {" — "}
-                            <span className="truncate">{a.descricao}</span>
+                            <span className="break-words text-slate-800">
+                              {a.descricao}
+                            </span>
                           </button>
                         ))}
                       </div>
