@@ -1,0 +1,30 @@
+{
+  "name": "TOConline (exemplo — copiar e preencher)",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://api17.toconline.pt",
+      "enabled": true
+    },
+    {
+      "key": "oauth_url",
+      "value": "https://app17.toconline.pt/oauth",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "COLE_AQUI_O_ACCESS_TOKEN_ASCII",
+      "enabled": true
+    },
+    {
+      "key": "client_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "client_secret",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}

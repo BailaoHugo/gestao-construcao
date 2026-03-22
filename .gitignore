@@ -61,3 +61,13 @@ dist/
 
 # Uploads temporários (se vier a existir)
 uploads/tmp/
+
+# Saída local do script TOConline (não versionar respostas com dados reais)
+tmp/toconline-verify/
+
+# RPA Playwright: downloads, logs, sessão (não versionar)
+tmp/toconline-rpa/
+
+# Export Postman / segredos TOConline (mantém só README)
+secrets/*.json
+!secrets/README.md

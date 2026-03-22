@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "toconline:verify": "node scripts/toconline-verify.mjs",
+    "toconline:inspect-json": "node scripts/toconline-inspect-json.mjs",
+    "toconline:oauth-url": "bash scripts/toconline-oauth-auth-url.sh",
+    "toconline:oauth-token": "bash scripts/toconline-oauth-token.sh",
+    "toconline:rpa": "node scripts/toconline-rpa/mvp.mjs"
   },
   "dependencies": {
     "next": "16.1.6",
@@ -25,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "playwright": "^1.51.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "xlsx": "^0.18.5"
