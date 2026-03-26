@@ -6,6 +6,7 @@ const ICON_VARIANTS = {
   blue: "bg-blue-50 text-blue-600",
   violet: "bg-violet-50 text-violet-600",
   amber: "bg-amber-50 text-amber-600",
+  sky: "bg-sky-50 text-sky-600",
 } as const;
 
 type ModuleCardProps = {

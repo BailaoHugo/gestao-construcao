@@ -11,9 +11,15 @@
     "toconline:inspect-json": "node scripts/toconline-inspect-json.mjs",
     "toconline:oauth-url": "bash scripts/toconline-oauth-auth-url.sh",
     "toconline:oauth-token": "bash scripts/toconline-oauth-token.sh",
-    "toconline:rpa": "node scripts/toconline-rpa/mvp.mjs"
+    "toconline:rpa": "node scripts/toconline-rpa/mvp.mjs",
+    "toconline:rpa:deps": "playwright install-deps chromium",
+    "toconline:organize-by-obra": "node scripts/toconline-organize-by-obra.mjs",
+    "toconline:organize-by-obra:db": "node scripts/toconline-organize-by-obra.mjs --dbUpsert=1",
+    "toconline:extract:batch": "node scripts/toconline-extract-invoices-batch.mjs",
+    "toconline:canonical:etl": "node scripts/toconline-canonical-etl.mjs"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.2",
     "next": "16.1.6",
     "openai": "^6.29.0",
     "pdfjs-dist": "^5.5.207",

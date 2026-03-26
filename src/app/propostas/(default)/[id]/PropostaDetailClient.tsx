@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Proposta, PropostaLinha } from "@/propostas/domain";
 import {
@@ -10,8 +9,8 @@ import {
 import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
-import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
-import { importedParsedLineToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
+import type { ImportLinhaDraft } from "@/lib/propostas/parseImportedLines";
+import { importDraftToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
@@ -49,6 +48,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     initial.revisaoAtual.id,
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [organizandoOrcamento, setOrganizandoOrcamento] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fatorVenda, setFatorVenda] = useState(1.3);
   const [catalogoLinhasLayout, setCatalogoLinhasLayout] =
@@ -129,9 +129,9 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     handleLinhasChange(revisaoAtiva.linhas.filter((l) => l.id !== id));
   };
 
-  const handleInsertImportedLines = (linhasImportadas: ParsedImportedLine[]) => {
+  const handleInsertImportedLines = (linhasImportadas: ImportLinhaDraft[]) => {
     if (!podeEditar) return;
-    const novas = linhasImportadas.map(importedParsedLineToPropostaLinha);
+    const novas = linhasImportadas.map(importDraftToPropostaLinha);
     handleLinhasChange([...revisaoAtiva.linhas, ...novas]);
   };
 
@@ -191,6 +191,25 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     console.log("Criar nova revisão (ainda não suportado nesta versão).");
   };
 
+  const handleGerarContrato = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+      const res = await fetch("/api/contratos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propostaId: proposta.id, revisaoId: revisaoAtivaId }),
+      });
+      const data = (await res.json()) as { id?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Falha ao criar contrato");
+      window.location.href = `/contratos/${data.id}`;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleGuardarAlteracoes = async () => {
     if (!podeEditar) return;
     try {
@@ -222,6 +241,33 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     }
   };
 
+  const handleOrganizarOrcamento = async () => {
+    if (!podeEditar) return;
+    try {
+      setOrganizandoOrcamento(true);
+      setError(null);
+      const res = await fetch("/api/propostas/organizar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propostaId: proposta.id, onlyEmpty: false }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { error?: string; proposta?: Proposta }
+        | null;
+      if (!res.ok) {
+        throw new Error(data?.error || "Falha ao organizar o orçamento.");
+      }
+      if (data?.proposta) {
+        setProposta(data.proposta);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setOrganizandoOrcamento(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-4">
@@ -237,12 +283,20 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={`/propostas/${proposta.id}/print`}
+              <button
+                type="button"
+                onClick={() => void handleOrganizarOrcamento()}
+                disabled={organizandoOrcamento}
+                className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-medium text-indigo-900 shadow-sm transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {organizandoOrcamento ? "A organizar…" : "Organizar orçamento"}
+              </button>
+              <a
+                href={`/api/propostas/${proposta.id}/pdf?revisaoId=${revisaoAtivaId}`}
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
-                Imprimir / PDF
-              </Link>
+                Exportar PDF
+              </a>
               <span className="rounded-full bg-slate-900 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
                 Rascunho
               </span>
@@ -262,12 +316,22 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={`/propostas/${proposta.id}/print`}
+              <a
+                href={`/api/propostas/${proposta.id}/pdf?revisaoId=${revisaoAtivaId}`}
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
-                Imprimir / PDF
-              </Link>
+                Exportar PDF
+              </a>
+              {revisaoAtiva.estado === "EMITIDA" && (
+                <button
+                  type="button"
+                  onClick={() => void handleGerarContrato()}
+                  disabled={isSaving}
+                  className="rounded-full bg-sky-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-sky-500 disabled:opacity-60"
+                >
+                  Gerar Contrato
+                </button>
+              )}
               <span
                 className={`rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-white ${
                   revisaoAtiva.estado === "EMITIDA"

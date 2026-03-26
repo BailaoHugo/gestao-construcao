@@ -47,6 +47,15 @@ export default function Home() {
           />
 
           <ModuleCard
+            title="Contratos"
+            description="Geração e gestão de contratos de empreitada."
+            actionLabel="Abrir módulo"
+            href="/contratos"
+            icon={<span className="text-xs font-semibold tracking-tight">CO</span>}
+            iconVariant="sky"
+          />
+
+          <ModuleCard
             title="Clientes"
             description="Gestão de clientes e contactos associados às obras (em breve)."
             actionLabel="Em breve"
