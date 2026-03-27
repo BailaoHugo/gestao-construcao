@@ -4,32 +4,32 @@ export type FaturaTipo = 'AUTO' | 'MANUAL';
 
 export interface Fatura {
   id: string;
-  contrato_id: string;
+  contratoId: string;
   numero: string | null;
   tipo: FaturaTipo;
-  numero_auto: number | null;
+  numeroAuto: number | null;
   estado: FaturaEstado;
-  percentagem_adjudicacao: number | null;
-  data_emissao: string | null;
-  data_vencimento: string | null;
-  taxa_iva: number;
+  percentagemAdjudicacao: number | null;
+  dataEmissao: string | null;
+  dataVencimento: string | null;
+  taxaIva: number;
   notas: string | null;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   // joined from contratos + propostas
-  proposta_codigo?: string;
-  obra_nome?: string;
-  cliente_nome?: string;
+  propostaCodigo?: string;
+  obraNome?: string;
+  clienteNome?: string;
 }
 
 export interface FaturaAutoCapitulo {
   id: string;
-  fatura_id: string;
+  faturaId: string;
   capitulo: string;
   descricao: string;
-  valor_contrato: number;
-  percentagem_anterior: number;
-  percentagem_atual: number;
+  valorContrato: number;
+  percentagemAnterior: number;
+  percentagemAtual: number;
 }
 
 export interface FaturaCompleta extends Fatura {
