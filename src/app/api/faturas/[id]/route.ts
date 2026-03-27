@@ -3,10 +3,11 @@ import { loadFaturaCompleta } from '@/faturas/db';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   try {
-    const fatura = await loadFaturaCompleta(params.id);
+    const fatura = await loadFaturaCompleta(id);
     if (!fatura) {
       return NextResponse.json({ error: 'Fatura não encontrada' }, { status: 404 });
     }
