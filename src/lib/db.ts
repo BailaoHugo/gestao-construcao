@@ -2,20 +2,28 @@ import { Pool } from "pg";
 
 const connectionString = process.env.DATABASE_URL;
 
+// Log URL sem password para diagnóstico em produção
+const safeUrl = connectionString
+  ? connectionString.replace(/:([^:@]+)@/, ":***@")
+  : "(não definido)";
+// eslint-disable-next-line no-console
+console.log("[db] DATABASE_URL:", safeUrl);
+
 if (!connectionString) {
-  // Em ambiente de desenvolvimento é útil ter um erro claro
-  // se a variável de ambiente não estiver definida.
   // eslint-disable-next-line no-console
   console.warn(
     "[db] DATABASE_URL não está definido. A ligação à base de dados irá falhar.",
   );
 }
 
-// Supabase pooler usa TLS; o certificado intermédio pode não estar no truststore.
-// Forçamos a não rejeitar certificados "self-signed".
 export const pool = new Pool({
   connectionString,
   ssl: { rejectUnauthorized: false },
+});
+
+pool.on("error", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("[db] Pool error:", err.message);
 });
 
 export async function withTransaction<T>(
