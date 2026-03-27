@@ -59,8 +59,8 @@ export async function createFatura(
      RETURNING *`,
     [
       contrato_id,
-      tipo ?? 'manual',
-      estado ?? 'rascunho',
+      tipo ?? 'MANUAL',
+      estado ?? 'RASCUNHO',
       percentagem_adjudicacao ?? null,
       taxa_iva ?? 23,
       notas ?? null,
@@ -110,7 +110,7 @@ export async function updateFatura(
 export async function emitirFatura(id: string): Promise<Fatura> {
   const { rows } = await pool.query(
     `UPDATE faturas
-     SET estado = 'emitida',
+     SET estado = 'EMITIDA',
          data_emissao = COALESCE(data_emissao, NOW()::date),
          updated_at = NOW()
      WHERE id = $1
