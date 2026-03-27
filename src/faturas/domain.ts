@@ -1,57 +1,37 @@
-export type FaturaEstado = 'RASCUNHO' | 'EMITIDA' | 'PAGA';
-export type FaturaTipo  = 'adjudicacao' | 'auto';
+// módulo faturação v1.0
+export type FaturaEstado = 'rascunho' | 'emitida' | 'paga' | 'anulada';
+export type FaturaTipo = 'auto' | 'manual';
 
-export interface FaturaCapituloAuto {
+export interface Fatura {
   id: string;
-  faturaId: string;
+  contrato_id: string;
+  numero: string | null;
+  tipo: FaturaTipo;
+  numero_auto: number | null;
+  estado: FaturaEstado;
+  percentagem_adjudicacao: number | null;
+  data_emissao: string | null;
+  data_vencimento: string | null;
+  taxa_iva: number;
+  notas: string | null;
+  created_at: string;
+  updated_at: string;
+  // joined from contratos + propostas
+  proposta_codigo?: string;
+  obra_nome?: string;
+  cliente_nome?: string;
+}
+
+export interface FaturaAutoCapitulo {
+  id: string;
+  fatura_id: string;
   capitulo: string;
   descricao: string;
-  valorContrato: number;
-  percentagemAnterior: number;
-  percentagemAtual: number;
+  valor_contrato: number;
+  percentagem_anterior: number;
+  percentagem_atual: number;
 }
 
-export interface FaturaResumo {
-  id: string;
-  contratoId: string;
-  numero: string;
-  tipo: FaturaTipo;
-  numeroAuto: number | null;
-  estado: FaturaEstado;
-  percentagemAdjudicacao: number;
-  dataEmissao: string | null;
-  dataVencimento: string | null;
-  taxaIva: number;
-  notas: string;
-  criadoEm: string;
-  atualizadoEm: string;
-  propostaCodigo: string;
-  clienteNome: string;
-  contratoValorTotal: number;
-  valorTrabalhosBruto: number;
-  descontoAdjudicacao: number;
-  valorBase: number;
-  valorIva: number;
-  valorTotal: number;
+export interface FaturaCompleta extends Fatura {
+  capitulos: FaturaAutoCapitulo[];
 }
-
-export interface Fatura extends FaturaResumo {
-  capitulos: FaturaCapituloAuto[];
-}
-
-export interface CreateFaturaInput {
-  contratoId: string;
-  tipo: FaturaTipo;
-  percentagemAdjudicacao?: number;
-  taxaIva?: number;
-  notas?: string;
-  capitulos?: Array<{
-    capitulo: string;
-    descricao: string;
-    valorContrato: number;
-    percentagemAnterior: number;
-    percentagemAtual: number;
-  }>;
-}
-
-// módulo faturação v1.0
