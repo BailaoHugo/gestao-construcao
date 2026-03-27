@@ -34,39 +34,28 @@ export default function Home() {
             actionLabel="Abrir módulo"
             href="/propostas"
             icon={<span className="text-xs font-semibold tracking-tight">PR</span>}
-            iconVariant="emerald"
-          />
-
-          <ModuleCard
-            title="Obras"
-            description="Planeamento, acompanhamento e controlo de obras. Registo de despesas e facturas."
-            actionLabel="Abrir módulo"
-            href="/obras"
-            icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
-            iconVariant="amber"
+            iconVariant="blue"
           />
 
           <ModuleCard
             title="Contratos"
-            description="Geração e gestão de contratos de empreitada."
+            description="Elaborar e gerir contratos de empreitada e cláusulas contratuais."
             actionLabel="Abrir módulo"
             href="/contratos"
             icon={<span className="text-xs font-semibold tracking-tight">CO</span>}
-            iconVariant="sky"
+            iconVariant="blue"
           />
 
           <ModuleCard
-            title="Clientes"
-            description="Gestão de clientes e contactos associados às obras (em breve)."
-            actionLabel="Em breve"
-            disabled
-            icon={<span className="text-xs font-semibold tracking-tight">CL</span>}
-            iconVariant="violet"
+            title="Faturação"
+            description="Faturas de adjudicação e autos de medição mensais."
+            actionLabel="Abrir módulo"
+            href="/faturas"
+            icon={<span className="text-xs font-semibold tracking-tight">FT</span>}
+            iconVariant="blue"
           />
         </section>
       </main>
     </MainLayout>
   );
 }
-
-
