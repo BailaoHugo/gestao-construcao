@@ -30,10 +30,9 @@ export interface Fatura {
   propostaCodigo: string;
   obraNome: string;
   clienteNome: string;
-  // present when loaded via loadFaturaCompleta
-  capitulos?: FaturaAutoCapitulo[];
-}
-
-export interface FaturaCompleta extends Fatura {
+  // populated by loadFaturaCompleta; empty array otherwise
   capitulos: FaturaAutoCapitulo[];
 }
+
+// FaturaCompleta is an alias kept for backwards compat
+export type FaturaCompleta = Fatura;
