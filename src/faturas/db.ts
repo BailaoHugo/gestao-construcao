@@ -17,9 +17,9 @@ const BASE_SELECT = `
     f.notas,
     f.created_at            AS "createdAt",
     f.updated_at            AS "updatedAt",
-    p.codigo                AS "propostaCodigo",
-    p.obra_nome             AS "obraNome",
-    p.cliente_nome          AS "clienteNome"
+    COALESCE(p.codigo, '')  AS "propostaCodigo",
+    COALESCE(p.obra_nome, '') AS "obraNome",
+    COALESCE(p.cliente_nome, '') AS "clienteNome"
   FROM faturas f
   LEFT JOIN contratos c ON c.id = f.contrato_id
   LEFT JOIN propostas p ON p.id = c.proposta_id
@@ -56,16 +56,10 @@ export async function createFatura(
        (contrato_id, tipo, estado, percentagem_adjudicacao, taxa_iva,
         notas, data_emissao, data_vencimento)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-     RETURNING
-       id, contrato_id AS "contratoId", numero, tipo,
-       numero_auto AS "numeroAuto", estado,
-       percentagem_adjudicacao AS "percentagemAdjudicacao",
-       data_emissao AS "dataEmissao", data_vencimento AS "dataVencimento",
-       taxa_iva AS "taxaIva", notas,
-       created_at AS "createdAt", updated_at AS "updatedAt"`,
+     RETURNING id`,
     [
       contratoId,
-      tipo ?? 'MANUAL',
+      tipo ?? 'manual',
       estado ?? 'RASCUNHO',
       percentagemAdjudicacao ?? null,
       taxaIva ?? 23,
@@ -74,7 +68,9 @@ export async function createFatura(
       dataVencimento ?? null,
     ],
   );
-  return rows[0];
+  const created = await getFatura(rows[0].id);
+  if (!created) throw new Error('Fatura criada não encontrada');
+  return created;
 }
 
 export async function updateFatura(
@@ -142,10 +138,10 @@ export async function loadFaturaCompleta(
   const { rows: capitulos } = await pool.query(
     `SELECT
        id,
-       fatura_id        AS "faturaId",
+       fatura_id            AS "faturaId",
        capitulo,
        descricao,
-       valor_contrato   AS "valorContrato",
+       valor_contrato       AS "valorContrato",
        percentagem_anterior AS "percentagemAnterior",
        percentagem_atual    AS "percentagemAtual"
      FROM fatura_auto_capitulos
