@@ -1,6 +1,6 @@
 // módulo faturação v1.0
-export type FaturaEstado = 'rascunho' | 'emitida' | 'paga' | 'anulada';
-export type FaturaTipo = 'auto' | 'manual';
+export type FaturaEstado = 'RASCUNHO' | 'EMITIDA' | 'PAGA' | 'ANULADA';
+export type FaturaTipo = 'AUTO' | 'MANUAL';
 
 export interface Fatura {
   id: string;
