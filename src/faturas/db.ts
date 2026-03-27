@@ -1,5 +1,5 @@
 import { pool } from '@/lib/db';
-import type { Fatura, FaturaCompleta } from './domain';
+import type { Fatura, FaturaAutoCapitulo } from './domain';
 
 // módulo faturação v1.0 – db layer
 const BASE_SELECT = `
@@ -17,40 +17,37 @@ const BASE_SELECT = `
     f.notas,
     f.created_at            AS "createdAt",
     f.updated_at            AS "updatedAt",
-    COALESCE(p.codigo, '')  AS "propostaCodigo",
-    COALESCE(p.obra_nome, '') AS "obraNome",
+    COALESCE(p.codigo, '')       AS "propostaCodigo",
+    COALESCE(p.obra_nome, '')    AS "obraNome",
     COALESCE(p.cliente_nome, '') AS "clienteNome"
   FROM faturas f
   LEFT JOIN contratos c ON c.id = f.contrato_id
   LEFT JOIN propostas p ON p.id = c.proposta_id
 `;
 
+function withCapitulos(row: Record<string, unknown>): Fatura {
+  return { ...row, capitulos: [] } as unknown as Fatura;
+}
+
 export async function loadTodasFaturas(): Promise<Fatura[]> {
   const { rows } = await pool.query(
     BASE_SELECT + ' ORDER BY f.created_at DESC',
   );
-  return rows;
+  return rows.map(withCapitulos);
 }
 
 export async function getFatura(id: string): Promise<Fatura | null> {
   const { rows } = await pool.query(BASE_SELECT + ' WHERE f.id = $1', [id]);
-  return rows[0] ?? null;
+  return rows[0] ? withCapitulos(rows[0]) : null;
 }
 
 export async function createFatura(
   data: Pick<Fatura, 'contratoId' | 'tipo'> & Partial<Fatura>,
 ): Promise<Fatura> {
   const {
-    contratoId,
-    tipo,
-    estado,
-    percentagemAdjudicacao,
-    taxaIva,
-    notas,
-    dataEmissao,
-    dataVencimento,
+    contratoId, tipo, estado, percentagemAdjudicacao,
+    taxaIva, notas, dataEmissao, dataVencimento,
   } = data;
-
   const { rows } = await pool.query(
     `INSERT INTO faturas
        (contrato_id, tipo, estado, percentagem_adjudicacao, taxa_iva,
@@ -58,14 +55,9 @@ export async function createFatura(
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      RETURNING id`,
     [
-      contratoId,
-      tipo ?? 'manual',
-      estado ?? 'RASCUNHO',
-      percentagemAdjudicacao ?? null,
-      taxaIva ?? 23,
-      notas ?? null,
-      dataEmissao ?? null,
-      dataVencimento ?? null,
+      contratoId, tipo ?? 'manual', estado ?? 'RASCUNHO',
+      percentagemAdjudicacao ?? null, taxaIva ?? 23,
+      notas ?? null, dataEmissao ?? null, dataVencimento ?? null,
     ],
   );
   const created = await getFatura(rows[0].id);
@@ -78,36 +70,28 @@ export async function updateFatura(
   data: Partial<Fatura>,
 ): Promise<Fatura> {
   const fieldMap: Record<string, string> = {
-    tipo: 'tipo',
-    estado: 'estado',
+    tipo: 'tipo', estado: 'estado',
     percentagemAdjudicacao: 'percentagem_adjudicacao',
-    taxaIva: 'taxa_iva',
-    notas: 'notas',
-    dataEmissao: 'data_emissao',
-    dataVencimento: 'data_vencimento',
+    taxaIva: 'taxa_iva', notas: 'notas',
+    dataEmissao: 'data_emissao', dataVencimento: 'data_vencimento',
   };
-
   const updates: string[] = [];
   const values: unknown[] = [];
   let idx = 1;
-
   for (const [tsKey, dbCol] of Object.entries(fieldMap)) {
     if (tsKey in data) {
       updates.push(`${dbCol} = $${idx++}`);
       values.push((data as Record<string, unknown>)[tsKey] ?? null);
     }
   }
-
   if (!updates.length) {
-    const fatura = await getFatura(id);
-    if (!fatura) throw new Error(`Fatura ${id} não encontrada`);
-    return fatura;
+    const f = await getFatura(id);
+    if (!f) throw new Error(`Fatura ${id} não encontrada`);
+    return f;
   }
-
   values.push(id);
   await pool.query(
-    `UPDATE faturas SET ${updates.join(', ')}, updated_at = NOW()
-     WHERE id = $${idx}`,
+    `UPDATE faturas SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx}`,
     values,
   );
   const updated = await getFatura(id);
@@ -129,18 +113,14 @@ export async function emitirFatura(id: string): Promise<Fatura> {
   return fatura;
 }
 
-export async function loadFaturaCompleta(
-  id: string,
-): Promise<FaturaCompleta | null> {
+export async function loadFaturaCompleta(id: string): Promise<Fatura | null> {
   const fatura = await getFatura(id);
   if (!fatura) return null;
-
-  const { rows: capitulos } = await pool.query(
+  const { rows } = await pool.query(
     `SELECT
        id,
        fatura_id            AS "faturaId",
-       capitulo,
-       descricao,
+       capitulo, descricao,
        valor_contrato       AS "valorContrato",
        percentagem_anterior AS "percentagemAnterior",
        percentagem_atual    AS "percentagemAtual"
@@ -149,6 +129,5 @@ export async function loadFaturaCompleta(
      ORDER BY capitulo`,
     [id],
   );
-
-  return { ...fatura, capitulos };
+  return { ...fatura, capitulos: rows as FaturaAutoCapitulo[] };
 }
