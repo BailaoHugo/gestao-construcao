@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { QueryResult } from "pg";
 import { pool, withTransaction } from "@/lib/db";
+import { classificarCapituloPorDescricaoCompleto } from "@/lib/propostas/classificarCapituloPorDescricao";
 import type {
   Proposta,
   PropostaEstado,
@@ -308,6 +309,120 @@ export async function loadPropostaCompleta(
   } finally {
     client.release();
   }
+}
+
+export type LinhaOrganizadaResumo = {
+  id: string;
+  descricao: string;
+  grande_capitulo: string | null;
+  capitulo: string | null;
+  score: number;
+  confianca: "alta" | "media" | "baixa";
+  motivo: string;
+};
+
+/**
+ * Atribui `grande_capitulo` e `capitulo` a cada linha da revisão atual com base na
+ * `descricao`. Não altera preços, quantidades nem k.
+ * Com `preview: true`, não grava na BD e devolve a proposta atual sem alterações.
+ */
+export async function organizarOrcamentoProposta(
+  propostaId: string,
+  options?: { onlyEmpty?: boolean; preview?: boolean },
+): Promise<{
+  proposta: Proposta;
+  linhasAtualizadas: number;
+  detalhes: LinhaOrganizadaResumo[];
+  preview: boolean;
+}> {
+  const proposta = await loadPropostaCompleta(propostaId);
+  if (!proposta) {
+    throw new Error("Proposta não encontrada");
+  }
+
+  const rev = proposta.revisaoAtual;
+  if (rev.estado !== "RASCUNHO") {
+    throw new Error("Só é possível organizar o orçamento em modo Rascunho");
+  }
+
+  const preview = Boolean(options?.preview);
+  const detalhes: LinhaOrganizadaResumo[] = [];
+  let linhasAtualizadas = 0;
+
+  const pushDetalhe = (
+    linha: PropostaLinha,
+    c: ReturnType<typeof classificarCapituloPorDescricaoCompleto>,
+  ) => {
+    detalhes.push({
+      id: linha.id,
+      descricao: linha.descricao,
+      grande_capitulo: c.grande_capitulo,
+      capitulo: c.capitulo,
+      score: c.score,
+      confianca: c.confianca,
+      motivo: c.motivo,
+    });
+  };
+
+  if (preview) {
+    for (const linha of rev.linhas) {
+      if (options?.onlyEmpty) {
+        const gc = (linha.grandeCapitulo ?? "").trim();
+        const cp = (linha.capitulo ?? "").trim();
+        if (gc !== "" || cp !== "") continue;
+      }
+      const c = classificarCapituloPorDescricaoCompleto(linha.descricao);
+      pushDetalhe(linha, c);
+    }
+    return {
+      proposta,
+      linhasAtualizadas: 0,
+      detalhes,
+      preview: true,
+    };
+  }
+
+  await withTransaction(async (client) => {
+    for (const linha of rev.linhas) {
+      if (options?.onlyEmpty) {
+        const gc = (linha.grandeCapitulo ?? "").trim();
+        const cp = (linha.capitulo ?? "").trim();
+        if (gc !== "" || cp !== "") continue;
+      }
+
+      const c = classificarCapituloPorDescricaoCompleto(linha.descricao);
+
+      const r = await client.query(
+        `
+          update proposta_linhas
+          set
+            grande_capitulo = $2,
+            capitulo = $3,
+            updated_at = now()
+          where id = $1::uuid
+            and revisao_id = $4::uuid
+        `,
+        [linha.id, c.grande_capitulo, c.capitulo, rev.id],
+      );
+
+      if ((r.rowCount ?? 0) > 0) {
+        linhasAtualizadas += 1;
+        pushDetalhe(linha, c);
+      }
+    }
+  });
+
+  const atualizada = await loadPropostaCompleta(propostaId);
+  if (!atualizada) {
+    throw new Error("Proposta não encontrada após organização");
+  }
+
+  return {
+    proposta: atualizada,
+    linhasAtualizadas,
+    detalhes,
+    preview: false,
+  };
 }
 
 export async function updatePropostaWithRevisao(

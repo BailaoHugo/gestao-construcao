@@ -4,10 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PropostaLinha } from "@/propostas/domain";
 import { formatCurrencyPt } from "@/propostas/format";
 import { ImportarLinhasModal } from "@/components/propostas/ImportarLinhasModal";
-import {
-  parseImportedLines,
-  type ParsedImportedLine,
-} from "@/lib/propostas/parseImportedLines";
+import type { ImportLinhaDraft } from "@/lib/propostas/parseImportedLines";
 import {
   calcularDerivadosLinha,
   K_DEFAULT,
@@ -41,7 +38,7 @@ type LinhasEditorProps = {
   fatorVenda: number;
   onAddLinhaLivre: () => void;
   onRemoveLinha: (id: string) => void;
-  onInsertImportedLines: (linhas: ParsedImportedLine[]) => void;
+  onInsertImportedLines: (linhas: ImportLinhaDraft[]) => void;
   onSelectArtigoCatalogo: (artigo: CatalogoArtigo) => void;
   /** Sem cartão próprio (ex.: dentro de CollapsibleSection) */
   embed?: boolean;

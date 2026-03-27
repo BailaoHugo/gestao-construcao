@@ -1,0 +1,121 @@
+{
+  "cookies": [
+    {
+      "name": "_ga",
+      "value": "GA1.1.619073817.1774286584",
+      "domain": ".toconline.pt",
+      "path": "/",
+      "expires": 1808846589.649037,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "casper_issuer",
+      "value": "https://app17.toconline.pt",
+      "domain": ".toconline.pt",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "casper_session",
+      "value": "17-301647-1543769-23f9a2ce80ae871961defc565063999b12947e7ddc40cb9229f8e389d9cf94f7",
+      "domain": ".toconline.pt",
+      "path": "/",
+      "expires": 1774300989,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "casper_validity",
+      "value": "1774300989.421",
+      "domain": ".toconline.pt",
+      "path": "/",
+      "expires": 1774300989,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_8671FT017V",
+      "value": "GS2.1.s1774286583$o1$g1$t1774286589$j54$l0$h0",
+      "domain": ".toconline.pt",
+      "path": "/",
+      "expires": 1808846589.653781,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_toconline_session",
+      "value": "2ceb1c33e8d99a5a249a973a03fb06b1",
+      "domain": "app17.toconline.pt",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "XSRF-TOKEN",
+      "value": "TxLr0KzVcRg%2BnFuPDRiQlCro5VtQarKb7iRkrt9wIQ8%3D",
+      "domain": "app17.toconline.pt",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "use_default_date_filters",
+      "value": "t",
+      "domain": "app17.toconline.pt",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "use_default_date_filters_entity",
+      "value": "301647",
+      "domain": "app17.toconline.pt",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://app17.toconline.pt",
+      "localStorage": [
+        {
+          "name": "casper-user-email",
+          "value": "hugo.bailao@ennova.pt"
+        },
+        {
+          "name": "purchases-invoices",
+          "value": "{}"
+        },
+        {
+          "name": "idpEnv",
+          "value": "{\"env\":\"prod\"}"
+        },
+        {
+          "name": "auth-2fa-unique-login-key",
+          "value": "26197ffd-7d98-49a9-a1f6-d2e9afde7d4c"
+        },
+        {
+          "name": "casper-last-entity-id",
+          "value": "301647"
+        }
+      ]
+    }
+  ]
+}

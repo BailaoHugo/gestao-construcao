@@ -7,8 +7,8 @@ import { formatCurrencyPt } from "@/propostas/format";
 import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
-import type { ParsedImportedLine } from "@/lib/propostas/parseImportedLines";
-import { importedParsedLineToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
+import type { ImportLinhaDraft } from "@/lib/propostas/parseImportedLines";
+import { importDraftToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
@@ -89,8 +89,8 @@ export default function NovaPropostaPage() {
     setLinhas((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const handleInsertImportedLines = (linhasImportadas: ParsedImportedLine[]) => {
-    const novas = linhasImportadas.map(importedParsedLineToPropostaLinha);
+  const handleInsertImportedLines = (linhasImportadas: ImportLinhaDraft[]) => {
+    const novas = linhasImportadas.map(importDraftToPropostaLinha);
     setLinhas((prev) => [...prev, ...novas]);
   };
 

@@ -72,6 +72,19 @@ npm run toconline:verify
 
 Se editas o projeto por **SSH Remote** para a VM, estás a trabalhar **só na VM**; o PC só mostra o ecrã — os ficheiros continuam no servidor.
 
+## 7. RPA Playwright (`npm run toconline:rpa`) na VM
+
+Além de `npm install` e `npx playwright install chromium`, em **Debian/Ubuntu minimal** (ex. GCP) é preciso instalar bibliotecas de sistema; senão o erro típico é `libnspr4.so: cannot open shared object file`:
+
+```bash
+cd ~/gestao-construcao
+sudo env "PATH=$PATH" npx playwright install-deps chromium
+```
+
+Se aparecer `sudo: npx: command not found`, o `sudo` não herda o `PATH` do nvm/fnm — usa o comando com `PATH=$PATH` como acima, ou `sudo "$(command -v npx)" playwright install-deps chromium`.
+
+SSH sem ambiente gráfico: corre com **`HEADLESS=true`** (ou omite `HEADLESS=false`). Ver [scripts/toconline-rpa/README.md](../scripts/toconline-rpa/README.md).
+
 ---
 
 **Resumo:** coloca `secrets/toconline-postman.json` **na VM**, corre `npm run toconline:verify` **na VM**, e não guardes tokens no repositório git.
