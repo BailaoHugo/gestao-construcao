@@ -53,3 +53,5 @@ export interface CreateFaturaInput {
     percentagemAtual: number;
   }>;
 }
+
+// módulo faturação v1.0
