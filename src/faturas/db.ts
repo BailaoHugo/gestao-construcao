@@ -25,7 +25,7 @@ const BASE_SELECT = `
   LEFT JOIN propostas p ON p.id = c.proposta_id
 `;
 
-export async function listFaturas(): Promise<Fatura[]> {
+export async function loadTodasFaturas(): Promise<Fatura[]> {
   const { rows } = await pool.query(
     BASE_SELECT + ' ORDER BY f.created_at DESC',
   );
