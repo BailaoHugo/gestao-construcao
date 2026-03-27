@@ -3,10 +3,11 @@ import { emitirFatura } from '@/faturas/db';
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   try {
-    const fatura = await emitirFatura(params.id);
+    const fatura = await emitirFatura(id);
     return NextResponse.json(fatura);
   } catch (err) {
     console.error('POST /api/faturas/[id]/emitir', err);
