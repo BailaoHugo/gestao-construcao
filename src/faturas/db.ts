@@ -5,21 +5,21 @@ import type { Fatura, FaturaCompleta } from './domain';
 const BASE_SELECT = `
   SELECT
     f.id,
-    f.contrato_id,
+    f.contrato_id           AS "contratoId",
     f.numero,
     f.tipo,
-    f.numero_auto,
+    f.numero_auto           AS "numeroAuto",
     f.estado,
-    f.percentagem_adjudicacao,
-    f.data_emissao,
-    f.data_vencimento,
-    f.taxa_iva,
+    f.percentagem_adjudicacao AS "percentagemAdjudicacao",
+    f.data_emissao          AS "dataEmissao",
+    f.data_vencimento       AS "dataVencimento",
+    f.taxa_iva              AS "taxaIva",
     f.notas,
-    f.created_at,
-    f.updated_at,
-    p.codigo        AS proposta_codigo,
-    p.obra_nome,
-    p.cliente_nome
+    f.created_at            AS "createdAt",
+    f.updated_at            AS "updatedAt",
+    p.codigo                AS "propostaCodigo",
+    p.obra_nome             AS "obraNome",
+    p.cliente_nome          AS "clienteNome"
   FROM faturas f
   LEFT JOIN contratos c ON c.id = f.contrato_id
   LEFT JOIN propostas p ON p.id = c.proposta_id
@@ -38,17 +38,17 @@ export async function getFatura(id: string): Promise<Fatura | null> {
 }
 
 export async function createFatura(
-  data: Pick<Fatura, 'contrato_id' | 'tipo'> & Partial<Fatura>,
+  data: Pick<Fatura, 'contratoId' | 'tipo'> & Partial<Fatura>,
 ): Promise<Fatura> {
   const {
-    contrato_id,
+    contratoId,
     tipo,
     estado,
-    percentagem_adjudicacao,
-    taxa_iva,
+    percentagemAdjudicacao,
+    taxaIva,
     notas,
-    data_emissao,
-    data_vencimento,
+    dataEmissao,
+    dataVencimento,
   } = data;
 
   const { rows } = await pool.query(
@@ -56,16 +56,22 @@ export async function createFatura(
        (contrato_id, tipo, estado, percentagem_adjudicacao, taxa_iva,
         notas, data_emissao, data_vencimento)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-     RETURNING *`,
+     RETURNING
+       id, contrato_id AS "contratoId", numero, tipo,
+       numero_auto AS "numeroAuto", estado,
+       percentagem_adjudicacao AS "percentagemAdjudicacao",
+       data_emissao AS "dataEmissao", data_vencimento AS "dataVencimento",
+       taxa_iva AS "taxaIva", notas,
+       created_at AS "createdAt", updated_at AS "updatedAt"`,
     [
-      contrato_id,
+      contratoId,
       tipo ?? 'MANUAL',
       estado ?? 'RASCUNHO',
-      percentagem_adjudicacao ?? null,
-      taxa_iva ?? 23,
+      percentagemAdjudicacao ?? null,
+      taxaIva ?? 23,
       notas ?? null,
-      data_emissao ?? null,
-      data_vencimento ?? null,
+      dataEmissao ?? null,
+      dataVencimento ?? null,
     ],
   );
   return rows[0];
@@ -75,19 +81,24 @@ export async function updateFatura(
   id: string,
   data: Partial<Fatura>,
 ): Promise<Fatura> {
-  const editable = [
-    'tipo', 'estado', 'percentagem_adjudicacao', 'taxa_iva',
-    'notas', 'data_emissao', 'data_vencimento',
-  ] as const;
+  const fieldMap: Record<string, string> = {
+    tipo: 'tipo',
+    estado: 'estado',
+    percentagemAdjudicacao: 'percentagem_adjudicacao',
+    taxaIva: 'taxa_iva',
+    notas: 'notas',
+    dataEmissao: 'data_emissao',
+    dataVencimento: 'data_vencimento',
+  };
 
   const updates: string[] = [];
   const values: unknown[] = [];
   let idx = 1;
 
-  for (const field of editable) {
-    if (field in data) {
-      updates.push(`${field} = $${idx++}`);
-      values.push((data as Record<string, unknown>)[field] ?? null);
+  for (const [tsKey, dbCol] of Object.entries(fieldMap)) {
+    if (tsKey in data) {
+      updates.push(`${dbCol} = $${idx++}`);
+      values.push((data as Record<string, unknown>)[tsKey] ?? null);
     }
   }
 
@@ -98,27 +109,28 @@ export async function updateFatura(
   }
 
   values.push(id);
-  const { rows } = await pool.query(
+  await pool.query(
     `UPDATE faturas SET ${updates.join(', ')}, updated_at = NOW()
-     WHERE id = $${idx} RETURNING *`,
+     WHERE id = $${idx}`,
     values,
   );
-  if (!rows[0]) throw new Error(`Fatura ${id} não encontrada`);
-  return rows[0];
+  const updated = await getFatura(id);
+  if (!updated) throw new Error(`Fatura ${id} não encontrada`);
+  return updated;
 }
 
 export async function emitirFatura(id: string): Promise<Fatura> {
-  const { rows } = await pool.query(
+  await pool.query(
     `UPDATE faturas
      SET estado = 'EMITIDA',
          data_emissao = COALESCE(data_emissao, NOW()::date),
          updated_at = NOW()
-     WHERE id = $1
-     RETURNING *`,
+     WHERE id = $1`,
     [id],
   );
-  if (!rows[0]) throw new Error(`Fatura ${id} não encontrada`);
-  return rows[0];
+  const fatura = await getFatura(id);
+  if (!fatura) throw new Error(`Fatura ${id} não encontrada`);
+  return fatura;
 }
 
 export async function loadFaturaCompleta(
@@ -128,7 +140,17 @@ export async function loadFaturaCompleta(
   if (!fatura) return null;
 
   const { rows: capitulos } = await pool.query(
-    'SELECT * FROM fatura_auto_capitulos WHERE fatura_id = $1 ORDER BY capitulo',
+    `SELECT
+       id,
+       fatura_id        AS "faturaId",
+       capitulo,
+       descricao,
+       valor_contrato   AS "valorContrato",
+       percentagem_anterior AS "percentagemAnterior",
+       percentagem_atual    AS "percentagemAtual"
+     FROM fatura_auto_capitulos
+     WHERE fatura_id = $1
+     ORDER BY capitulo`,
     [id],
   );
 
