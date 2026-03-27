@@ -2,6 +2,16 @@
 export type FaturaEstado = 'RASCUNHO' | 'EMITIDA' | 'PAGA' | 'ANULADA';
 export type FaturaTipo = 'auto' | 'manual';
 
+export interface FaturaAutoCapitulo {
+  id: string;
+  faturaId: string;
+  capitulo: string;
+  descricao: string;
+  valorContrato: number;
+  percentagemAnterior: number;
+  percentagemAtual: number;
+}
+
 export interface Fatura {
   id: string;
   contratoId: string;
@@ -16,20 +26,12 @@ export interface Fatura {
   notas: string | null;
   createdAt: string;
   updatedAt: string;
-  // joined from contratos + propostas (always present via LEFT JOIN)
+  // joined from contratos + propostas
   propostaCodigo: string;
   obraNome: string;
   clienteNome: string;
-}
-
-export interface FaturaAutoCapitulo {
-  id: string;
-  faturaId: string;
-  capitulo: string;
-  descricao: string;
-  valorContrato: number;
-  percentagemAnterior: number;
-  percentagemAtual: number;
+  // present when loaded via loadFaturaCompleta
+  capitulos?: FaturaAutoCapitulo[];
 }
 
 export interface FaturaCompleta extends Fatura {
