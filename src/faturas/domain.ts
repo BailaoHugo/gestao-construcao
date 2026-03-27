@@ -16,10 +16,10 @@ export interface Fatura {
   notas: string | null;
   createdAt: string;
   updatedAt: string;
-  // joined from contratos + propostas
-  propostaCodigo?: string;
-  obraNome?: string;
-  clienteNome?: string;
+  // joined from contratos + propostas (always present via LEFT JOIN)
+  propostaCodigo: string;
+  obraNome: string;
+  clienteNome: string;
 }
 
 export interface FaturaAutoCapitulo {
