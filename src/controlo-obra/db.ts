@@ -275,4 +275,39 @@ export async function createCustoObra(input: CreateCustoObraInput): Promise<Cust
       input.fornecedorId ?? null, input.trabalhadorId ?? null,
       input.quantidade ?? null, input.custoUnitario ?? null,
       input.valor, input.faturaRef ?? null, input.notas ?? null,
-    ],
+    ],  );
+  return rows[0];
+}
+
+export async function deleteCustoObra(id: string): Promise<boolean> {
+  const { rowCount } = await pool.query(`DELETE FROM custos_obra WHERE id = $1`, [id]);
+  return (rowCount ?? 0) > 0;
+}
+
+export async function loadResumoControloObra(contratoId: string): Promise<ResumoControloObra> {
+  const { rows } = await pool.query(
+    `SELECT
+       COALESCE(SUM(valor), 0)                                          AS "totalCustos",
+       COALESCE(SUM(CASE WHEN tipo='material'       THEN valor END), 0) AS "totalMateriais",
+       COALESCE(SUM(CASE WHEN tipo='subempreitada'  THEN valor END), 0) AS "totalSubempreitadas",
+       COALESCE(SUM(CASE WHEN tipo='mao_de_obra'    THEN valor END), 0) AS "totalMaoDeObra",
+       COALESCE(SUM(CASE WHEN tipo='equipamento'    THEN valor END), 0) AS "totalEquipamento"
+     FROM custos_obra WHERE contrato_id = $1`,
+    [contratoId],
+  );
+  const { rows: fr } = await pool.query(
+    `SELECT COUNT(*) AS cnt FROM faturas_recebidas
+     WHERE contrato_id = $1 AND estado IN ('pendente','processando','revisto')`,
+    [contratoId],
+  );
+  const r = rows[0];
+  return {
+    contratoId,
+    totalCustos:         Number(r.totalCustos),
+    totalMateriais:      Number(r.totalMateriais),
+    totalSubempreitadas: Number(r.totalSubempreitadas),
+    totalMaoDeObra:      Number(r.totalMaoDeObra),
+    totalEquipamento:    Number(r.totalEquipamento),
+    numFaturasPendentes: Number(fr[0].cnt),
+  };
+}
