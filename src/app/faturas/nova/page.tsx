@@ -1,185 +1,244 @@
 'use client';
+import { Suspense, useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import type { FaturaTipo } from '@/faturas/domain';
-
-interface ContratoOption {
+interface Contrato {
   id: string;
-  clienteNome: string;
   propostaCodigo: string;
+  clienteNome: string;
+  totalVenda: number;
 }
 
-interface Capitulo {
+interface CapituloRow {
   capitulo: string;
   descricao: string;
-  valorContrato: number;
-  percentagemAnterior: number;
-  percentagemAtual: number;
+  valor_contrato: number;
+  percentagem_anterior: number;
+  percentagem_atual: number;
 }
 
-export default function NovaFaturaPage() {
-  const router = useRouter();
+function NovaFaturaForm() {
   const searchParams = useSearchParams();
-  const preContratoId = searchParams.get('contratoId') ?? '';
+  const router = useRouter();
+  const preContratoId = searchParams.get('contrato') ?? '';
 
-  const [contratos, setContratos] = useState<ContratoOption[]>([]);
+  const [contratos, setContratos] = useState<Contrato[]>([]);
   const [contratoId, setContratoId] = useState(preContratoId);
-  const [tipo, setTipo] = useState<FaturaTipo>('adjudicacao');
-  const [percentagemAdjudicacao, setPercentagemAdjudicacao] = useState(30);
+  const [tipo, setTipo] = useState<'adjudicacao' | 'auto'>('adjudicacao');
+  const [percentagemAdj, setPercentagemAdj] = useState(30);
   const [taxaIva, setTaxaIva] = useState(23);
   const [notas, setNotas] = useState('');
-  const [capitulos, setCapitulos] = useState<Capitulo[]>([
-    { capitulo: '', descricao: '', valorContrato: 0, percentagemAnterior: 0, percentagemAtual: 0 },
+  const [capitulos, setCapitulos] = useState<CapituloRow[]>([
+    { capitulo: '', descricao: '', valor_contrato: 0, percentagem_anterior: 0, percentagem_atual: 0 },
   ]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetch('/api/contratos')
       .then(r => r.json())
-      .then(data => {
-        const list = (Array.isArray(data) ? data : []).map((c: any) => ({
-          id: c.id, clienteNome: c.clienteNome, propostaCodigo: c.propostaCodigo,
-        }));
-        setContratos(list);
-        if (!contratoId && list.length > 0) setContratoId(list[0].id);
-      })
-      .catch(() => setError('Erro ao carregar contratos.'));
+      .then(data => setContratos(Array.isArray(data) ? data : (data.contratos ?? [])))
+      .catch(() => {});
   }, []);
 
-  function addCapitulo() {
-    setCapitulos(prev => [...prev, { capitulo: '', descricao: '', valorContrato: 0, percentagemAnterior: 0, percentagemAtual: 0 }]);
-  }
+  const addCapitulo = () =>
+    setCapitulos(prev => [...prev, { capitulo: '', descricao: '', valor_contrato: 0, percentagem_anterior: 0, percentagem_atual: 0 }]);
 
-  function removeCapitulo(i: number) {
-    setCapitulos(prev => prev.filter((_, idx) => idx !== i));
-  }
+  const removeCapitulo = (idx: number) =>
+    setCapitulos(prev => prev.filter((_, i) => i !== idx));
 
-  function updateCapitulo(i: number, field: keyof Capitulo, value: string | number) {
-    setCapitulos(prev => prev.map((c, idx) => idx === i ? { ...c, [field]: value } : c));
-  }
+  const updateCapitulo = (idx: number, field: keyof CapituloRow, value: string | number) =>
+    setCapitulos(prev => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c));
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    if (!contratoId) { setError('Selecione um contrato.'); return; }
     setSaving(true);
+    setError('');
     try {
-      const body = {
-        contratoId, tipo, percentagemAdjudicacao, taxaIva,
-        notas: notas.trim(),
-        ...(tipo === 'auto' ? { capitulos } : {}),
+      const body: Record<string, unknown> = {
+        contratoId,
+        tipo,
+        percentagemAdjudicacao: percentagemAdj,
+        taxaIva,
+        notas,
       };
-      const r = await fetch('/api/faturas', {
+      if (tipo === 'auto') body.capitulos = capitulos;
+      const res = await fetch('/api/faturas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (!r.ok) { const err = await r.json(); throw new Error(err.error ?? 'Erro'); }
-      const fatura = await r.json();
+      if (!res.ok) throw new Error(await res.text());
+      const fatura = await res.json();
       router.push(`/faturas/${fatura.id}`);
-    } catch (err: any) {
-      setError(err.message ?? 'Erro ao criar fatura.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar fatura');
+    } finally {
       setSaving(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center gap-3">
-          <Link href="/faturas" className="text-gray-400 hover:text-gray-600 text-sm">← Faturas</Link>
-          <span className="text-gray-300">|</span>
-          <h1 className="text-xl font-semibold text-gray-800">Nova Fatura</h1>
-        </div>
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="mb-6">
+        <a href="/faturas" className="text-sm text-blue-600 hover:underline">← Voltar às faturas</a>
+        <h1 className="text-2xl font-bold mt-2">Nova Fatura</h1>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">{error}</div>}
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-xl border p-6 shadow-sm">
+        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}
 
-          <Section title="Contrato">
-            <label className="block">
-              <span className="lbl">Contrato</span>
-              <select className="inp" value={contratoId} onChange={e => setContratoId(e.target.value)} required>
-                <option value="">Selecione um contrato…</option>
-                {contratos.map(c => <option key={c.id} value={c.id}>{c.propostaCodigo} – {c.clienteNome}</option>)}
-              </select>
-            </label>
-          </Section>
+        {/* Contrato */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Contrato</label>
+          <select
+            value={contratoId}
+            onChange={e => setContratoId(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Selecionar contrato…</option>
+            {contratos.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.propostaCodigo} — {c.clienteNome}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          <Section title="Tipo de Fatura">
-            <div className="flex gap-6">
-              {(['adjudicacao', 'auto'] as FaturaTipo[]).map(t => (
-                <label key={t} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="tipo" value={t} checked={tipo === t} onChange={() => setTipo(t)} />
-                  <span className="text-sm text-gray-700">{t === 'adjudicacao' ? 'Fatura de Adjudicação' : 'Auto de Medição'}</span>
-                </label>
+        {/* Tipo */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Fatura</label>
+          <div className="flex gap-4">
+            {(['adjudicacao', 'auto'] as const).map(t => (
+              <label key={t} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tipo"
+                  value={t}
+                  checked={tipo === t}
+                  onChange={() => setTipo(t)}
+                  className="text-blue-600"
+                />
+                <span className="text-sm">{t === 'adjudicacao' ? 'Adjudicação' : 'Auto de Medição'}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Percentagem Adjudicação */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">% Adjudicação</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              value={percentagemAdj}
+              onChange={e => setPercentagemAdj(Number(e.target.value))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Taxa IVA (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              value={taxaIva}
+              onChange={e => setTaxaIva(Number(e.target.value))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Capítulos (só Auto) */}
+        {tipo === 'auto' && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">Capítulos</label>
+              <button type="button" onClick={addCapitulo} className="text-sm text-blue-600 hover:underline">+ Adicionar</button>
+            </div>
+            <div className="space-y-3">
+              {capitulos.map((cap, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-gray-50 rounded p-2">
+                  <input
+                    placeholder="Cap."
+                    value={cap.capitulo}
+                    onChange={e => updateCapitulo(idx, 'capitulo', e.target.value)}
+                    className="col-span-1 border rounded px-2 py-1 text-xs"
+                  />
+                  <input
+                    placeholder="Descrição"
+                    value={cap.descricao}
+                    onChange={e => updateCapitulo(idx, 'descricao', e.target.value)}
+                    className="col-span-4 border rounded px-2 py-1 text-xs"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Valor contrato"
+                    value={cap.valor_contrato}
+                    onChange={e => updateCapitulo(idx, 'valor_contrato', Number(e.target.value))}
+                    className="col-span-2 border rounded px-2 py-1 text-xs"
+                  />
+                  <input
+                    type="number"
+                    placeholder="% Ant."
+                    value={cap.percentagem_anterior}
+                    onChange={e => updateCapitulo(idx, 'percentagem_anterior', Number(e.target.value))}
+                    className="col-span-2 border rounded px-2 py-1 text-xs"
+                  />
+                  <input
+                    type="number"
+                    placeholder="% Atual"
+                    value={cap.percentagem_atual}
+                    onChange={e => updateCapitulo(idx, 'percentagem_atual', Number(e.target.value))}
+                    className="col-span-2 border rounded px-2 py-1 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCapitulo(idx)}
+                    className="col-span-1 text-red-500 hover:text-red-700 text-xs"
+                  >✕</button>
+                </div>
               ))}
             </div>
-          </Section>
-
-          <Section title="Configuração">
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block">
-                <span className="lbl">% Adjudicação</span>
-                <input type="number" className="inp" value={percentagemAdjudicacao} min={0} max={100} step={0.01}
-                  onChange={e => setPercentagemAdjudicacao(parseFloat(e.target.value))} required />
-              </label>
-              <label className="block">
-                <span className="lbl">Taxa IVA (%)</span>
-                <input type="number" className="inp" value={taxaIva} min={0} max={100} step={0.01}
-                  onChange={e => setTaxaIva(parseFloat(e.target.value))} required />
-              </label>
-            </div>
-          </Section>
-
-          {tipo === 'auto' && (
-            <Section title="Avanço por Capítulo">
-              <div className="space-y-2">
-                {capitulos.map((cap, i) => (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                    <input className="inp col-span-1 text-center" placeholder="Cap." value={cap.capitulo} onChange={e => updateCapitulo(i, 'capitulo', e.target.value)} />
-                    <input className="inp col-span-4" placeholder="Descrição" value={cap.descricao} onChange={e => updateCapitulo(i, 'descricao', e.target.value)} />
-                    <input type="number" className="inp col-span-2" placeholder="Valor €" value={cap.valorContrato || ''} min={0} step={0.01} onChange={e => updateCapitulo(i, 'valorContrato', parseFloat(e.target.value) || 0)} />
-                    <input type="number" className="inp col-span-2" placeholder="% Ant." value={cap.percentagemAnterior || ''} min={0} max={100} step={0.01} onChange={e => updateCapitulo(i, 'percentagemAnterior', parseFloat(e.target.value) || 0)} />
-                    <input type="number" className="inp col-span-2" placeholder="% Atual" value={cap.percentagemAtual || ''} min={0} max={100} step={0.01} onChange={e => updateCapitulo(i, 'percentagemAtual', parseFloat(e.target.value) || 0)} />
-                    <button type="button" onClick={() => removeCapitulo(i)} className="col-span-1 text-gray-400 hover:text-red-500 text-xl leading-none">×</button>
-                  </div>
-                ))}
-                <button type="button" onClick={addCapitulo} className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-1">+ Adicionar capítulo</button>
-              </div>
-            </Section>
-          )}
-
-          <Section title="Notas">
-            <textarea className="inp h-24 resize-none" placeholder="Observações opcionais…" value={notas} onChange={e => setNotas(e.target.value)} />
-          </Section>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Link href="/faturas" className="border border-gray-300 text-gray-700 text-sm font-medium px-5 py-2 rounded-lg hover:border-gray-400 transition-colors">Cancelar</Link>
-            <button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors">
-              {saving ? 'A criar…' : 'Criar Fatura'}
-            </button>
           </div>
-        </form>
-      </div>
+        )}
 
-      <style jsx>{`
-        .lbl { display: block; font-size: 0.75rem; font-weight: 500; color: #6b7280; margin-bottom: 4px; }
-        .inp { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 0.875rem; color: #111827; background: #fff; }
-        .inp:focus { outline: 2px solid #3b82f6; border-color: transparent; }
-      `}</style>
+        {/* Notas */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+          <textarea
+            value={notas}
+            onChange={e => setNotas(e.target.value)}
+            rows={3}
+            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <a href="/faturas" className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">Cancelar</a>
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? 'A guardar…' : 'Criar Fatura'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export default function NovaFaturaPage() {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 className="font-semibold text-gray-800 mb-4">{title}</h2>
-      {children}
-    </div>
+    <Suspense fallback={<div className="p-8 text-gray-500">A carregar…</div>}>
+      <NovaFaturaForm />
+    </Suspense>
   );
 }
