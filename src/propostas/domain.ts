@@ -1,4 +1,4 @@
-export type PropostaEstado = "RASCUNHO" | "EMITIDA";
+export type PropostaEstado = "RASCUNHO" | "EMITIDA" | "APROVADA";
 
 export interface PropostaResumo {
   id: string;
