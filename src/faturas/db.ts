@@ -18,7 +18,7 @@ type CapituloRow = {
 
 function computeValues(row: FaturaRow) {
   const pctAdj = parseFloat(row.percentagem_adjudicacao) || 0;
-  const taxaIva = parseFloat(row.taxa_iva) || 23;
+  const taxaIva = parseFloat(row.taxa_iva) ?? 23;
   const contratoTotal = parseFloat(row.contrato_valor_total) || 0;
   let valorTrabalhosBruto = 0, descontoAdjudicacao = 0, valorBase = 0;
   if (row.tipo === 'adjudicacao') {
