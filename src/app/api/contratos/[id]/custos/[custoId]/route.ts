@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-
+import { pool } from '@/lib/db';
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string; custoId: string }> },
