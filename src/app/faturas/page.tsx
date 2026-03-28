@@ -92,9 +92,14 @@ export default function FaturasPage() {
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right">
-                        <Link href={`/faturas/${f.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
-                          Ver →
-                        </Link>
+                        <div className="flex gap-3 justify-end items-center">
+                          <Link href={`/faturas/obra/${f.contratoId}`} className="text-emerald-600 hover:text-emerald-800 font-medium text-sm">
+                            Obra →
+                          </Link>
+                          <Link href={`/faturas/${f.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                            Ver →
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   );
