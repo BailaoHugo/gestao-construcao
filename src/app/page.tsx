@@ -54,6 +54,15 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">FT</span>}
             iconVariant="blue"
           />
+
+          <ModuleCard
+            title="Controlo de Obra"
+            description="Gestão de custos, faturas recebidas, fornecedores e trabalhadores por contrato."
+            actionLabel="Abrir módulo"
+            href="/controlo-obra"
+            icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
+            iconVariant="blue"
+          />
         </section>
       </main>
     </MainLayout>
