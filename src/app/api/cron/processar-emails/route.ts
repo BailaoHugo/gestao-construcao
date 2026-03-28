@@ -103,7 +103,7 @@ export async function GET(req: Request) {
             );
           }
         }
-        if (msg.bodyStructure) scanParts(msg.bodyStructure as Record<string, unknown>);
+        if (msg.bodyStructure) scanParts(msg.bodyStructure as unknown as Record<string, unknown>);
         if (!attachments.length) continue;
 
         for (const att of attachments) {
