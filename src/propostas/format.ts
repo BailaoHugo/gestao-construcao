@@ -16,6 +16,7 @@ export function formatDatePt(iso: string | null | undefined): string {
 }
 
 export function formatEstadoLabel(estado: PropostaEstado): string {
-  return estado === "EMITIDA" ? "Emitida" : "Rascunho";
+    if (estado === "APROVADA") return "Aprovada";
+    return estado === "EMITIDA" ? "Emitida" : "Rascunho";
 }
 
