@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
-
+import { pool } from '@/lib/db';
 async function ensureCustosTable() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS contrato_custos (
