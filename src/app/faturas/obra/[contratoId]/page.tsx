@@ -118,13 +118,13 @@ export default function AvancoObraPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <Link href="/faturas" className="text-gray-400 hover:text-gray-600 text-sm">\u2190 Faturação</Link>
+            <Link href="/faturas" className="text-gray-400 hover:text-gray-600 text-sm">← Faturação</Link>
             <span className="text-gray-300">|</span>
             <h1 className="text-xl font-semibold text-gray-800">Avanço de Obra</h1>
             {contrato && (
               <>
                 <span className="text-gray-300">|</span>
-                <span className="text-sm text-gray-500">{contrato.propostaCodigo} \u2014 {contrato.clienteNome}</span>
+                <span className="text-sm text-gray-500">{contrato.propostaCodigo} — {contrato.clienteNome}</span>
               </>
             )}
           </div>
@@ -200,7 +200,7 @@ export default function AvancoObraPage() {
                             {delta > 0 ? (
                               <span className="text-blue-700">{fmt(valorFaturar)}</span>
                             ) : (
-                              <span className="text-gray-300">\u2014</span>
+                              <span className="text-gray-300">—</span>
                             )}
                           </td>
                         </tr>
