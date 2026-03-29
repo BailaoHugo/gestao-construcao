@@ -69,8 +69,8 @@ export default function FornecedoresPage() {
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">GestÃ£o ConstruÃ§Ã£o</div>
-          <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">â Controlo de Obra</Link>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
+          <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">← Controlo de Obra</Link>
         </header>
 
         <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
@@ -135,7 +135,7 @@ export default function FornecedoresPage() {
                       {!f.ativo && <span className="text-xs bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full">inativo</span>}
                       <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{f.tipo}</span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{[f.nif, f.email, f.telefone].filter(Boolean).join(' Â· ')}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{[f.nif, f.email, f.telefone].filter(Boolean).join(' · ')}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button onClick={() => handleEdit(f)} className="text-xs text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50 transition">Editar</button>
