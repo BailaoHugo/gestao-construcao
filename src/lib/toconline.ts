@@ -306,6 +306,7 @@ export async function syncDespesas(
   let pageNum = 1;
   const pageSize = 100;
 
+  while (true) {
     const filter = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
     const qs = new URLSearchParams({
       filter,
