@@ -313,6 +313,7 @@ export async function syncDespesas(
       'page[number]': String(pageNum),
       'page[size]': String(pageSize),
     });
+    const raw = await tocFetch<unknown>(`/commercial_purchases_documents?${qs}`);
     const data = Array.isArray(raw)
       ? raw
       : ((raw as { data?: unknown[] }).data ?? []);
