@@ -6,7 +6,6 @@ export default function Home() {
   return (
     <MainLayout>
       <TopBar />
-
       <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
         <header className="mb-8 space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
@@ -17,7 +16,6 @@ export default function Home() {
             utilizar.
           </p>
         </header>
-
         <section className="grid gap-5 md:grid-cols-3">
           <ModuleCard
             title="Catálogo"
@@ -27,7 +25,6 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">CT</span>}
             iconVariant="blue"
           />
-
           <ModuleCard
             title="Propostas"
             description="Criar, guardar, consultar e imprimir propostas comerciais."
@@ -36,7 +33,6 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">PR</span>}
             iconVariant="blue"
           />
-
           <ModuleCard
             title="Contratos"
             description="Elaborar e gerir contratos de empreitada e cláusulas contratuais."
@@ -45,7 +41,6 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">CO</span>}
             iconVariant="blue"
           />
-
           <ModuleCard
             title="Faturação"
             description="Faturas de adjudicação e autos de medição mensais."
@@ -54,13 +49,20 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">FT</span>}
             iconVariant="blue"
           />
-
           <ModuleCard
             title="Controlo de Obra"
             description="Gestão de custos, faturas recebidas, fornecedores e trabalhadores por contrato."
             actionLabel="Abrir módulo"
             href="/controlo-obra"
             icon={<span className="text-xs font-semibold tracking-tight">OB</span>}
+            iconVariant="blue"
+          />
+          <ModuleCard
+            title="Clientes"
+            description="Lista de clientes sincronizados do TOConline."
+            actionLabel="Abrir módulo"
+            href="/clientes"
+            icon={<span className="text-xs font-semibold tracking-tight">CL</span>}
             iconVariant="blue"
           />
         </section>
