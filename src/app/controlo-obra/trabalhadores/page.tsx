@@ -68,8 +68,8 @@ export default function TrabalhadoresPage() {
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">GestÃ£o ConstruÃ§Ã£o</div>
-          <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">â Controlo de Obra</Link>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
+          <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">← Controlo de Obra</Link>
         </header>
 
         <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
@@ -93,7 +93,7 @@ export default function TrabalhadoresPage() {
                   <input value={form.cargo} onChange={e => setForm(f => ({ ...f, cargo: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 mb-1">Custo/Hora (â¬)</label>
+                  <label className="block text-xs text-slate-500 mb-1">Custo/Hora (€)</label>
                   <input type="number" min="0" step="0.01" value={form.custoHora} onChange={e => setForm(f => ({ ...f, custoHora: Number(e.target.value) }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
@@ -126,7 +126,7 @@ export default function TrabalhadoresPage() {
                       {!t.ativo && <span className="text-xs bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full">inativo</span>}
                       {t.cargo && <span className="text-xs text-slate-500">{t.cargo}</span>}
                     </div>
-                    {t.custoHora > 0 && <p className="text-xs text-slate-400 mt-0.5">{t.custoHora.toFixed(2)} â¬/h</p>}
+                    {t.custoHora > 0 && <p className="text-xs text-slate-400 mt-0.5">{t.custoHora.toFixed(2)} €/h</p>}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button onClick={() => handleEdit(t)} className="text-xs text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50 transition">Editar</button>
