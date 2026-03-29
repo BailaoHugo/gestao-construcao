@@ -9,7 +9,7 @@ import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
 import type { ImportLinhaDraft } from "@/lib/propostas/parseImportedLines";
-import { importDraftToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
+import { importDraftToPropostaLinha } fom "@/lib/propostas/importedLineToPropostaLinha";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
@@ -173,12 +173,24 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     handleAddLinhaFromCatalogo(artigo, 1);
   };
 
-  const handleCriarNovaRevisao = () => {
-    // Futuro: criar nova revisÃ£o em Supabase
-    // eslint-disable-next-line no-console
-    console.log("Criar nova revisÃ£o (ainda nÃ£o suportado nesta versÃ£o).");
+    const handleCriarNovaRevisao = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+      const res = await fetch(`/api/propostas/${proposta.id}/revisao`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error ?? 'Falha ao criar nova revisão.');
+      }
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsSaving(false);
+    }
   };
-
   const handleGerarContrato = async () => {
     try {
       setIsSaving(true);
