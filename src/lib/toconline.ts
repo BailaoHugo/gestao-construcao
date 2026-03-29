@@ -35,7 +35,7 @@ export async function getAccessToken(): Promise<string> {
     body: new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-      .toString(),
+    }).toString(),
   });
   if (!resp.ok) {
     const text = await resp.text();
