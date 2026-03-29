@@ -13,6 +13,8 @@ interface Fornecedor {
 }
 
 const EMPTY: Omit<Fornecedor, 'id' | 'ativo'> = { nome: '', nif: '', email: '', telefone: '', tipo: 'fornecedor' };
+const TIPOS = ['todos', 'fornecedor', 'subempreiteiro', 'outro'] as const;
+type TipoFilter = typeof TIPOS[number];
 
 export default function FornecedoresPage() {
   const [list, setList] = useState<Fornecedor[]>([]);
@@ -21,6 +23,7 @@ export default function FornecedoresPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [tipoFilter, setTipoFilter] = useState<TipoFilter>('todos');
 
   const load = () =>
     fetch('/api/fornecedores')
@@ -30,24 +33,23 @@ export default function FornecedoresPage() {
 
   useEffect(() => { load(); }, []);
 
+  const filtered = tipoFilter === 'todos' ? list : list.filter(f => f.tipo === tipoFilter);
+
+  const counts: Record<string, number> = {};
+  for (const f of list) counts[f.tipo] = (counts[f.tipo] ?? 0) + 1;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const method = editing ? 'PUT' : 'POST';
       const url = editing ? `/api/fornecedores/${editing}` : '/api/fornecedores';
-      await fetch(url, {
-        method,
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+      await fetch(url, { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(form) });
       setForm({ ...EMPTY });
       setEditing(null);
       setShowForm(false);
       load();
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
   const handleEdit = (f: Fornecedor) => {
@@ -65,6 +67,13 @@ export default function FornecedoresPage() {
     load();
   };
 
+  const tipoLabel: Record<string, string> = {
+    todos: 'Todos',
+    fornecedor: 'Fornecedores',
+    subempreiteiro: 'Subempreiteiros',
+    outro: 'Outros',
+  };
+
   return (
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
@@ -72,13 +81,26 @@ export default function FornecedoresPage() {
           <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
           <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">← Controlo de Obra</Link>
         </header>
-
         <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Fornecedores</h1>
-            <button onClick={() => { setForm({ ...EMPTY }); setEditing(null); setShowForm(true); }} className="rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700 transition">
+            <button
+              onClick={() => { setForm({ ...EMPTY }); setEditing(null); setShowForm(true); }}
+              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700 transition">
               + Novo Fornecedor
             </button>
+          </div>
+
+          {/* Filtro por tipo */}
+          <div className="mb-6 flex gap-2 flex-wrap">
+            {TIPOS.map(t => (
+              <button
+                key={t}
+                onClick={() => setTipoFilter(t)}
+                className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${tipoFilter === t ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
+                {tipoLabel[t]}{t !== 'todos' && counts[t] ? ` (${counts[t]})` : t === 'todos' && list.length ? ` (${list.length})` : ''}
+              </button>
+            ))}
           </div>
 
           {showForm && (
@@ -87,23 +109,28 @@ export default function FornecedoresPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Nome *</label>
-                  <input required value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+                  <input required value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">NIF</label>
-                  <input value={form.nif ?? ''} onChange={e => setForm(f => ({ ...f, nif: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+                  <input value={form.nif ?? ''} onChange={e => setForm(f => ({ ...f, nif: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Email</label>
-                  <input type="email" value={form.email ?? ''} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+                  <input type="email" value={form.email ?? ''} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Telefone</label>
-                  <input value={form.telefone ?? ''} onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+                  <input value={form.telefone ?? ''} onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
                 </div>
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">Tipo</label>
-                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300">
+                  <select value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300">
                     <option value="fornecedor">Fornecedor</option>
                     <option value="subempreiteiro">Subempreiteiro</option>
                     <option value="outro">Outro</option>
@@ -111,10 +138,12 @@ export default function FornecedoresPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <button type="submit" disabled={saving} className="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition">
+                <button type="submit" disabled={saving}
+                  className="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition">
                   {saving ? 'A guardar...' : editing ? 'Guardar' : 'Criar'}
                 </button>
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="rounded-full border border-slate-200 px-6 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                <button type="button" onClick={() => { setShowForm(false); setEditing(null); }}
+                  className="rounded-full border border-slate-200 px-6 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                   Cancelar
                 </button>
               </div>
@@ -123,11 +152,11 @@ export default function FornecedoresPage() {
 
           {loading ? (
             <p className="text-sm text-slate-400">A carregar...</p>
-          ) : list.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem fornecedores registados.</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-sm text-slate-400">Sem {tipoLabel[tipoFilter].toLowerCase()} registados.</p>
           ) : (
             <div className="divide-y divide-slate-100">
-              {list.map(f => (
+              {filtered.map(f => (
                 <div key={f.id} className="flex items-center justify-between py-4 gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
