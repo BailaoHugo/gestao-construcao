@@ -136,7 +136,9 @@ export async function syncFornecedores(): Promise<{ upserted: number }> {
   console.log('[toconline] suppliers[0]:', JSON.stringify(items[0] ?? null));
   let upserted = 0;
   for (const item of items) {
-    // Auto-classificar: trabalhadores independentes sao tipicamente subempreiteiros
+    // Auto-classificar: trabalhadores independentes sao tipicamente subempreiteiros.
+    // No ON CONFLICT, so atualizamos o tipo se ainda for o valor padrao ('fornecedor'),
+    // para preservar classificacoes manuais feitas pelo utilizador.
     const tipo = item.is_independent_worker === true ? 'subempreiteiro' : 'fornecedor';
     await pool.query(
       `INSERT INTO fornecedores (toconline_id, nome, nif, email, telefone, ativo, tipo, toconline_synced_at)
@@ -147,6 +149,7 @@ export async function syncFornecedores(): Promise<{ upserted: number }> {
          email = EXCLUDED.email,
          telefone = EXCLUDED.telefone,
          ativo = EXCLUDED.ativo,
+         tipo = CASE WHEN fornecedores.tipo = 'fornecedor' THEN EXCLUDED.tipo ELSE fornecedores.tipo END,
          toconline_synced_at = now(),
          atualizado_em = now()`,
       [String(item.id), resolveName(item), resolveNif(item), item.email ?? null, item.phone ?? null, item.active ?? true, tipo],
