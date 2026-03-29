@@ -49,7 +49,7 @@ export default function ControloObraPage() {
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">GestÃ£o ConstruÃ§Ã£o</div>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
           <div className="flex gap-3">
             <Link href="/controlo-obra/faturas" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Faturas</Link>
             <Link href="/controlo-obra/fornecedores" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Fornecedores</Link>
@@ -65,7 +65,7 @@ export default function ControloObraPage() {
           {loading ? (
             <p className="text-sm text-slate-400">A carregar...</p>
           ) : contratos.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem contratos disponÃ­veis.</p>
+            <p className="text-sm text-slate-400">Sem contratos disponíveis.</p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {contratos.map(c => {
