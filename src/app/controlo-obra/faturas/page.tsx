@@ -55,9 +55,9 @@ function FaturasContent() {
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">GestÃ£o ConstruÃ§Ã£o</div>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
           <div className="flex gap-3">
-            <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">â Contratos</Link>
+            <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">← Contratos</Link>
           </div>
         </header>
 
