@@ -77,11 +77,15 @@ function FaturasContent() {
           contratoId: contratoId || undefined,
         }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Erro no upload');
+        if (data.id) {
+          // IA falhou mas fatura foi guardada - redireciona para revisão manual
+          router.push(`/controlo-obra/faturas/${data.id}`);
+          return;
+        }
+        throw new Error(data.error || 'Erro no upload');
       }
-      const data = await res.json();
       router.push(`/controlo-obra/faturas/${data.id}`);
     } catch (err: unknown) {
       setUploadError(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -208,7 +212,7 @@ function FaturasContent() {
                         <p className="text-xs text-slate-400 mt-0.5">Contrato: {f.contratoNumero}</p>
                       )}
                       {f.erroProcessamento && (
-                        <p className="text-xs text-red-500 mt-0.5 truncate">Erro: {f.erroProcessamento}</p>
+                        <p className="text-xs text-amber-600 mt-0.5 truncate">⚠️ Sem leitura automática — classificação manual</p>
                       )}
                     </div>
                     <div className="text-right text-xs text-slate-400 shrink-0">
