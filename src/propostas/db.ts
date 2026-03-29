@@ -798,3 +798,58 @@ export async function createPropostaWithRevisao(
   return { id: propostaId };
 }
 
+export async function criarNovaRevisao(
+  propostaId: string,
+): Promise<{ revisaoId: string; numeroRevisao: number }> {
+  return withTransaction(async (client) => {
+    const res = await client.query<{ id: string; numero_revisao: number }>(
+      `SELECT id, numero_revisao FROM proposta_revisoes
+       WHERE proposta_id = $1
+       ORDER BY numero_revisao DESC LIMIT 1`,
+      [propostaId],
+    );
+    if ((res.rowCount ?? 0) === 0) throw new Error('Proposta não encontrada');
+
+    const { id: sourceRevisaoId, numero_revisao: currentNum } = res.rows[0];
+    const novoNum = currentNum + 1;
+    const novoRevisaoId = randomUUID();
+
+    await client.query(
+      `INSERT INTO proposta_revisoes
+         (id, proposta_id, numero_revisao, estado,
+          data_proposta, validade_texto, total, total_custo, total_venda,
+          margem_valor, margem_percentagem, created_at, updated_at)
+       SELECT $1, proposta_id, $2, 'RASCUNHO',
+              data_proposta, validade_texto, total, total_custo, total_venda,
+              margem_valor, margem_percentagem, now(), now()
+       FROM proposta_revisoes WHERE id = $3`,
+      [novoRevisaoId, novoNum, sourceRevisaoId],
+    );
+
+    await client.query(
+      `INSERT INTO proposta_linhas
+         (id, revisao_id, ordem, origem, artigo_id, codigo_artigo,
+          descricao, unidade, quantidade, preco_unitario, total_linha,
+          preco_custo_unitario, total_custo_linha, preco_venda_unitario,
+          total_venda_linha, grande_capitulo, capitulo, k, observacoes,
+          created_at, updated_at)
+       SELECT gen_random_uuid(), $1, ordem, origem, artigo_id, codigo_artigo,
+              descricao, unidade, quantidade, preco_unitario, total_linha,
+              preco_custo_unitario, total_custo_linha, preco_venda_unitario,
+              total_venda_linha, grande_capitulo, capitulo, k, observacoes,
+              now(), now()
+       FROM proposta_linhas WHERE revisao_id = $2
+       ORDER BY ordem`,
+      [novoRevisaoId, sourceRevisaoId],
+    );
+
+    await client.query(
+      `UPDATE propostas SET estado_atual = 'RASCUNHO', updated_at = now() WHERE id = $1`,
+      [propostaId],
+    );
+
+    return { revisaoId: novoRevisaoId, numeroRevisao: novoNum };
+  });
+}
+
+
