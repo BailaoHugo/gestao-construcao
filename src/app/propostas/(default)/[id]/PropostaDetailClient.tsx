@@ -9,7 +9,7 @@ import LinhasEditor, {
   type CatalogoArtigo,
 } from "@/components/propostas/LinhasEditor";
 import type { ImportLinhaDraft } from "@/lib/propostas/parseImportedLines";
-import { importDraftToPropostaLinha } fom "@/lib/propostas/importedLineToPropostaLinha";
+import { importDraftToPropostaLinha } from "@/lib/propostas/importedLineToPropostaLinha";
 import { MariaPanel } from "@/components/propostas/MariaPanel";
 import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPanel";
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
