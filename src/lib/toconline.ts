@@ -307,13 +307,12 @@ export async function syncDespesas(
   const pageSize = 100;
 
   while (true) {
-    const filter = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
-    const qs = new URLSearchParams({
-      filter,
+    const filterExpr = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
+    const paginationQs = new URLSearchParams({
       'page[number]': String(pageNum),
       'page[size]': String(pageSize),
     });
-    const raw = await tocFetch<unknown>(`/commercial_purchases_documents?${qs}`);
+    const raw = await tocFetch<unknown>(`/commercial_purchases_documents?filter="${filterExpr}"&${paginationQs}`);
     const data = Array.isArray(raw)
       ? raw
       : ((raw as { data?: unknown[] }).data ?? []);
