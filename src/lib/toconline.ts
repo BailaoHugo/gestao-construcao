@@ -24,14 +24,18 @@ export async function getAccessToken(): Promise<string> {
     );
   }
 
-  const credentials = Buffer.from(`${clientId}:${secret}`).toString('base64');
+  const body = new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: clientId,
+    client_secret: secret,
+  }).toString();
   const resp = await fetch(`${oauthUrl}/token`, {
     method: 'POST',
     headers: {
-      Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
     },
-    body: 'grant_type=client_credentials',
+    body,
   });
 
   if (!resp.ok) {
