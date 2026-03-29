@@ -252,3 +252,147 @@ export function isConfigured(): boolean {
       process.env.TOCONLINE_REFRESH_TOKEN)
   );
 }
+// -- Despesas (Documentos de Compra) -----------------------------------------
+
+export interface TocDespesa {
+  id: string;
+  document_no?: string | null;
+  document_type?: string | null;
+  status?: number | null;
+  date?: string | null;
+  due_date?: string | null;
+  gross_total?: number | null;
+  net_total?: number | null;
+  tax_payable?: number | null;
+  pending_total?: number | null;
+  supplier_business_name?: string | null;
+  supplier_tax_registration_number?: string | null;
+  external_reference?: string | null;
+  notes?: string | null;
+  currency_iso_code?: string | null;
+  synced_at?: string | null;
+}
+
+const CREATE_DESPESAS_TABLE = `
+  CREATE TABLE IF NOT EXISTS despesas (
+    id            SERIAL PRIMARY KEY,
+    toconline_id  TEXT UNIQUE NOT NULL,
+    document_no   TEXT,
+    document_type TEXT,
+    status        INTEGER,
+    date          DATE,
+    due_date      DATE,
+    gross_total   NUMERIC(12,2),
+    net_total     NUMERIC(12,2),
+    tax_payable   NUMERIC(12,2),
+    pending_total NUMERIC(12,2),
+    supplier_nome TEXT,
+    supplier_nif  TEXT,
+    external_ref  TEXT,
+    notes         TEXT,
+    currency      TEXT DEFAULT 'EUR',
+    synced_at     TIMESTAMP DEFAULT now(),
+    criado_em     TIMESTAMP DEFAULT now()
+  )
+`;
+
+export async function syncDespesas(
+  startDate: string,
+  endDate: string,
+): Promise<{ upserted: number; pages: number }> {
+  await pool.query(CREATE_DESPESAS_TABLE);
+
+  let upserted = 0;
+  let pageNum = 1;
+  const pageSize = 100;
+
+  while (true) {
+    const qs = new URLSearchParams({
+      'filter[date_gteq]': startDate,
+      'filter[date_lteq]': endDate,
+      'page[number]': String(pageNum),
+      'page[size]': String(pageSize),
+    });
+    const raw = await tocFetch<unknown>(`/commercial_purchases_documents?${qs}`);
+    const data = Array.isArray(raw)
+      ? raw
+      : ((raw as { data?: unknown[] }).data ?? []);
+    const items = data.map(normalizeItem) as TocDespesa[];
+
+    for (const item of items) {
+      await pool.query(
+        `INSERT INTO despesas (
+          toconline_id, document_no, document_type, status, date, due_date,
+          gross_total, net_total, tax_payable, pending_total,
+          supplier_nome, supplier_nif, external_ref, notes, currency, synced_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,now())
+        ON CONFLICT (toconline_id) DO UPDATE SET
+          document_no   = EXCLUDED.document_no,
+          document_type = EXCLUDED.document_type,
+          status        = EXCLUDED.status,
+          date          = EXCLUDED.date,
+          due_date      = EXCLUDED.due_date,
+          gross_total   = EXCLUDED.gross_total,
+          net_total     = EXCLUDED.net_total,
+          tax_payable   = EXCLUDED.tax_payable,
+          pending_total = EXCLUDED.pending_total,
+          supplier_nome = EXCLUDED.supplier_nome,
+          supplier_nif  = EXCLUDED.supplier_nif,
+          external_ref  = EXCLUDED.external_ref,
+          notes         = EXCLUDED.notes,
+          currency      = EXCLUDED.currency,
+          synced_at     = now()`,
+        [
+          String(item.id),
+          item.document_no ?? null,
+          item.document_type ?? null,
+          item.status ?? null,
+          item.date ?? null,
+          item.due_date ?? null,
+          item.gross_total ?? null,
+          item.net_total ?? null,
+          item.tax_payable ?? null,
+          item.pending_total ?? null,
+          item.supplier_business_name ?? null,
+          item.supplier_tax_registration_number ?? null,
+          item.external_reference ?? null,
+          item.notes ?? null,
+          item.currency_iso_code ?? 'EUR',
+        ],
+      );
+      upserted++;
+    }
+
+    if (items.length < pageSize) break;
+    pageNum++;
+  }
+
+  return { upserted, pages: pageNum };
+}
+
+export async function loadDespesas(
+  startDate: string,
+  endDate: string,
+): Promise<TocDespesa[]> {
+  try {
+    const { rows } = await pool.query(
+      `SELECT toconline_id AS id, document_no, document_type, status,
+              to_char(date, 'YYYY-MM-DD') AS date,
+              to_char(due_date, 'YYYY-MM-DD') AS due_date,
+              gross_total, net_total, tax_payable, pending_total,
+              supplier_nome AS supplier_business_name,
+              supplier_nif  AS supplier_tax_registration_number,
+              external_ref  AS external_reference,
+              notes, currency AS currency_iso_code,
+              to_char(synced_at, 'YYYY-MM-DD HH24:MI') AS synced_at
+       FROM despesas
+       WHERE date BETWEEN $1 AND $2
+       ORDER BY date DESC, document_no`,
+      [startDate, endDate],
+    );
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
