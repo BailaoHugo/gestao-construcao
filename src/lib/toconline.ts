@@ -62,12 +62,16 @@ function normalizeItem(item: any): any {
 
 export interface TocFornecedor {
   id: string | number;
+  business_name?: string;
+  tax_registration_number?: string;
   name?: string; nome?: string;
   tax_id?: string; nif?: string;
   email?: string; phone?: string; active?: boolean;
 }
 export interface TocCliente {
   id: string | number;
+  business_name?: string;
+  tax_registration_number?: string;
   name?: string; nome?: string;
   tax_id?: string; nif?: string;
   email?: string; phone?: string; active?: boolean;
@@ -86,11 +90,11 @@ function extractArray<T>(data: T[] | { data: T[] } | { items: T[] }): T[] {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function resolveName(item: any): string {
-  return item.nome || item.name || item.designation || item.designacao || 'Desconhecido';
+  return item.business_name || item.nome || item.name || item.designation || item.designacao || 'Desconhecido';
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function resolveNif(item: any): string | null {
-  return item.nif ?? item.tax_id ?? item.vat_number ?? null;
+  return item.tax_registration_number ?? item.nif ?? item.tax_id ?? item.vat_number ?? null;
 }
 
 // -- Sync Fornecedores -----------------------------------------------------------
