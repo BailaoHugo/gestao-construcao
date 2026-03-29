@@ -13,7 +13,7 @@ import {
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-// ── Fornecedores ─────────────────────────────────────────────────────────────
+// ââ Fornecedores âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export async function loadFornecedores(ativo?: boolean): Promise<Fornecedor[]> {
   const conditions: string[] = [];
@@ -87,7 +87,7 @@ export async function updateFornecedor(
   return rows[0] ?? null;
 }
 
-// ── Trabalhadores ─────────────────────────────────────────────────────────────
+// ââ Trabalhadores âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export async function loadTrabalhadores(ativo?: boolean): Promise<Trabalhador[]> {
   const conditions: string[] = [];
@@ -150,7 +150,7 @@ export async function updateTrabalhador(
   return rows[0] ?? null;
 }
 
-// ── Faturas Recebidas ─────────────────────────────────────────────────────────
+// ââ Faturas Recebidas âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export async function loadFaturasRecebidas(estado?: FaturaRecebidaEstado): Promise<FaturaRecebida[]> {
   const values: unknown[] = [];
@@ -166,17 +166,18 @@ export async function loadFaturasRecebidas(estado?: FaturaRecebidaEstado): Promi
             fr.processado_em AS "processadoEm", fr.erro_processamento AS "erroProcessamento",
             fr.notas, fr.criado_em AS "criadoEm",
             f.nome AS "fornecedorNome",
-            c.numero AS "contratoNumero", c.designacao AS "contratoDesignacao"
+            p.codigo AS "contratoNumero", p.cliente_nome AS "contratoDesignacao"
      FROM faturas_recebidas fr
      LEFT JOIN fornecedores f ON f.id = fr.fornecedor_id
      LEFT JOIN contratos c ON c.id = fr.contrato_id
+    LEFT JOIN propostas p ON p.id = c.proposta_id
      ${where}
      ORDER BY fr.criado_em DESC`,
     values,
   );
   return rows.map(r => ({
     ...r,
-    contratoInfo: r.contratoNumero ? `${r.contratoNumero} – ${r.contratoDesignacao}` : null,
+    contratoInfo: r.contratoNumero ? `${r.contratoNumero} â ${r.contratoDesignacao}` : null,
   }));
 }
 
@@ -192,16 +193,17 @@ export async function loadFaturaRecebida(id: string): Promise<FaturaRecebida | n
             fr.processado_em AS "processadoEm", fr.erro_processamento AS "erroProcessamento",
             fr.notas, fr.criado_em AS "criadoEm",
             f.nome AS "fornecedorNome",
-            c.numero AS "contratoNumero", c.designacao AS "contratoDesignacao"
+            p.codigo AS "contratoNumero", p.cliente_nome AS "contratoDesignacao"
      FROM faturas_recebidas fr
      LEFT JOIN fornecedores f ON f.id = fr.fornecedor_id
      LEFT JOIN contratos c ON c.id = fr.contrato_id
+    LEFT JOIN propostas p ON p.id = c.proposta_id
      WHERE fr.id = $1`,
     [id],
   );
   if (!rows[0]) return null;
   const r = rows[0];
-  return { ...r, contratoInfo: r.contratoNumero ? `${r.contratoNumero} – ${r.contratoDesignacao}` : null };
+  return { ...r, contratoInfo: r.contratoNumero ? `${r.contratoNumero} â ${r.contratoDesignacao}` : null };
 }
 
 export async function updateFaturaRecebida(
@@ -233,7 +235,7 @@ export async function updateFaturaRecebida(
   return loadFaturaRecebida(id);
 }
 
-// ── Custos de Obra ────────────────────────────────────────────────────────────
+// ââ Custos de Obra ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export async function loadCustosObra(contratoId: string): Promise<CustoObra[]> {
   const { rows } = await pool.query(
