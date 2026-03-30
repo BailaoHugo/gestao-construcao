@@ -26,3 +26,4 @@ export async function GET(req: NextRequest) {
   const data = await resp.json();
   return NextResponse.json({ status: resp.status, data });
 }
+// updated credentials
