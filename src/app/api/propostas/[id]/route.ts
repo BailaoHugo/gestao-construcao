@@ -2,6 +2,7 @@ import { lookup } from "node:dns/promises";
 import { NextResponse, type NextRequest } from "next/server";
 import type { PropostaFolhaRosto, PropostaLinha } from "@/propostas/domain";
 import { loadPropostaCompleta, updatePropostaWithRevisao } from "@/propostas/db";
+import { pool } from "@/lib/db";
 
 function getDbHostname(): string | null {
   const u = process.env.DATABASE_URL;
@@ -93,3 +94,33 @@ export async function PUT(
   }
 }
 
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        'DELETE FROM proposta_linhas WHERE revisao_id IN (SELECT id FROM proposta_revisoes WHERE proposta_id = $1)',
+        [id]
+      );
+      await client.query('DELETE FROM proposta_revisoes WHERE proposta_id = $1', [id]);
+      await client.query('DELETE FROM propostas WHERE id = $1', [id]);
+      await client.query('COMMIT');
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[api/propostas/[id]] DELETE error:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
