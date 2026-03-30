@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
@@ -23,12 +22,12 @@ interface Despesa {
 }
 
 function fmt(n: number | null | undefined) {
-  if (n === null || n === undefined) return '\u2014';
+  if (n === null || n === undefined) return '—';
   return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(Number(n));
 }
 
 function fmtDate(d: string | null) {
-  if (!d) return '\u2014';
+  if (!d) return '—';
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-PT');
 }
 
@@ -41,8 +40,8 @@ const STATUS_LABELS: Record<number, string> = {
 const DOC_TYPE_LABELS: Record<string, string> = {
   FC: 'Fatura Compra',
   DSP: 'Despesa',
-  NC: 'Nota Cr\u00e9dito',
-  ND: 'Nota D\u00e9bito',
+  NC: 'Nota Crédito',
+  ND: 'Nota Débito',
 };
 
 export default function DespesasPage() {
@@ -51,7 +50,7 @@ export default function DespesasPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [startDate, setStartDate] = useState('2026-01-01');
-  const [endDate, setEndDate] = useState('2026-01-31');
+  const [endDate, setEndDate] = useState('2026-12-31');
 
   const load = () => {
     setLoading(true);
@@ -73,30 +72,27 @@ export default function DespesasPage() {
         body: JSON.stringify({ startDate, endDate }),
       });
       const d = await r.json();
-      setSyncMsg(d.ok
-        ? `\u2713 Sincronizado: ${d.upserted} documentos importados`
-        : `Erro: ${d.error}`);
+      setSyncMsg(d.ok ? `✓ Sincronizado: ${d.upserted} documentos importados` : `Erro: ${d.error}`);
       if (d.ok) load();
     } finally {
       setSyncing(false);
     }
   };
 
-  const totalGross   = list.reduce((s, d) => s + (Number(d.gross_total)   || 0), 0);
-  const totalNet     = list.reduce((s, d) => s + (Number(d.net_total)     || 0), 0);
-  const totalVat     = list.reduce((s, d) => s + (Number(d.tax_payable)   || 0), 0);
+  const totalGross = list.reduce((s, d) => s + (Number(d.gross_total) || 0), 0);
+  const totalNet = list.reduce((s, d) => s + (Number(d.net_total) || 0), 0);
+  const totalVat = list.reduce((s, d) => s + (Number(d.tax_payable) || 0), 0);
   const totalPending = list.reduce((s, d) => s + (Number(d.pending_total) || 0), 0);
 
   return (
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">Gest\u00e3o Constru\u00e7\u00e3o</div>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
           <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
-            \u2190 Controlo de Obra
+            ← Controlo de Obra
           </Link>
         </header>
-
         <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -106,40 +102,25 @@ export default function DespesasPage() {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <label className="text-xs text-slate-500">De</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-300"
-                />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-300" />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">At\u00e9</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-300"
-                />
+                <label className="text-xs text-slate-500">Até</label>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-slate-300" />
               </div>
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition"
-              >
-                {syncing ? 'A sincronizar...' : '\u21bb Sincronizar TOConline'}
+              <button onClick={handleSync} disabled={syncing}
+                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition">
+                {syncing ? 'A sincronizar...' : '↻ Sincronizar TOConline'}
               </button>
             </div>
           </div>
-
           {syncMsg && (
-            <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${
-              syncMsg.startsWith('Erro') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
-            }`}>
+            <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${syncMsg.startsWith('Erro') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
               {syncMsg}
             </div>
           )}
-
           {list.length > 0 && (
             <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
               {[
@@ -155,14 +136,13 @@ export default function DespesasPage() {
               ))}
             </div>
           )}
-
           {loading ? (
             <p className="text-sm text-slate-400">A carregar...</p>
           ) : list.length === 0 ? (
             <div className="rounded-xl bg-slate-50 px-6 py-10 text-center">
-              <p className="text-sm text-slate-500">Sem despesas para o per\u00edodo selecionado.</p>
+              <p className="text-sm text-slate-500">Sem despesas para o período selecionado.</p>
               <p className="mt-2 text-xs text-slate-400">
-                Use &ldquo;\u21bb Sincronizar TOConline&rdquo; para importar os documentos de compra.
+                Use &ldquo;↻ Sincronizar TOConline&rdquo; para importar os documentos de compra.
               </p>
             </div>
           ) : (
@@ -186,16 +166,16 @@ export default function DespesasPage() {
                     <tr key={d.id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3 pr-4 text-xs text-slate-500 whitespace-nowrap">{fmtDate(d.date)}</td>
                       <td className="py-3 pr-4">
-                        <div className="text-xs font-medium text-slate-800">{d.document_no ?? '\u2014'}</div>
+                        <div className="text-xs font-medium text-slate-800">{d.document_no ?? '—'}</div>
                         {d.external_reference && (
                           <div className="text-xs text-slate-400">{d.external_reference}</div>
                         )}
                       </td>
                       <td className="py-3 pr-4 text-xs text-slate-500 whitespace-nowrap">
-                        {DOC_TYPE_LABELS[d.document_type ?? ''] ?? d.document_type ?? '\u2014'}
+                        {DOC_TYPE_LABELS[d.document_type ?? ''] ?? d.document_type ?? '—'}
                       </td>
                       <td className="py-3 pr-4">
-                        <div className="text-xs text-slate-700">{d.supplier_business_name ?? '\u2014'}</div>
+                        <div className="text-xs text-slate-700">{d.supplier_business_name ?? '—'}</div>
                         {d.supplier_tax_registration_number && (
                           <div className="text-xs text-slate-400">NIF {d.supplier_tax_registration_number}</div>
                         )}
@@ -209,18 +189,14 @@ export default function DespesasPage() {
                           d.status === 2 ? 'bg-amber-50 text-amber-600' :
                           'bg-slate-100 text-slate-500'
                         }`}>
-                          {STATUS_LABELS[d.status ?? 0] ?? String(d.status ?? '\u2014')}
+                          {STATUS_LABELS[d.status ?? 0] ?? String(d.status ?? '—')}
                         </span>
                       </td>
                       <td className="py-3 pl-4 text-center">
-                        <a
-                          href={`/api/despesas/${d.id}/pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <a href={`/api/despesas/${d.id}/pdf`} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition"
-                          title="Abrir fatura PDF"
-                        >
-                          \ud83d\udcc4 Ver
+                          title="Abrir fatura PDF">
+                          📄 Ver
                         </a>
                       </td>
                     </tr>
