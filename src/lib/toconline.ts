@@ -135,22 +135,15 @@ export async function syncFornecedores(): Promise<{ upserted: number }> {
   console.log('[toconline] suppliers[0]:', JSON.stringify(items[0] ?? null));
   let upserted = 0;
   for (const item of items) {
-    // Auto-classificar: trabalhadores independentes sao tipicamente subempreiteiros.
-    // No ON CONFLICT, so atualizamos o tipo se ainda for o valor padrao ('fornecedor'),
-    // para preservar classificacoes manuais feitas pelo utilizador.
     const tipo = item.is_independent_worker === true ? 'subempreiteiro' : 'fornecedor';
     await pool.query(
       `INSERT INTO fornecedores (toconline_id, nome, nif, email, telefone, ativo, tipo, toconline_synced_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, now())
        ON CONFLICT (toconline_id) DO UPDATE SET
-         nome = EXCLUDED.nome,
-         nif = EXCLUDED.nif,
-         email = EXCLUDED.email,
-         telefone = EXCLUDED.telefone,
-         ativo = EXCLUDED.ativo,
+         nome = EXCLUDED.nome, nif = EXCLUDED.nif, email = EXCLUDED.email,
+         telefone = EXCLUDED.telefone, ativo = EXCLUDED.ativo,
          tipo = CASE WHEN fornecedores.tipo = 'fornecedor' THEN EXCLUDED.tipo ELSE fornecedores.tipo END,
-         toconline_synced_at = now(),
-         atualizado_em = now()`,
+         toconline_synced_at = now(), atualizado_em = now()`,
       [String(item.id), resolveName(item), resolveNif(item), item.email ?? null, item.phone ?? null, item.active ?? true, tipo],
     );
     upserted++;
@@ -170,12 +163,8 @@ export async function syncClientes(): Promise<{ upserted: number }> {
       `INSERT INTO toconline_clientes (toconline_id, nome, nif, email, telefone, ativo, synced_at)
        VALUES ($1, $2, $3, $4, $5, $6, now())
        ON CONFLICT (toconline_id) DO UPDATE SET
-         nome = EXCLUDED.nome,
-         nif = EXCLUDED.nif,
-         email = EXCLUDED.email,
-         telefone = EXCLUDED.telefone,
-         ativo = EXCLUDED.ativo,
-         synced_at = now()`,
+         nome = EXCLUDED.nome, nif = EXCLUDED.nif, email = EXCLUDED.email,
+         telefone = EXCLUDED.telefone, ativo = EXCLUDED.ativo, synced_at = now()`,
       [String(item.id), resolveName(item), resolveNif(item), item.email ?? null, item.phone ?? null, item.active ?? true],
     );
     upserted++;
@@ -195,10 +184,8 @@ export async function syncCentrosCusto(): Promise<{ upserted: number; skipped?: 
         `INSERT INTO centros_custo (toconline_id, codigo, designacao, ativo, synced_at)
          VALUES ($1, $2, $3, $4, now())
          ON CONFLICT (toconline_id) DO UPDATE SET
-           codigo = EXCLUDED.codigo,
-           designacao = EXCLUDED.designacao,
-           ativo = EXCLUDED.ativo,
-           synced_at = now()`,
+           codigo = EXCLUDED.codigo, designacao = EXCLUDED.designacao,
+           ativo = EXCLUDED.ativo, synced_at = now()`,
         [String(item.id), item.code ?? String(item.id), resolveName(item), item.active ?? true],
       );
       upserted++;
@@ -227,11 +214,8 @@ export async function runFullSync(): Promise<SyncResults> {
     ['centros_custo', syncCentrosCusto],
   ];
   for (const [key, fn] of tasks) {
-    try {
-      results[key] = await fn();
-    } catch (e) {
-      results[key] = { error: (e as Error).message };
-    }
+    try { results[key] = await fn(); }
+    catch (e) { results[key] = { error: (e as Error).message }; }
   }
   const hasErrors = Object.values(results).some(r => 'error' in r);
   await pool.query(
@@ -246,12 +230,11 @@ export async function runFullSync(): Promise<SyncResults> {
 export function isConfigured(): boolean {
   return !!(
     process.env.TOCONLINE_ACCESS_TOKEN ||
-    (process.env.TOCONLINE_CLIENT_ID &&
-      process.env.TOCONLINE_SECRET &&
-      process.env.TOCONLINE_OAUTH_URL &&
-      process.env.TOCONLINE_REFRESH_TOKEN)
+    (process.env.TOCONLINE_CLIENT_ID && process.env.TOCONLINE_SECRET &&
+     process.env.TOCONLINE_OAUTH_URL && process.env.TOCONLINE_REFRESH_TOKEN)
   );
 }
+
 // -- Despesas (Documentos de Compra) -----------------------------------------
 
 export interface TocDespesa {
@@ -271,12 +254,16 @@ export interface TocDespesa {
   notes?: string | null;
   currency_iso_code?: string | null;
   synced_at?: string | null;
+  centro_custo?: string | null;
+  arquivo_url?: string | null;
+  arquivo_nome?: string | null;
+  origem?: string | null;
 }
 
 const CREATE_DESPESAS_TABLE = `
   CREATE TABLE IF NOT EXISTS despesas (
     id            SERIAL PRIMARY KEY,
-    toconline_id  TEXT UNIQUE NOT NULL,
+    toconline_id  TEXT UNIQUE,
     document_no   TEXT,
     document_type TEXT,
     status        INTEGER,
@@ -291,16 +278,33 @@ const CREATE_DESPESAS_TABLE = `
     external_ref  TEXT,
     notes         TEXT,
     currency      TEXT DEFAULT 'EUR',
+    centro_custo  TEXT,
+    arquivo_url   TEXT,
+    arquivo_nome  TEXT,
+    origem        TEXT DEFAULT 'toconline',
     synced_at     TIMESTAMP DEFAULT now(),
     criado_em     TIMESTAMP DEFAULT now()
   )
 `;
 
+export async function migrateDespesas(): Promise<void> {
+  await pool.query(CREATE_DESPESAS_TABLE);
+  // Idempotent: add new columns to existing tables
+  await pool.query(`
+    ALTER TABLE despesas
+      ADD COLUMN IF NOT EXISTS centro_custo TEXT,
+      ADD COLUMN IF NOT EXISTS arquivo_url  TEXT,
+      ADD COLUMN IF NOT EXISTS arquivo_nome TEXT,
+      ADD COLUMN IF NOT EXISTS origem       TEXT DEFAULT 'toconline'
+  `);
+  await pool.query(`UPDATE despesas SET origem = 'toconline' WHERE origem IS NULL`);
+}
+
 export async function syncDespesas(
   startDate: string,
   endDate: string,
 ): Promise<{ upserted: number; pages: number }> {
-  await pool.query(CREATE_DESPESAS_TABLE);
+  await migrateDespesas();
 
   let upserted = 0;
   let pageNum = 1;
@@ -313,9 +317,7 @@ export async function syncDespesas(
       'page[size]': String(pageSize),
     });
     const raw = await tocFetch<unknown>(`/commercial_purchases_documents?filter="${filterExpr}"&${paginationQs}`);
-    const data = Array.isArray(raw)
-      ? raw
-      : ((raw as { data?: unknown[] }).data ?? []);
+    const data = Array.isArray(raw) ? raw : ((raw as { data?: unknown[] }).data ?? []);
     const items = data.map(normalizeItem) as TocDespesa[];
 
     for (const item of items) {
@@ -323,8 +325,9 @@ export async function syncDespesas(
         `INSERT INTO despesas (
           toconline_id, document_no, document_type, status, date, due_date,
           gross_total, net_total, tax_payable, pending_total,
-          supplier_nome, supplier_nif, external_ref, notes, currency, synced_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,now())
+          supplier_nome, supplier_nif, external_ref, notes, currency,
+          origem, synced_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'toconline',now())
         ON CONFLICT (toconline_id) DO UPDATE SET
           document_no   = EXCLUDED.document_no,
           document_type = EXCLUDED.document_type,
@@ -375,15 +378,19 @@ export async function loadDespesas(
 ): Promise<TocDespesa[]> {
   try {
     const { rows } = await pool.query(
-      `SELECT toconline_id AS id, document_no, document_type, status,
-              to_char(date, 'YYYY-MM-DD') AS date,
-              to_char(due_date, 'YYYY-MM-DD') AS due_date,
-              gross_total, net_total, tax_payable, pending_total,
-              supplier_nome AS supplier_business_name,
-              supplier_nif  AS supplier_tax_registration_number,
-              external_ref  AS external_reference,
-              notes, currency AS currency_iso_code,
-              to_char(synced_at, 'YYYY-MM-DD HH24:MI') AS synced_at
+      `SELECT
+          toconline_id                              AS id,
+          document_no, document_type, status,
+          to_char(date,     'YYYY-MM-DD')           AS date,
+          to_char(due_date, 'YYYY-MM-DD')           AS due_date,
+          gross_total, net_total, tax_payable, pending_total,
+          supplier_nome  AS supplier_business_name,
+          supplier_nif   AS supplier_tax_registration_number,
+          external_ref   AS external_reference,
+          notes,
+          currency       AS currency_iso_code,
+          centro_custo, arquivo_url, arquivo_nome, origem,
+          to_char(synced_at, 'YYYY-MM-DD HH24:MI')  AS synced_at
        FROM despesas
        WHERE date BETWEEN $1 AND $2
        ORDER BY date DESC, document_no`,
@@ -394,4 +401,3 @@ export async function loadDespesas(
     return [];
   }
 }
-
