@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { loadContratoCompleto, updateContrato } from "@/contratos/db";
 import type { ContratoEstado, ClausulaContrato } from "@/contratos/domain";
+import { pool } from "@/lib/db";
 
 export async function GET(
   _req: NextRequest,
@@ -84,6 +85,33 @@ export async function PATCH(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[api/contratos/[id]] PATCH error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM contrato_avancos WHERE contrato_id = $1', [id]);
+      await client.query('DELETE FROM contrato_custos WHERE contrato_id = $1', [id]);
+      await client.query('DELETE FROM contratos WHERE id = $1', [id]);
+      await client.query('COMMIT');
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[api/contratos/[id]] DELETE error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
