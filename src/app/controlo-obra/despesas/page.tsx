@@ -23,12 +23,12 @@ interface Despesa {
 }
 
 function fmt(n: number | null | undefined) {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '\u2014';
   return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(Number(n));
 }
 
 function fmtDate(d: string | null) {
-  if (!d) return '—';
+  if (!d) return '\u2014';
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-PT');
 }
 
@@ -41,8 +41,8 @@ const STATUS_LABELS: Record<number, string> = {
 const DOC_TYPE_LABELS: Record<string, string> = {
   FC: 'Fatura Compra',
   DSP: 'Despesa',
-  NC: 'Nota Crédito',
-  ND: 'Nota Débito',
+  NC: 'Nota Cr\u00e9dito',
+  ND: 'Nota D\u00e9bito',
 };
 
 export default function DespesasPage() {
@@ -74,7 +74,7 @@ export default function DespesasPage() {
       });
       const d = await r.json();
       setSyncMsg(d.ok
-        ? `✓ Sincronizado: ${d.upserted} documentos importados`
+        ? `\u2713 Sincronizado: ${d.upserted} documentos importados`
         : `Erro: ${d.error}`);
       if (d.ok) load();
     } finally {
@@ -91,9 +91,9 @@ export default function DespesasPage() {
     <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
+          <div className="text-sm font-semibold tracking-wide text-slate-800">Gest\u00e3o Constru\u00e7\u00e3o</div>
           <Link href="/controlo-obra" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
-            ← Controlo de Obra
+            \u2190 Controlo de Obra
           </Link>
         </header>
 
@@ -114,7 +114,7 @@ export default function DespesasPage() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">Até</label>
+                <label className="text-xs text-slate-500">At\u00e9</label>
                 <input
                   type="date"
                   value={endDate}
@@ -127,7 +127,7 @@ export default function DespesasPage() {
                 disabled={syncing}
                 className="rounded-full bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition"
               >
-                {syncing ? 'A sincronizar...' : '↻ Sincronizar TOConline'}
+                {syncing ? 'A sincronizar...' : '\u21bb Sincronizar TOConline'}
               </button>
             </div>
           </div>
@@ -160,9 +160,9 @@ export default function DespesasPage() {
             <p className="text-sm text-slate-400">A carregar...</p>
           ) : list.length === 0 ? (
             <div className="rounded-xl bg-slate-50 px-6 py-10 text-center">
-              <p className="text-sm text-slate-500">Sem despesas para o período selecionado.</p>
+              <p className="text-sm text-slate-500">Sem despesas para o per\u00edodo selecionado.</p>
               <p className="mt-2 text-xs text-slate-400">
-                Use &ldquo;↻ Sincronizar TOConline&rdquo; para importar os documentos de compra.
+                Use &ldquo;\u21bb Sincronizar TOConline&rdquo; para importar os documentos de compra.
               </p>
             </div>
           ) : (
@@ -178,6 +178,7 @@ export default function DespesasPage() {
                     <th className="pb-3 text-right text-xs font-medium text-slate-400 pr-4">IVA</th>
                     <th className="pb-3 text-right text-xs font-medium text-slate-400 pr-2">Total</th>
                     <th className="pb-3 text-center text-xs font-medium text-slate-400">Estado</th>
+                    <th className="pb-3 text-center text-xs font-medium text-slate-400 pl-4">Anexo</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -185,16 +186,16 @@ export default function DespesasPage() {
                     <tr key={d.id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3 pr-4 text-xs text-slate-500 whitespace-nowrap">{fmtDate(d.date)}</td>
                       <td className="py-3 pr-4">
-                        <div className="text-xs font-medium text-slate-800">{d.document_no ?? '—'}</div>
+                        <div className="text-xs font-medium text-slate-800">{d.document_no ?? '\u2014'}</div>
                         {d.external_reference && (
                           <div className="text-xs text-slate-400">{d.external_reference}</div>
                         )}
                       </td>
                       <td className="py-3 pr-4 text-xs text-slate-500 whitespace-nowrap">
-                        {DOC_TYPE_LABELS[d.document_type ?? ''] ?? d.document_type ?? '—'}
+                        {DOC_TYPE_LABELS[d.document_type ?? ''] ?? d.document_type ?? '\u2014'}
                       </td>
                       <td className="py-3 pr-4">
-                        <div className="text-xs text-slate-700">{d.supplier_business_name ?? '—'}</div>
+                        <div className="text-xs text-slate-700">{d.supplier_business_name ?? '\u2014'}</div>
                         {d.supplier_tax_registration_number && (
                           <div className="text-xs text-slate-400">NIF {d.supplier_tax_registration_number}</div>
                         )}
@@ -208,8 +209,19 @@ export default function DespesasPage() {
                           d.status === 2 ? 'bg-amber-50 text-amber-600' :
                           'bg-slate-100 text-slate-500'
                         }`}>
-                          {STATUS_LABELS[d.status ?? 0] ?? String(d.status ?? '—')}
+                          {STATUS_LABELS[d.status ?? 0] ?? String(d.status ?? '\u2014')}
                         </span>
+                      </td>
+                      <td className="py-3 pl-4 text-center">
+                        <a
+                          href={`/api/despesas/${d.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition"
+                          title="Abrir fatura PDF"
+                        >
+                          \ud83d\udcc4 Ver
+                        </a>
                       </td>
                     </tr>
                   ))}
