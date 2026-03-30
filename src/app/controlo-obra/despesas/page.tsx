@@ -227,7 +227,7 @@ export default function DespesasPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {filtered.map(d => (
-                    <tr key={d.id ?? (d.supplier_business_name + d.date)} className="hover:bg-slate-50/60 transition">
+                    <tr key={d.id ?? ((d.supplier_business_name ?? '') + d.date)} className="hover:bg-slate-50/60 transition">
                       <td className="py-2.5 pr-3 text-xs text-slate-500 whitespace-nowrap">{fmtDate(d.date)}</td>
                       <td className="py-2.5 pr-3">
                         <div className="text-xs font-medium text-slate-800">{d.document_no ?? '—'}</div>
