@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,58 +25,59 @@ export default function LoginPage() {
         router.refresh();
       } else {
         const data = await res.json();
-        setError(data.error || 'Erro ao autenticar');
+        setError(data.error || 'Erro ao iniciar sessão');
       }
     } catch {
-      setError('Erro de ligacao. Tente novamente.');
+      setError('Erro de ligação. Tenta novamente.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 px-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-100 px-8 py-10">
-          <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 mb-4">
-              <span className="text-white text-xl font-bold">G</span>
-            </div>
-            <h1 className="text-xl font-semibold text-slate-900">Gestao Construcao</h1>
-            <p className="text-sm text-slate-500 mt-1">Inicia sessao para continuar</p>
-          </div>
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-slate-800">Gestão de Obra</h1>
+          <p className="text-slate-500 mt-1 text-sm">Inicia sessão para continuar</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input
                 type="email"
+                required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                required
-                autoFocus
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
-                placeholder="email@empresa.pt"
+                placeholder="o.teu@email.com"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-slate-700">Password</label>
+                <Link
+                  href="/recuperar-password"
+                  className="text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  Esqueceu a password?
+                </Link>
+              </div>
               <input
                 type="password"
+                required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                required
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
                 placeholder="••••••••"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 rounded-xl px-3 py-2.5 border border-red-100">
+              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
@@ -83,9 +85,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-slate-900 text-white text-sm font-medium py-2.5 hover:bg-slate-800 disabled:opacity-50 transition-colors mt-2"
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold rounded-lg text-sm transition-colors"
             >
-              {loading ? 'A entrar...' : 'Entrar'}
+              {loading ? 'A entrar…' : 'Entrar'}
             </button>
           </form>
         </div>
