@@ -53,6 +53,7 @@ export default function ControloObraPage() {
           <div className="flex gap-3">
             <Link href="/controlo-obra/faturas" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Faturas</Link>
             <Link href="/controlo-obra/despesas" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Despesas</Link>
+            <Link href="/despesas/scan" className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100">📷 Registar Despesa</Link>
             <Link href="/controlo-obra/fornecedores" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Fornecedores</Link>
             <Link href="/controlo-obra/trabalhadores" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Trabalhadores</Link>
             <Link href="/" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Dashboard</Link>
