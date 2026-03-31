@@ -53,6 +53,7 @@ export async function POST(req: Request) {
           {
             type: 'input_image',
             image_url: `data:${mimeType};base64,${base64}`,
+            detail: 'auto',
           },
           {
             type: 'input_text',
