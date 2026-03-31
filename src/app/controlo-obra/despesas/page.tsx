@@ -4,10 +4,10 @@ import Link from 'next/link';
 
 interface Despesa {
   id: string;
-  document_no: string | null;
+  document_no: string | nul;
   document_type: string | null;
   status: number | null;
-  date: string | null;
+  date: string | null
   due_date: string | null;
   gross_total: number | null;
   net_total: number | null;
@@ -34,7 +34,7 @@ function fmtDate(d: string | null) {
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-PT');
 }
 
-const STATUS_LABELS: Record<number, string> = { 1: 'Rascunho', 2: 'Pendente', 3: 'Finalizada' };
+const STATUS_LABELS: Record<number, string> = { 0: 'Importada', 1: 'Rascunho', 2: 'Pendente', 3: 'Finalizada' };
 const DOC_TYPE_LABELS: Record<string, string> = {
   FC: 'Fatura Compra', DSP: 'Despesa', NC: 'Nota Crédito', ND: 'Nota Débito',
 };
@@ -263,7 +263,7 @@ export default function DespesasPage() {
                             title={d.arquivo_nome ?? 'Abrir ficheiro'}>
                             📄 Abrir
                           </a>
-                        ) : d.id ? (
+                        ) : d.id && d.status && d.status > 0 ? (
                           <a href={'/api/despesas/' + d.id + '/pdf'} target="_blank" rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition"
                             title="Abrir fatura PDF">
