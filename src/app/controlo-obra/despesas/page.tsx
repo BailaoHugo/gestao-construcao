@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 interface Despesa {
   id: string;
-  document_no: string | nul;
+  document_no: string | null;
   document_type: string | null;
   status: number | null;
   date: string | null
