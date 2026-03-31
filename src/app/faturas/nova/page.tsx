@@ -7,6 +7,7 @@ interface Contrato {
   propostaCodigo: string;
   clienteNome: string;
   totalVenda: number;
+  estado: string;
 }
 
 interface CapituloRow {
@@ -37,8 +38,7 @@ function NovaFaturaForm() {
   useEffect(() => {
     fetch('/api/contratos')
       .then(r => r.json())
-      .then(data => setContratos(Array.isArray(data) ? data : (data.contratos ?? [])))
-      .catch(() => {});
+      .then(data => setContratos(ArraysetContratos((Array.isArray(data) ? data : (data.contratos ?? [])).filter((c: Contrato) => c.estado === 'EMITIDO'))=> {});
   }, []);
 
   const addCapitulo = () =>
