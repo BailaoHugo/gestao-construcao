@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 const PROMPT = `Analisa esta imagem de recibo ou fatura e extrai os dados.
-Responde APENAS com JSON valido, sem markdown:
+Responde APENAS com JSON valido, sem markdown, com estes campos exatos:
 {
   "fornecedor": "nome da empresa",
   "nif": "NIF do fornecedor ou null",
@@ -45,31 +45,36 @@ export async function POST(req: Request) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: 'gpt-4o',
-      messages: [{
+      input: [{
         role: 'user',
         content: [
-          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}`, detail: 'high' } },
-          { type: 'text', text: PROMPT },
+          {
+            type: 'input_image',
+            image_url: `data:${mimeType};base64,${base64}`,
+          },
+          {
+            type: 'input_text',
+            text: PROMPT,
+          },
         ],
       }],
-      max_tokens: 600,
     });
 
-    const text = response.choices[0]?.message?.content?.trim() || '';
+    const text = response.output_text?.trim() || '';
     let extracted: Record<string, unknown> = {};
     try {
       const clean = text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
       extracted = JSON.parse(clean);
     } catch {
-      return NextResponse.json({ error: 'Nao foi possivel extrair dados da imagem', raw: text }, { status: 422 });
+      return NextResponse.json({ error: 'Nao foi possivel extrair dados', raw: text }, { status: 422 });
     }
 
     return NextResponse.json({ ok: true, ...extracted });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[api/despesas/scan]', msg);
-    return NextResponse.json({ error: 'Erro ao chamar IA' }, { status: 500 });
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
