@@ -21,7 +21,14 @@ export async function getAccessToken(): Promise<string> {
   const clientId = process.env.TOCONLINE_CLIENT_ID;
   const secret = process.env.TOCONLINE_SECRET;
   const oauthUrl = process.env.TOCONLINE_OAUTH_URL;
-  const refreshToken = process.env.TOCONLINE_REFRESH_TOKEN;
+  // Read refresh token: prefer DB (rotating tokens), fallback to env var
+  const envRefreshToken = process.env.TOCONLINE_REFRESH_TOKEN;
+  let refreshToken = envRefreshToken;
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+    const cfgRow = await pool.query(`SELECT value FROM app_config WHERE key = 'toconline_refresh_token'`);
+    if (cfgRow.rows[0]?.value) refreshToken = cfgRow.rows[0].value;
+  } catch (_) {}
   if (!clientId || !secret || !oauthUrl) throw new Error('TOConline nao configurado');
   if (!refreshToken) throw new Error('TOConline: TOCONLINE_REFRESH_TOKEN nao definido');
   const credentials = Buffer.from(clientId + ':' + secret).toString('base64');
@@ -43,6 +50,16 @@ export async function getAccessToken(): Promise<string> {
   }
   const data = await resp.json();
   _tokenCache = { token: data.access_token, expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000 };
+  // Persist rotating refresh token so next cold start uses the new one
+  if (data.refresh_token) {
+    try {
+      await pool.query(
+        `INSERT INTO app_config (key, value) VALUES ('toconline_refresh_token', $1)
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+        [data.refresh_token]
+      );
+    } catch (_) {}
+  }
   return _tokenCache.token;
 }
 
