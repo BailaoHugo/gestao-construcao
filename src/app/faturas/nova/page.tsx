@@ -38,7 +38,7 @@ function NovaFaturaForm() {
   useEffect(() => {
     fetch('/api/contratos')
       .then(r => r.json())
-      .then(data => setContratos(ArraysetContratos((Array.isArray(data) ? data : (data.contratos ?? [])).filter((c: Contrato) => c.estado === 'EMITIDO'))=> {});
+      .then(data => setContratos((Array.isArray(data) ? data : (data.contratos ?? [])).filter((c: Contrato) => c.estado === 'EMITIDO')))
   }, []);
 
   const addCapitulo = () =>
