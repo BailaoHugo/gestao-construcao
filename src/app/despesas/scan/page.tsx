@@ -30,6 +30,7 @@ export default function ScanDespesa() {
   const [scanning, setScanning] = useState(false);
   const [dados, setDados] = useState<Dados | null>(null);
   const [obra, setObra] = useState('');
+  const [obras, setObras] = useState<string[]>([]);
   const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -83,7 +84,10 @@ export default function ScanDespesa() {
     }
   };
 
-  if (saved) return (
+  if (saved) 
+  // Load obras for dropdown
+  useState(() => { (async()=>{ try{ const r=await fetch('/api/obras'); const j=await r.json(); setObras((j.items||[]).map((o)=>o.nome||o.descricao||'').filter(Boolean)); }catch(_){} })(); });
+return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,fontFamily:'sans-serif'}}>
       <div style={{fontSize:72}}>✅</div>
       <h2 style={{color:'#065f46',margin:'16px 0 8px'}}>Despesa registada!</h2>
@@ -168,7 +172,10 @@ export default function ScanDespesa() {
 
           <div style={{marginBottom:12}}>
             <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Obra / Centro de Custo</label>
-            <input type="text" style={inp} value={obra} onChange={e=>setObra(e.target.value)} placeholder="Ex: Obra Lisboa, CC-001" />
+            <>
+        <input type="text" style={inp} value={obra} onChange={e=>setObra(e.target.value)} placeholder="Ex: Obra Lisboa, CC-001" list="obras-list" />
+        <datalist id="obras-list">{obras.map(o=><option key={o} value={o}/>)}</datalist>
+      </>
           </div>
 
           <div style={{marginBottom:20}}>
