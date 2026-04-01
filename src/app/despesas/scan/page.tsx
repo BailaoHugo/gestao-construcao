@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const CATS = ['Material de obra','Ferramentas','Combustivel','Alimentacao','Subcontratacao','Transporte','Outros'];
 
@@ -86,7 +86,7 @@ export default function ScanDespesa() {
 
   if (saved) 
   // Load obras for dropdown
-  useState(() => { (async()=>{ try{ const r=await fetch('/api/obras'); const j=await r.json(); setObras((j.items||[]).map((o)=>o.nome||o.descricao||'').filter(Boolean)); }catch(_){} })(); });
+  useEffect(() => { (async()=>{ try{ const r=await fetch('/api/obras'); const j=await r.json(); setObras((j.items||[]).map((o: {nome?:string;descricao?:string})=>o.nome||o.descricao||'').filter(Boolean)); }catch(_){} })(); }, []);
 return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,fontFamily:'sans-serif'}}>
       <div style={{fontSize:72}}>✅</div>
