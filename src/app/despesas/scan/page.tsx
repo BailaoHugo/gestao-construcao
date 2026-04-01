@@ -9,7 +9,7 @@ interface Dados {
   descricao?: string; categoria?: string;
 }
 
-const inp: React.CSSProperties = 
+const inp: React.CSSProperties = {
   width:'100%', padding:'10px 12px', border:'1px solid #d1d5db',
   borderRadius:8, fontSize:15, boxSizing:'border-box', background:'#fff',
 };
