@@ -9,7 +9,7 @@ interface Dados {
   descricao?: string; categoria?: string;
 }
 
-const inp: React.CSSProperties = {
+const inp: React.CSSProperties = 
   width:'100%', padding:'10px 12px', border:'1px solid #d1d5db',
   borderRadius:8, fontSize:15, boxSizing:'border-box', background:'#fff',
 };
@@ -84,10 +84,9 @@ export default function ScanDespesa() {
     }
   };
 
-  if (saved) 
   // Load obras for dropdown
   useEffect(() => { (async()=>{ try{ const r=await fetch('/api/obras'); const j=await r.json(); setObras((j.items||[]).map((o: {nome?:string;descricao?:string})=>o.nome||o.descricao||'').filter(Boolean)); }catch(_){} })(); }, []);
-return (
+  if (saved) return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,fontFamily:'sans-serif'}}>
       <div style={{fontSize:72}}>✅</div>
       <h2 style={{color:'#065f46',margin:'16px 0 8px'}}>Despesa registada!</h2>
