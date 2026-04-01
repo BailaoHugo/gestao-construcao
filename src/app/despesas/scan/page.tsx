@@ -156,7 +156,7 @@ return (
             <div key={key} style={{marginBottom:12}}>
               <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>{label}</label>
               <input type={type} style={inp}
-                value={(dados[key] ?? '') as string}
+                value={(dados?.[key] ?? '') as string}
                 onChange={e => setDados(prev => ({...prev, [key]: type==='number' ? (parseFloat(e.target.value)||null) : e.target.value}))}
               />
             </div>
