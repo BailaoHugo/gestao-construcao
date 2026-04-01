@@ -164,7 +164,7 @@ return (
 
           <div style={{marginBottom:12}}>
             <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Categoria</label>
-            <select style={inp} value={dados.categoria||''} onChange={e => setDados(p=>({...p,categoria:e.target.value}))}>
+            <select style={inp} value={dados?.categoria||''} onChange={e => setDados(p=>({...p,categoria:e.target.value}))}>
               <option value="">Seleciona...</option>
               {CATS.map(c=><option key={c} value={c}>{c}</option>)}
             </select>
