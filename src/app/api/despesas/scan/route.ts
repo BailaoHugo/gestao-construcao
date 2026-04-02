@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import path from 'path';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -34,7 +35,11 @@ const PROMPT = `Analisa este recibo ou fatura e extrai os dados. Responde APENAS
 async function extractPdfText(buf: Buffer): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs') as any;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+  // pdfjs v5 requires a non-empty workerSrc; point to the bundled worker file
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    const workerPath = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'legacy', 'build', 'pdf.worker.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `file://${workerPath}`;
+  }
   const pdf = await pdfjsLib.getDocument({
     data: new Uint8Array(buf),
     useWorkerFetch: false,
