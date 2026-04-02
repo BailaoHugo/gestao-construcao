@@ -65,6 +65,22 @@ export default function Home() {
             icon={<span className="text-xs font-semibold tracking-tight">CL</span>}
             iconVariant="blue"
           />
+          <ModuleCard
+            title="Obras / Centros de Custo"
+            description="Gestão de obras e centros de custo: criar, editar e controlar o estado de cada obra."
+            actionLabel="Abrir módulo"
+            href="/obras"
+            icon={<span className="text-xs font-semibold tracking-tight">CC</span>}
+            iconVariant="blue"
+          />
+          <ModuleCard
+            title="Fornecedores"
+            description="Base de dados de fornecedores e subempreiteiros: criar, editar e ativar/desativar."
+            actionLabel="Abrir módulo"
+            href="/fornecedores"
+            icon={<span className="text-xs font-semibold tracking-tight">FN</span>}
+            iconVariant="blue"
+          />
         </section>
       </main>
     </MainLayout>
