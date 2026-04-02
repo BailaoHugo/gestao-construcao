@@ -6,8 +6,39 @@ export const maxDuration = 30;
 
 const PROMPT = `Analisa este recibo ou fatura e extrai os dados. Responde APENAS com JSON valido, sem markdown, com estes campos exatos: { "fornecedor": "nome da empresa", "nif": "NIF do fornecedor ou null", "data": "YYYY-MM-DD ou null", "valor_total": numero com IVA ou null, "valor_sem_iva": numero sem IVA ou null, "iva": percentagem ex 23 ou null, "descricao": "descricao resumida do que foi comprado", "categoria": "Material de obra | Ferramentas | Combustivel | Alimentacao | Subcontratacao | Transporte | Outros" } Se nao conseguires ler um campo coloca null.`;
 
+// Polyfill DOMMatrix for Node.js (required by pdfjs-dist)
+function ensureDOMMatrix() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const g = globalThis as any;
+  if (typeof g.DOMMatrix === 'undefined') {
+    g.DOMMatrix = class DOMMatrix {
+      a=1; b=0; c=0; d=1; e=0; f=0;
+      m11=1; m12=0; m13=0; m14=0;
+      m21=0; m22=1; m23=0; m24=0;
+      m31=0; m32=0; m33=1; m34=0;
+      m41=0; m42=0; m43=0; m44=1;
+      is2D=true; isIdentity=true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      constructor(_init?: any) {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      static fromMatrix(_other?: any) { return new g.DOMMatrix(); }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      multiply(_other?: any) { return this; }
+      translate(_tx=0, _ty=0, _tz=0) { return this; }
+      scale(_sx=1, _sy=1) { return this; }
+      rotate(_rx=0, _ry=0, _rz=0) { return this; }
+      inverse() { return this; }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transformPoint(p?: any) { return p || { x: 0, y: 0, z: 0, w: 1 }; }
+      toFloat32Array() { return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]); }
+      toFloat64Array() { return new Float64Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]); }
+    };
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function extractPdfText(buf: Buffer): Promise<string> {
+  ensureDOMMatrix();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs') as any;
   pdfjsLib.GlobalWorkerOptions.workerSrc = '';
