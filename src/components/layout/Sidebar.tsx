@@ -9,6 +9,7 @@ const navItems = [
   { href: "/contratos", label: "Contratos", abbr: "CO" },
   { href: "/orcamentos", label: "Orçamentos", abbr: "OR" },
   { href: "/catalogo", label: "Catálogo", abbr: "CT" },
+  { href: "/clientes", label: "Clientes", abbr: "CL" },
 ];
 
 export function Sidebar() {
