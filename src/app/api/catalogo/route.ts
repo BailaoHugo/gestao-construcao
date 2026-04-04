@@ -54,8 +54,15 @@ export async function GET(req: NextRequest) {
     ),
   ]);
 
+  // pg devolve NUMERIC como string — converter para número
+  const artigos = rows.rows.map((r) => ({
+    ...r,
+    preco_custo: parseFloat(r.preco_custo),
+    k_padrao:    parseFloat(r.k_padrao),
+  }));
+
   return NextResponse.json({
-    rows:     rows.rows,
+    rows:     artigos,
     total:    count.rows[0].total,
     chapters: chapters.rows,
     page,
