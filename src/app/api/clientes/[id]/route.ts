@@ -4,8 +4,11 @@ import { Pool } from "pg";
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 // PUT /api/clientes/[id]
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
   const body = await req.json();
   const { nome, email, telefone, nif, morada, notas } = body;
 
@@ -25,7 +28,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/clientes/[id]
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  await pool.query("DELETE FROM clientes WHERE id=$1", [params.id]);
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  await pool.query("DELETE FROM clientes WHERE id=$1", [id]);
   return NextResponse.json({ ok: true });
 }
