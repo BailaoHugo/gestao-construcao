@@ -1,187 +1,210 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect, useCallback } from "react";
 
-const ESTADOS = ['ativo', 'concluido', 'suspenso', 'cancelado'];
+type Cliente = { id: number; nome: string };
+type Obra = {
+  id: number; nome: string; descricao?: string; estado: string;
+  cliente_id?: number; cliente_nome?: string;
+  data_inicio?: string; data_fim?: string;
+};
 
-interface Obra {
-  id: string;
-  code: string;
-  nome: string;
-  descricao: string;
-  estado: string;
-  cliente_nome: string;
-  data_inicio: string | null;
-  data_fim: string | null;
+const ESTADOS = [
+  { value: "em_curso",   label: "Em Curso",   color: "bg-blue-100 text-blue-700" },
+  { value: "concluida",  label: "Concluída",  color: "bg-green-100 text-green-700" },
+  { value: "suspensa",   label: "Suspensa",   color: "bg-amber-100 text-amber-700" },
+  { value: "cancelada",  label: "Cancelada",  color: "bg-red-100 text-red-700" },
+];
+
+function estadoBadge(estado: string) {
+  const e = ESTADOS.find((x) => x.value === estado) ?? ESTADOS[0];
+  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${e.color}`}>{e.label}</span>;
 }
 
-const empty = (): Partial<Obra> => ({ code: '', nome: '', descricao: '', estado: 'ativo', cliente_nome: '', data_inicio: null, data_fim: null });
+const EMPTY = { nome: "", descricao: "", estado: "em_curso", cliente_id: "", data_inicio: "", data_fim: "" };
 
 export default function ObrasPage() {
-  const [list, setList] = useState<Obra[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
-  const [form, setForm] = useState<Partial<Obra> | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [erro, setErro] = useState('');
+  const [obras, setObras]       = useState<Obra[]>([]);
+  const [total, setTotal]       = useState(0);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [search, setSearch]     = useState("");
+  const [loading, setLoading]   = useState(true);
+  const [modal, setModal]       = useState(false);
+  const [editId, setEditId]     = useState<number | null>(null);
+  const [form, setForm]         = useState<typeof EMPTY>({ ...EMPTY });
+  const [saving, setSaving]     = useState(false);
 
-  const load = () => {
+  const load = useCallback(async (q = search) => {
     setLoading(true);
-    fetch('/api/obras')
-      .then(r => r.json())
-      .then(d => setList(d.items || []))
-      .finally(() => setLoading(false));
-  };
+    const r = await fetch(`/api/obras?search=${encodeURIComponent(q)}&limit=50`);
+    const d = await r.json();
+    setObras(d.data ?? []);
+    setTotal(d.total ?? 0);
+    setLoading(false);
+  }, [search]);
 
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const t = setTimeout(() => load(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  const filtered = list.filter(o => {
-    const q = search.toLowerCase();
-    const matchQ = q === '' || o.nome.toLowerCase().includes(q) || o.code.toLowerCase().includes(q) || (o.cliente_nome || '').toLowerCase().includes(q);
-    const matchE = filtroEstado === '' || o.estado === filtroEstado;
-    return matchQ && matchE;
-  });
+  useEffect(() => {
+    fetch("/api/clientes?limit=200")
+      .then((r) => r.json())
+      .then((d) => setClientes(d.data ?? []));
+  }, []);
 
-  const openNew = () => { setForm(empty()); setEditId(null); setErro(''); };
-  const openEdit = (o: Obra) => { setForm({ ...o }); setEditId(o.id); setErro(''); };
-  const closeForm = () => { setForm(null); setEditId(null); setErro(''); };
-
-  const save = async () => {
-    if (!form?.code || !form?.nome) { setErro('Código e Nome são obrigatórios'); return; }
-    setSaving(true); setErro('');
-    try {
-      const method = editId ? 'PATCH' : 'POST';
-      const url = editId ? `/api/obras/${editId}` : '/api/obras';
-      const body = editId ? { name: form.nome, descricao: form.descricao, estado: form.estado, cliente_nome: form.cliente_nome, data_inicio: form.data_inicio || null, data_fim: form.data_fim || null }
-                          : { code: form.code, name: form.nome, descricao: form.descricao, estado: form.estado, cliente_nome: form.cliente_nome, data_inicio: form.data_inicio || null, data_fim: form.data_fim || null };
-      const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'Erro');
-      closeForm();
-      load();
-    } catch(e) { setErro(e instanceof Error ? e.message : 'Erro'); }
-    finally { setSaving(false); }
-  };
-
-  const del = async (id: string, nome: string) => {
-    if (!confirm(`Eliminar "${nome}"?`)) return;
-    await fetch(`/api/obras/${id}`, { method: 'DELETE' });
-    load();
-  };
-
-  const estadoBadge = (e: string) => {
-    const map: Record<string, string> = { ativo: 'bg-green-100 text-green-700', concluido: 'bg-blue-100 text-blue-700', suspenso: 'bg-yellow-100 text-yellow-700', cancelado: 'bg-red-100 text-red-700' };
-    return map[e] || 'bg-slate-100 text-slate-600';
-  };
+  function openNew() {
+    setForm({ ...EMPTY });
+    setEditId(null);
+    setModal(true);
+  }
+  function openEdit(o: Obra) {
+    setForm({
+      nome: o.nome, descricao: o.descricao ?? "", estado: o.estado,
+      cliente_id: o.cliente_id ? String(o.cliente_id) : "",
+      data_inicio: o.data_inicio?.slice(0, 10) ?? "",
+      data_fim:    o.data_fim?.slice(0, 10) ?? "",
+    });
+    setEditId(o.id);
+    setModal(true);
+  }
+  async function save() {
+    if (!form.nome.trim()) return;
+    setSaving(true);
+    const body = {
+      ...form,
+      cliente_id:  form.cliente_id  ? parseInt(form.cliente_id)  : null,
+      data_inicio: form.data_inicio || null,
+      data_fim:    form.data_fim    || null,
+    };
+    if (editId) {
+      await fetch(`/api/obras/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    } else {
+      await fetch("/api/obras", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    }
+    setSaving(false);
+    setModal(false);
+    load(search);
+  }
+  async function del(id: number) {
+    if (!confirm("Eliminar esta obra?")) return;
+    await fetch(`/api/obras/${id}`, { method: "DELETE" });
+    load(search);
+  }
 
   return (
-    <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
-          <Link href="/" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">← Dashboard</Link>
-        </header>
-
-        <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Obras / Centros de Custo</h1>
-            <button onClick={openNew} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">+ Nova Obra</button>
-          </div>
-
-          <div className="mb-6 flex gap-3">
-            <input type="search" placeholder="Pesquisar por código, nome ou cliente..." value={search} onChange={e => setSearch(e.target.value)}
-              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
-            <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300">
-              <option value="">Todos os estados</option>
-              {ESTADOS.map(e => <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>)}
-            </select>
-          </div>
-
-          {form !== null && (
-            <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-6">
-              <h2 className="mb-4 text-base font-semibold text-slate-800">{editId ? 'Editar Obra' : 'Nova Obra'}</h2>
-              {erro && <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Código *</label>
-                  <input disabled={!!editId} value={form.code || ''} onChange={e => setForm(p => ({ ...p, code: e.target.value }))}
-                    placeholder="CC-001" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Nome *</label>
-                  <input value={form.nome || ''} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))}
-                    placeholder="Obra Lisboa Centro" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Cliente</label>
-                  <input value={form.cliente_nome || ''} onChange={e => setForm(p => ({ ...p, cliente_nome: e.target.value }))}
-                    placeholder="Nome do cliente" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Estado</label>
-                  <select value={form.estado || 'ativo'} onChange={e => setForm(p => ({ ...p, estado: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                    {ESTADOS.map(e => <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Data Início</label>
-                  <input type="date" value={form.data_inicio || ''} onChange={e => setForm(p => ({ ...p, data_inicio: e.target.value || null }))}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Data Fim</label>
-                  <input type="date" value={form.data_fim || ''} onChange={e => setForm(p => ({ ...p, data_fim: e.target.value || null }))}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Descrição</label>
-                  <input value={form.descricao || ''} onChange={e => setForm(p => ({ ...p, descricao: e.target.value }))}
-                    placeholder="Descrição opcional" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                </div>
-              </div>
-              <div className="mt-4 flex gap-3">
-                <button onClick={save} disabled={saving} className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-                  {saving ? 'A guardar...' : 'Guardar'}
-                </button>
-                <button onClick={closeForm} className="rounded-xl border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancelar</button>
-              </div>
-            </div>
-          )}
-
-          {loading ? (
-            <p className="text-sm text-slate-400">A carregar...</p>
-          ) : filtered.length === 0 ? (
-            <p className="text-sm text-slate-400">{search || filtroEstado ? 'Nenhuma obra encontrada.' : 'Sem obras registadas. Clique em "+ Nova Obra" para começar.'}</p>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {filtered.map(o => (
-                <div key={o.id} className="flex items-center gap-4 py-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-700">{o.code.slice(0, 3)}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-slate-800">{o.nome}</span>
-                      <span className="text-xs text-slate-400">{o.code}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${estadoBadge(o.estado)}`}>{o.estado}</span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {[o.cliente_nome, o.data_inicio && `Início: ${o.data_inicio}`, o.data_fim && `Fim: ${o.data_fim}`].filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => openEdit(o)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">Editar</button>
-                    <button onClick={() => del(o.id, o.nome)} className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50">Eliminar</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          {!loading && <p className="mt-4 text-xs text-slate-300">{filtered.length} obra{filtered.length !== 1 ? 's' : ''}</p>}
-        </main>
+    <div className="flex flex-col gap-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Obras</h1>
+          <p className="text-sm text-slate-500">{total} {total === 1 ? "obra registada" : "obras registadas"}</p>
+        </div>
+        <button onClick={openNew}
+          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition">
+          + Nova Obra
+        </button>
       </div>
+
+      {/* Pesquisa */}
+      <input value={search} onChange={(e) => setSearch(e.target.value)}
+        placeholder="Pesquisar obras..."
+        className="w-full rounded-xl border-0 bg-white/80 px-4 py-3 text-sm shadow-sm ring-1 ring-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+      {/* Tabela */}
+      {loading ? (
+        <div className="text-center py-16 text-slate-400 text-sm">A carregar...</div>
+      ) : obras.length === 0 ? (
+        <div className="text-center py-16 text-slate-400 text-sm">Ainda não há obras. Cria a primeira!</div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl bg-white/80 shadow-sm ring-1 ring-slate-100">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <th className="px-5 py-3">Nome</th>
+                <th className="px-5 py-3">Cliente</th>
+                <th className="px-5 py-3">Estado</th>
+                <th className="px-5 py-3">Início</th>
+                <th className="px-5 py-3">Fim</th>
+                <th className="px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {obras.map((o) => (
+                <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
+                  <td className="px-5 py-3 font-medium text-slate-800">{o.nome}</td>
+                  <td className="px-5 py-3 text-slate-500">{o.cliente_nome ?? <span className="text-slate-300 italic">—</span>}</td>
+                  <td className="px-5 py-3">{estadoBadge(o.estado)}</td>
+                  <td className="px-5 py-3 text-slate-500">{o.data_inicio?.slice(0, 10) ?? "—"}</td>
+                  <td className="px-5 py-3 text-slate-500">{o.data_fim?.slice(0, 10) ?? "—"}</td>
+                  <td className="px-5 py-3">
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => openEdit(o)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Editar</button>
+                      <button onClick={() => del(o.id)}   className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 ring-1 ring-red-100 hover:bg-red-50">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="mb-5 text-lg font-semibold text-slate-800">{editId ? "Editar Obra" : "Nova Obra"}</h2>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Nome *</label>
+                <input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Cliente</label>
+                <select value={form.cliente_id} onChange={(e) => setForm({ ...form, cliente_id: e.target.value })}
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  <option value="">— Sem cliente —</option>
+                  {clientes.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Descrição</label>
+                <textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} rows={2}
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Estado</label>
+                <select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-500">Data Início</label>
+                  <input type="date" value={form.data_inicio} onChange={(e) => setForm({ ...form, data_inicio: e.target.value })}
+                    className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-500">Data Fim</label>
+                  <input type="date" value={form.data_fim} onChange={(e) => setForm({ ...form, data_fim: e.target.value })}
+                    className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setModal(false)} className="rounded-xl px-4 py-2 text-sm text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Cancelar</button>
+              <button onClick={save} disabled={saving || !form.nome.trim()}
+                className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition">
+                {saving ? "A guardar..." : "Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
