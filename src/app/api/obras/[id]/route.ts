@@ -8,7 +8,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   const r = await pool.query(
     `UPDATE obras SET nome=$1, descricao=$2, estado=$3, cliente_id=$4, data_inicio=$5, data_fim=$6
      WHERE id=$7 RETURNING *`,
-    [nome, descricao ?? null, estado ?? "em_curso", cliente_id ?? null, data_inicio ?? null, data_fim ?? null, id]
+    [nome, descricao ?? null, estado ?? "em_curso", cliente_id || null, data_inicio || null, data_fim || null, id]
   );
   if (!r.rowCount) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
   return NextResponse.json(r.rows[0]);
