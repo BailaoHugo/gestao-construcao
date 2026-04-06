@@ -118,7 +118,7 @@ async function fetchObras(q: string): Promise<(ObraRow & { id: string; label: st
   const r = await fetch(`/api/obras?search=${encodeURIComponent(q)}&limit=20&estado=ativo`);
   if (!r.ok) return [];
   const d = await r.json() as { data?: ObraRow[]; items?: ObraRow[] };
-  const rows = d.data ?? d.items ?? [];
+  const rows = d.rows ?? d.data ?? d.items ?? [];
   return rows.map(o => ({ ...o, label: o.nome, sub: o.code }));
 }
 
