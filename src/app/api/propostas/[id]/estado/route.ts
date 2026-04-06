@@ -69,7 +69,7 @@ export async function PATCH(
           `INSERT INTO obras (code, nome, descricao, estado, created_at, updated_at)
            VALUES ($1, $2, $3, 'ativo', now(), now())
            RETURNING id`,
-          [nextNum, prop.obra_nome, prop.obra_morada ?? null]
+          [nextNum, prop.obra_nome]
         );
         const novaObraId = obraRes.rows[0].id;
         await client.query(
