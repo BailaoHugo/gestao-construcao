@@ -5,9 +5,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const body = await req.json();
-  const name      = (body.name ?? body.nome ?? "").trim() || undefined;
-  const descricao = body.descricao ?? null;
-  const estado    = body.estado    ?? undefined;
+  const name      = body.name !== undefined ? (body.name ?? body.nome ?? "").trim() || undefined : undefined;
+  const descricao = body.descricao !== undefined ? (body.descricao ?? null) : undefined;
+  const estado    = body.estado    !== undefined ? body.estado : undefined;
   const clienteId = body.cliente_id !== undefined ? (body.cliente_id || null) : undefined;
   const dataIni   = body.data_inicio !== undefined ? (body.data_inicio || null) : undefined;
   const dataFim   = body.data_fim    !== undefined ? (body.data_fim    || null) : undefined;
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   if (sets.length === 0) return NextResponse.json({ error: "Nada a actualizar" }, { status: 400 });
   vals.push(id);
   const r = await pool.query(
-    `UPDATE obras SET ${sets.join(', ')} WHERE id=$${i} RETURNING *`,
+    `UPDATE obras SET ${sets.join(', ')}, updated_at=now() WHERE id=$${i} RETURNING *`,
     vals
   );
   if (!r.rowCount) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });

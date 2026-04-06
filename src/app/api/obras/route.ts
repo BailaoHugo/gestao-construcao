@@ -5,10 +5,16 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") ?? "";
+  const estado = searchParams.get("estado") ?? "";          // filtrar por estado
   const page   = Math.max(1, parseInt(searchParams.get("page")  ?? "1"));
   const limit  = Math.min(100, parseInt(searchParams.get("limit") ?? "50"));
   const offset = (page - 1) * limit;
   const like   = `%${search}%`;
+
+  // Condição de estado (se não fornecido, devolve só as activas)
+  const estadoCond = estado
+    ? `AND o.estado = '${estado.replace(/'/g, "''")}'`
+    : "";
 
   const rows = await pool.query(
     `SELECT o.id, o.code, o.name AS nome, o.descricao, o.estado,
@@ -16,14 +22,16 @@ export async function GET(req: NextRequest) {
             c.nome AS cliente_nome
      FROM obras o
      LEFT JOIN clientes c ON c.id = o.cliente_id
-     WHERE o.name ILIKE $1 OR o.code ILIKE $1 OR COALESCE(o.descricao,'') ILIKE $1
+     WHERE (o.name ILIKE $1 OR o.code ILIKE $1 OR COALESCE(o.descricao,'') ILIKE $1)
+     ${estadoCond}
      ORDER BY o.code ASC
      LIMIT $2 OFFSET $3`,
     [like, limit, offset]
   );
   const total = await pool.query(
-    `SELECT COUNT(*)::int AS n FROM obras
-     WHERE name ILIKE $1 OR code ILIKE $1 OR COALESCE(descricao,'') ILIKE $1`,
+    `SELECT COUNT(*)::int AS n FROM obras o
+     WHERE (o.name ILIKE $1 OR o.code ILIKE $1 OR COALESCE(o.descricao,'') ILIKE $1)
+     ${estadoCond}`,
     [like]
   );
 
@@ -33,11 +41,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  // Aceitar 'name' ou 'nome' do cliente
   const name      = (body.name ?? body.nome ?? "").trim();
   const code      = (body.code ?? "").trim();
   const descricao = body.descricao ?? null;
-  const estado    = body.estado    ?? "em_curso";
+  const estado    = body.estado    ?? "ativo";   // default correto
   const clienteId = body.cliente_id || null;
   const dataIni   = body.data_inicio || null;
   const dataFim   = body.data_fim    || null;
