@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 
 // max:1 evita MaxClientsInSessionMode no Vercel serverless (session mode do Supabase)
 const pool = new Pool({
@@ -11,4 +11,21 @@ const pool = new Pool({
     : { rejectUnauthorized: false },
 });
 
-export { pool };
+async function withTransaction<T>(
+  fn: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export { pool, withTransaction };
