@@ -4,20 +4,24 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { TopBar } from "@/components/layout/TopBar";
 import Link from "next/link";
 
+type CatalogoCounts = { obra_nova: number; reabilitacao: number; total: number };
+
 type Metrics = {
-  clientes: number;
-  obras: number;
-  propostas: number;
-  contratos: number;
-  catalogo:    { obra_nova: number; reabilitacao: number; total: number };
+  clientes:   number;
+  obras:      number;
+  propostas:  number;
+  contratos:  number;
+  catalogo:   CatalogoCounts;
 };
 
-const CARDS = [
+type NumericKey = "clientes" | "obras" | "propostas" | "contratos";
+
+const CARDS: { key: NumericKey; label: string; href: string; color: string; icon: string }[] = [
   { key: "clientes",  label: "Clientes",  href: "/clientes",  color: "bg-blue-50 text-blue-700",   icon: "👥" },
   { key: "obras",     label: "Obras",     href: "/obras",     color: "bg-amber-50 text-amber-700",  icon: "🏗️" },
-  { key: "propostas", label: "Propostas", href: "/propostas", color: "bg-purple-50 text-purple-700", icon: "📄" },
+  { key: "propostas", label: "Propostas", href: "/propostas", color: "bg-purple-50 text-purple-700",icon: "📄" },
   { key: "contratos", label: "Contratos", href: "/contratos", color: "bg-rose-50 text-rose-700",    icon: "📝" },
-] as const;
+];
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -26,14 +30,18 @@ export default function DashboardPage() {
   useEffect(() => {
     fetch("/api/dashboard")
       .then((r) => r.json())
-      .then((d) => { setMetrics(d); setLoading(false); })
+      .then((d: Metrics) => { setMetrics(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  const cat = metrics?.catalogo;
 
   return (
     <MainLayout>
       <TopBar title="Dashboard" />
       <main className="flex flex-col gap-6">
+
+        {/* Cards numéricos */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {CARDS.map(({ key, label, href, color, icon }) => (
             <Link
@@ -48,14 +56,54 @@ export default function DashboardPage() {
                 {loading ? (
                   <span className="inline-block h-7 w-10 animate-pulse rounded bg-slate-100" />
                 ) : (
-                  (metrics?.[key as keyof Metrics] ?? 0)
+                  (metrics?.[key] ?? 0)
                 )}
               </div>
-              <div className="text-xs font-medium text-slate-500 group-hover:text-slate-700">{label}</div>
+              <div className="text-xs font-medium text-slate-500 group-hover:text-slate-700">
+                {label}
+              </div>
             </Link>
           ))}
         </div>
 
+        {/* Card Catálogo */}
+        <div className="rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-xl text-teal-700">📚</span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Catálogo</p>
+                <p className="text-2xl font-bold text-slate-800">
+                  {loading ? (
+                    <span className="inline-block h-7 w-14 animate-pulse rounded bg-slate-100" />
+                  ) : (
+                    (cat?.total ?? 0).toLocaleString("pt-PT")
+                  )}
+                </p>
+                <p className="text-xs text-slate-500">artigos no total</p>
+              </div>
+            </div>
+            <Link href="/catalogo" className="text-xs font-medium text-teal-600 hover:underline">
+              Ver catálogo →
+            </Link>
+          </div>
+          <div className="flex gap-3">
+            <div className="flex-1 rounded-xl bg-blue-50 px-4 py-3 text-center ring-1 ring-blue-100">
+              <p className="text-xl font-bold text-blue-600">
+                {loading ? "…" : (cat?.obra_nova ?? 0).toLocaleString("pt-PT")}
+              </p>
+              <p className="mt-0.5 text-[11px] font-medium text-blue-500">Obra Nova</p>
+            </div>
+            <div className="flex-1 rounded-xl bg-emerald-50 px-4 py-3 text-center ring-1 ring-emerald-100">
+              <p className="text-xl font-bold text-emerald-600">
+                {loading ? "…" : (cat?.reabilitacao ?? 0).toLocaleString("pt-PT")}
+              </p>
+              <p className="mt-0.5 text-[11px] font-medium text-emerald-500">Reabilitação</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Boas-vindas */}
         <div className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
           <h2 className="text-lg font-semibold text-slate-800">Bem-vindo à Gestão de Obra</h2>
           <p className="mt-2 text-sm text-slate-500">
@@ -66,33 +114,8 @@ export default function DashboardPage() {
               💡 Tens <strong>{metrics.clientes} clientes</strong> importados. O próximo passo é criar obras e associá-las a clientes.
             </div>
           )}
-        
-          {/* Catálogo */}
-          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Catálogo</span>
-              <a href="/catalogo" className="text-[11px] text-blue-600 hover:underline">Ver →</a>
-            </div>
-            <p className="text-3xl font-bold text-slate-800">
-              {metrics.catalogo.total.toLocaleString("pt-PT")}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-500">artigos no total</p>
-            <div className="mt-3 flex gap-2">
-              <div className="flex-1 rounded-lg bg-blue-50 px-2 py-2 text-center">
-                <p className="text-base font-bold text-blue-600">
-                  {metrics.catalogo.obra_nova.toLocaleString("pt-PT")}
-                </p>
-                <p className="text-[10px] text-blue-500">Obra Nova</p>
-              </div>
-              <div className="flex-1 rounded-lg bg-emerald-50 px-2 py-2 text-center">
-                <p className="text-base font-bold text-emerald-600">
-                  {metrics.catalogo.reabilitacao.toLocaleString("pt-PT")}
-                </p>
-                <p className="text-[10px] text-emerald-500">Reabilitação</p>
-              </div>
-            </div>
-          </div>
         </div>
+
       </main>
     </MainLayout>
   );
