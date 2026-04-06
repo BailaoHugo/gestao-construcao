@@ -44,7 +44,7 @@ export async function PATCH(
       [estado, propostaId]
     );
 
-    // 4. Se APROVADA criar obra automaticamente
+    // 4. Se APROVADA criar obra automaticamente (apenas se ainda nao tem obra_id)
     if (estado === "APROVADA") {
       const propRes = await client.query<{
         obra_id: string | null;
@@ -56,18 +56,30 @@ export async function PATCH(
       const prop = propRes.rows[0];
 
       if (prop && !prop.obra_id && prop.obra_nome) {
-        // Gerar codigo sequencial
-        const codeRes = await client.query<{ max_code: string | null }>(
-          `SELECT MAX(code) AS max_code FROM obras WHERE code ~ '^[0-9]+$'`
-        );
-        const nextCode = String(
-          (parseInt(String(codeRes.rows[0]?.max_code ?? "0"), 10) + 1)
-        ).padStart(3, "0");
+        // Gerar codigo sequencial unico — loop ate encontrar um que nao exista
+        let nextCode = "001";
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const codeRes = await client.query<{ max_code: string | null }>(
+            `SELECT MAX(CASE WHEN code ~ '^[0-9]+$' THEN code::integer ELSE 0 END)::text AS max_code
+             FROM obras`
+          );
+          const maxNum = parseInt(String(codeRes.rows[0]?.max_code ?? "0"), 10);
+          nextCode = String(maxNum + 1 + attempt).padStart(3, "0");
 
-        // INSERT usa coluna 'name' (coluna real na BD)
+          // Verificar se ja existe
+          const existsRes = await client.query<{ exists: boolean }>(
+            `SELECT EXISTS(SELECT 1 FROM obras WHERE code = $1) AS exists`,
+            [nextCode]
+          );
+          if (!existsRes.rows[0].exists) break;
+        }
+
+        // INSERT com ON CONFLICT para seguranca extra
         const obraRes = await client.query<{ id: string }>(
           `INSERT INTO obras (code, name, estado, created_at, updated_at)
            VALUES ($1, $2, 'ativo', now(), now())
+           ON CONFLICT (code) DO UPDATE
+             SET name = EXCLUDED.name, updated_at = now()
            RETURNING id`,
           [nextCode, prop.obra_nome]
         );
