@@ -12,7 +12,7 @@ import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
 import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPanel";
 
 // ── tipos auxiliares ────────────────────────────────────────────────────────
-type ClienteRow = { id: string; nome: string; contacto?: string; email?: string };
+type ClienteRow = { id: string; nome: string; telefone?: string; email?: string };
 type ObraRow    = { id: string; code: string; nome: string };
 
 // ── Combobox genérico ────────────────────────────────────────────────────────
@@ -109,9 +109,9 @@ function Combobox<T extends { id: string; label: string; sub?: string }>({
 async function fetchClientes(q: string): Promise<(ClienteRow & { id: string; label: string; sub?: string })[]> {
   const r = await fetch(`/api/clientes?search=${encodeURIComponent(q)}&limit=20`);
   if (!r.ok) return [];
-  const d = await r.json() as { data?: ClienteRow[]; items?: ClienteRow[] };
-  const rows = d.data ?? d.items ?? [];
-  return rows.map(c => ({ ...c, label: c.nome, sub: c.email ?? c.contacto ?? undefined }));
+  const d = await r.json() as { rows?: ClienteRow[]; data?: ClienteRow[]; items?: ClienteRow[] };
+  const rows = d.rows ?? d.data ?? d.items ?? [];
+  return rows.map(c => ({ ...c, label: c.nome, sub: c.email ?? c.telefone ?? undefined }));
 }
 
 async function fetchObras(q: string): Promise<(ObraRow & { id: string; label: string; sub?: string })[]> {
@@ -271,7 +271,7 @@ export default function NovaPropostaPage() {
                     ...p,
                     clienteId:       item.id,
                     clienteNome:     item.nome,
-                    clienteContacto: item.contacto ?? p.clienteContacto,
+                    clienteContacto: item.telefone ?? p.clienteContacto,
                     clienteEmail:    item.email    ?? p.clienteEmail,
                   }))}
                   placeholder="Pesquisar cliente…"
