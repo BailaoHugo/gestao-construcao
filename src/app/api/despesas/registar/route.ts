@@ -3,13 +3,15 @@ import { pool } from '@/lib/db';
 
 // Mapeamento de categorias do scan para tipos da tabela despesas
 const CATEGORIA_TO_TIPO: Record<string, string> = {
-  'Material de obra': 'materiais',
-  'Ferramentas':      'equipamentos',
-  'Combustivel':      'outros',
-  'Alimentacao':      'outros',
-  'Subcontratacao':   'mao_de_obra',
-  'Transporte':       'outros',
-  'Outros':           'outros',
+  'Material de obra':       'materiais',
+  'Ferramentas':            'equipamentos',
+  'Subempreitada':          'mao_de_obra',
+  'Subcontratacao':         'mao_de_obra',
+  'Prestação de serviços':  'mao_de_obra',
+  'Combustivel':            'outros',
+  'Alimentacao':            'outros',
+  'Transporte':             'outros',
+  'Outros':                 'outros',
 };
 
 export async function POST(req: Request) {

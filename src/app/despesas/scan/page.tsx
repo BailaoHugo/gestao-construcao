@@ -2,7 +2,16 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 
-const CATS = ['Material de obra','Ferramentas','Combustivel','Alimentacao','Subcontratacao','Transporte','Outros'];
+const CATS = [
+  'Material de obra',
+  'Ferramentas',
+  'Subempreitada',
+  'Prestação de serviços',
+  'Combustivel',
+  'Alimentacao',
+  'Transporte',
+  'Outros',
+];
 
 interface Dados {
   fornecedor?: string; nif?: string; data?: string;
@@ -10,7 +19,7 @@ interface Dados {
   descricao?: string; categoria?: string;
 }
 
-interface Obra { id: string; code: string; name: string; }
+interface Obra { id: string; code: string; nome: string; }
 
 const inp: React.CSSProperties = {
   width:'100%', padding:'10px 12px', border:'1px solid #d1d5db',
@@ -45,7 +54,7 @@ export default function ScanDespesa() {
   useEffect(() => {
     fetch('/api/obras?limit=200')
       .then(r => r.json())
-      .then(d => setObras(d.rows ?? []))
+      .then(d => setObras(d.data ?? d.items ?? d.rows ?? []))
       .catch(() => {});
   }, []);
 
@@ -189,7 +198,7 @@ export default function ScanDespesa() {
             <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Centro de custo / Obra</label>
             <select style={inp} value={centroCustoId} onChange={e => setCentroCustoId(e.target.value)}>
               <option value="">Geral (sem obra)</option>
-              {obras.map(o => <option key={o.id} value={o.id}>{o.code} &mdash; {o.name}</option>)}
+              {obras.map(o => <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>)}
             </select>
           </div>
 
