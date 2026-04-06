@@ -57,12 +57,19 @@ export async function PATCH(
       );
       const prop = propRes.rows[0];
       if (prop && !prop.obra_id && prop.obra_nome) {
+        // Gerar código sequencial para a nova obra
+        const codeRes = await client.query<{ max_code: string | null }>(
+          `SELECT MAX(code) AS max_code FROM obras WHERE code ~ '^[0-9]+$'`
+        );
+        const nextNum = (parseInt(codeRes.rows[0]?.max_code ?? "0", 10) + 1)
+          .toString().padStart(3, "0");
+
         // Criar obra e ligar à proposta
         const obraRes = await client.query<{ id: string }>(
-          `INSERT INTO obras (name, morada, estado, created_at, updated_at)
-           VALUES ($1, $2, 'ativo', now(), now())
+          `INSERT INTO obras (code, nome, descricao, estado, created_at, updated_at)
+           VALUES ($1, $2, $3, 'ativo', now(), now())
            RETURNING id`,
-          [prop.obra_nome, prop.obra_morada ?? null]
+          [nextNum, prop.obra_nome, prop.obra_morada ?? null]
         );
         const novaObraId = obraRes.rows[0].id;
         await client.query(
