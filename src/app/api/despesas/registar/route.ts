@@ -1,48 +1,57 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
+// Mapeamento de categorias do scan para tipos da tabela despesas
+const CATEGORIA_TO_TIPO: Record<string, string> = {
+  'Material de obra': 'materiais',
+  'Ferramentas':      'equipamentos',
+  'Combustivel':      'outros',
+  'Alimentacao':      'outros',
+  'Subcontratacao':   'mao_de_obra',
+  'Transporte':       'outros',
+  'Outros':           'outros',
+};
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { fornecedor, nif, data, valor_total, valor_sem_iva, iva, descricao, categoria, obra, notas } = body;
+    const {
+      fornecedor, nif, data, valor_total, valor_sem_iva, iva,
+      descricao, categoria, centro_custo_id, notas, documento_ref,
+    } = body;
 
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS despesas_manuais (
-        id SERIAL PRIMARY KEY,
-        fornecedor TEXT,
-        nif TEXT,
-        data_documento DATE,
-        valor_total NUMERIC,
-        valor_sem_iva NUMERIC,
-        taxa_iva NUMERIC,
-        descricao TEXT,
-        categoria TEXT,
-        obra TEXT,
-        notas TEXT,
-        criado_em TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+    const tipo = CATEGORIA_TO_TIPO[categoria] ?? 'outros';
+    const valor = valor_total ?? valor_sem_iva ?? null;
 
-    const result = await pool.query(
-      `INSERT INTO despesas_manuais
-         (fornecedor, nif, data_documento, valor_total, valor_sem_iva, taxa_iva, descricao, categoria, obra, notas)
-       VALUES ($1,$2,$3::date,$4,$5,$6,$7,$8,$9,$10)
-       RETURNING id, criado_em::text`,
+    if (!descricao || !valor) {
+      return NextResponse.json({ error: 'descricao e valor sao obrigatorios' }, { status: 400 });
+    }
+
+    const notasCompletas = [
+      notas,
+      nif ? `NIF: ${nif}` : null,
+      iva  ? `IVA: ${iva}%` : null,
+      valor_sem_iva ? `Sem IVA: ${valor_sem_iva}€` : null,
+    ].filter(Boolean).join(' | ') || null;
+
+    const { rows } = await pool.query(
+      `INSERT INTO despesas
+         (data_despesa, descricao, tipo, valor, centro_custo_id, fornecedor, notas, documento_ref)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
       [
+        data || new Date().toISOString().slice(0, 10),
+        descricao,
+        tipo,
+        valor,
+        centro_custo_id || null,
         fornecedor || null,
-        nif || null,
-        data || null,
-        valor_total || null,
-        valor_sem_iva || null,
-        iva || null,
-        descricao || null,
-        categoria || null,
-        obra || null,
-        notas || null,
+        notasCompletas,
+        documento_ref || null,
       ]
     );
 
-    return NextResponse.json({ ok: true, id: result.rows[0].id });
+    return NextResponse.json({ ok: true, id: rows[0].id });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[api/despesas/registar]', msg);

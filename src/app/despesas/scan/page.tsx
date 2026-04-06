@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 
 const CATS = ['Material de obra','Ferramentas','Combustivel','Alimentacao','Subcontratacao','Transporte','Outros'];
 
@@ -9,12 +10,16 @@ interface Dados {
   descricao?: string; categoria?: string;
 }
 
+interface Obra { id: string; code: string; name: string; }
+
 const inp: React.CSSProperties = {
   width:'100%', padding:'10px 12px', border:'1px solid #d1d5db',
   borderRadius:8, fontSize:15, boxSizing:'border-box', background:'#fff',
 };
 
-function Btn({ label, color, onClick, full, disabled }: { label:string; color:string; onClick?:()=>void; full?:boolean; disabled?:boolean }) {
+function Btn({ label, color, onClick, full, disabled }: {
+  label:string; color:string; onClick?:()=>void; full?:boolean; disabled?:boolean;
+}) {
   return (
     <button onClick={onClick} disabled={disabled} style={{
       background: disabled ? '#9ca3af' : color, color:'#fff', border:'none',
@@ -29,13 +34,20 @@ export default function ScanDespesa() {
   const [preview, setPreview] = useState('');
   const [scanning, setScanning] = useState(false);
   const [dados, setDados] = useState<Dados | null>(null);
-  const [obra, setObra] = useState('');
-  const [obras, setObras] = useState<string[]>([]);
+  const [centroCustoId, setCentroCustoId] = useState('');
+  const [obras, setObras] = useState<Obra[]>([]);
   const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [erro, setErro] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/obras?limit=200')
+      .then(r => r.json())
+      .then(d => setObras(d.rows ?? []))
+      .catch(() => {});
+  }, []);
 
   const handleFile = async (f: File) => {
     setDados(null); setSaved(false); setErro('');
@@ -60,6 +72,7 @@ export default function ScanDespesa() {
     inputRef.current.setAttribute('capture','environment');
     inputRef.current.click();
   };
+
   const openFile = () => {
     if (!inputRef.current) return;
     inputRef.current.removeAttribute('capture');
@@ -72,7 +85,7 @@ export default function ScanDespesa() {
     try {
       const r = await fetch('/api/despesas/registar', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ ...dados, obra, notas }),
+        body: JSON.stringify({ ...dados, centro_custo_id: centroCustoId || null, notas }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'Erro');
@@ -84,23 +97,23 @@ export default function ScanDespesa() {
     }
   };
 
-  // Load obras for dropdown
-  useEffect(() => { (async()=>{ try{ const r=await fetch('/api/obras'); const j=await r.json(); setObras((j.items||[]).map((o: {nome?:string;descricao?:string})=>o.nome||o.descricao||'').filter(Boolean)); }catch(_){} })(); }, []);
   if (saved) return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,fontFamily:'sans-serif'}}>
       <div style={{fontSize:72}}>✅</div>
       <h2 style={{color:'#065f46',margin:'16px 0 8px'}}>Despesa registada!</h2>
-      <Btn label="Nova despesa" color="#2563eb" onClick={() => { setPreview(''); setDados(null); setSaved(false); setObra(''); setNotas(''); setErro(''); }} />
-      <a href="/controlo-obra" style={{marginTop:16,color:'#6b7280',fontSize:14}}>Voltar ao Controlo de Obra</a>
+      <Btn label="Nova despesa" color="#2563eb" onClick={() => {
+        setPreview(''); setDados(null); setSaved(false); setCentroCustoId(''); setNotas(''); setErro('');
+      }} />
+      <Link href="/despesas" style={{marginTop:16,color:'#6b7280',fontSize:14}}>Ver todas as despesas</Link>
     </div>
   );
 
   return (
     <div style={{maxWidth:480,margin:'0 auto',padding:20,fontFamily:'sans-serif',paddingBottom:80}}>
       <div style={{marginBottom:20}}>
-        <a href="/controlo-obra" style={{color:'#6b7280',fontSize:14,textDecoration:'none'}}>Controlo de Obra</a>
-        <h1 style={{fontSize:22,fontWeight:700,margin:'8px 0 2px'}}>Registar Despesa</h1>
-        <p style={{color:'#6b7280',fontSize:14,margin:0}}>Fotografa ou carrega um recibo — a IA extrai tudo automaticamente</p>
+        <Link href="/despesas" style={{color:'#6b7280',fontSize:14,textDecoration:'none'}}>&larr; Despesas</Link>
+        <h1 style={{fontSize:22,fontWeight:700,margin:'8px 0 2px'}}>Digitalizar Factura / Recibo</h1>
+        <p style={{color:'#6b7280',fontSize:14,margin:0}}>Fotografa ou carrega &mdash; a IA extrai os dados automaticamente</p>
       </div>
 
       {!preview && (
@@ -116,7 +129,7 @@ export default function ScanDespesa() {
 
       {preview && (
         <div style={{marginBottom:16,position:'relative'}}>
-          <img src={preview} alt="Recibo" style={{width:'100%',borderRadius:12,maxHeight:240,objectFit:'cover'}} />
+          <img src={preview} alt="Documento" style={{width:'100%',borderRadius:12,maxHeight:240,objectFit:'cover'}} />
           <button onClick={() => { setPreview(''); setDados(null); setErro(''); }}
             style={{position:'absolute',top:8,right:8,background:'rgba(0,0,0,0.55)',color:'#fff',border:'none',borderRadius:16,padding:'4px 10px',cursor:'pointer',fontSize:13}}>
             Mudar
@@ -140,23 +153,26 @@ export default function ScanDespesa() {
       {dados && !scanning && (
         <div>
           <div style={{background:'#f0fdf4',border:'1px solid #86efac',borderRadius:8,padding:10,marginBottom:16,fontSize:13,color:'#166534'}}>
-            Dados extraidos automaticamente — confirma ou corrige antes de guardar
+            Dados extraidos automaticamente &mdash; confirma ou corrige antes de guardar
           </div>
 
           {([
-            {label:'Fornecedor',key:'fornecedor',type:'text'},
-            {label:'NIF',key:'nif',type:'text'},
-            {label:'Data',key:'data',type:'date'},
-            {label:'Valor total (c/ IVA)',key:'valor_total',type:'number'},
-            {label:'Valor sem IVA',key:'valor_sem_iva',type:'number'},
-            {label:'Taxa IVA (%)',key:'iva',type:'number'},
-            {label:'Descricao',key:'descricao',type:'text'},
-          ] as {label:string;key:keyof Dados;type:string}[]).map(({label,key,type}) => (
+            {label:'Fornecedor', key:'fornecedor', type:'text'},
+            {label:'NIF',        key:'nif',        type:'text'},
+            {label:'Data',       key:'data',       type:'date'},
+            {label:'Valor total (c/ IVA)', key:'valor_total',   type:'number'},
+            {label:'Valor sem IVA',        key:'valor_sem_iva', type:'number'},
+            {label:'Taxa IVA (%)',          key:'iva',           type:'number'},
+            {label:'Descricao',            key:'descricao',     type:'text'},
+          ] as {label:string; key:keyof Dados; type:string}[]).map(({label,key,type}) => (
             <div key={key} style={{marginBottom:12}}>
               <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>{label}</label>
               <input type={type} style={inp}
                 value={(dados?.[key] ?? '') as string}
-                onChange={e => setDados(prev => ({...prev, [key]: type==='number' ? (parseFloat(e.target.value)||null) : e.target.value}))}
+                onChange={e => setDados(prev => ({
+                  ...prev,
+                  [key]: type==='number' ? (parseFloat(e.target.value)||null) : e.target.value
+                }))}
               />
             </div>
           ))}
@@ -170,19 +186,21 @@ export default function ScanDespesa() {
           </div>
 
           <div style={{marginBottom:12}}>
-            <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Obra / Centro de Custo</label>
-            <>
-        <input type="text" style={inp} value={obra} onChange={e=>setObra(e.target.value)} placeholder="Ex: Obra Lisboa, CC-001" list="obras-list" />
-        <datalist id="obras-list">{obras.map(o=><option key={o} value={o}/>)}</datalist>
-      </>
+            <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Centro de custo / Obra</label>
+            <select style={inp} value={centroCustoId} onChange={e => setCentroCustoId(e.target.value)}>
+              <option value="">Geral (sem obra)</option>
+              {obras.map(o => <option key={o.id} value={o.id}>{o.code} &mdash; {o.name}</option>)}
+            </select>
           </div>
 
           <div style={{marginBottom:20}}>
-            <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Notas</label>
-            <textarea style={{...inp,resize:'vertical'} as React.CSSProperties} rows={2} value={notas} onChange={e=>setNotas(e.target.value)} />
+            <label style={{display:'block',fontSize:12,fontWeight:600,color:'#374151',marginBottom:4}}>Notas adicionais</label>
+            <textarea style={{...inp,resize:'vertical'} as React.CSSProperties} rows={2}
+              value={notas} onChange={e=>setNotas(e.target.value)} />
           </div>
 
-          <Btn label={saving ? 'A guardar...' : 'Guardar despesa'} color="#16a34a" onClick={guardar} full disabled={saving} />
+          <Btn label={saving ? 'A guardar...' : 'Guardar despesa'} color="#16a34a"
+            onClick={guardar} full disabled={saving} />
         </div>
       )}
     </div>

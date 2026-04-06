@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useState, useCallback } from "react";
 
@@ -145,12 +146,20 @@ export default function DespesasPage() {
           <h1 className="text-2xl font-bold text-gray-900">Despesas</h1>
           <p className="text-sm text-gray-500 mt-1">Registo geral de despesas por centro de custo</p>
         </div>
-        <button
-          onClick={() => { resetForm(); setShowForm(true); }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-        >
-          + Nova despesa
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href="/despesas/scan"
+            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            Digitalizar factura
+          </Link>
+          <button
+            onClick={() => { resetForm(); setShowForm(true); }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            + Nova despesa
+          </button>
+        </div>
       </div>
 
       {/* Resumo por tipo */}

@@ -9,9 +9,7 @@ const navItems = [
   { href: "/clientes",  label: "Clientes",  abbr: "CL" },
   { href: "/contratos", label: "Contratos", abbr: "CO" },
   { href: "/catalogo",  label: "Catálogo",  abbr: "CT" },
-
-  { href: "/despesas", label: "Despesas", abbr: "DE" },
-  { href: "/catalogo",  label: "Catálogo",  abbr: "CT" },
+  { href: "/despesas",  label: "Despesas",  abbr: "DE" },
 ];
 
 export function Sidebar() {
@@ -30,7 +28,7 @@ export function Sidebar() {
             : pathname.startsWith(item.href);
           return (
             <Link
-              key={item.href}
+              key={item.href + item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
