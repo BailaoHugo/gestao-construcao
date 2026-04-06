@@ -67,7 +67,7 @@ export default function DespesasPage() {
   const loadObras = useCallback(async () => {
     const r = await fetch("/api/obras?limit=200");
     const d = await r.json();
-    setObras(d.rows ?? []);
+    setObras(d.data ?? d.items ?? d.rows ?? []);
   }, []);
 
   const loadDespesas = useCallback(async () => {
@@ -231,7 +231,23 @@ export default function DespesasPage() {
                     {d.centro_custo_code ? `${d.centro_custo_code} — ${d.centro_custo_nome}` : <span className="text-gray-300">—</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{d.fornecedor ?? <span className="text-gray-300">—</span>}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{d.documento_ref ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    {d.documento_ref && d.documento_ref.startsWith('http') ? (
+                      <a
+                        href={d.documento_ref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium"
+                        title="Ver documento"
+                      >
+                        📎 Ver
+                      </a>
+                    ) : d.documento_ref ? (
+                      <span className="text-xs text-gray-500">{d.documento_ref}</span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right font-semibold text-gray-900 whitespace-nowrap">{fmt(Number(d.valor))}</td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => openEdit(d)} className="text-blue-500 hover:text-blue-700 mr-3 text-xs">Editar</button>
