@@ -1,31 +1,27 @@
-import grandesCapitulos from "../../../data/orcamentos/processed/grandes_capitulos.json";
-import capitulos from "../../../data/orcamentos/processed/capitulos.json";
-
-type GrandeRow = { code: string; description: string };
-type CapRow = { code: string; description: string };
-
-const GRANDE_DESC = new Map<string, string>(
-  (grandesCapitulos as GrandeRow[]).map((g) => [g.code.trim(), g.description]),
-);
-
-const CAP_DESC = new Map<string, string>(
-  (capitulos as CapRow[]).map((c) => [c.code.trim(), c.description]),
-);
+/**
+ * catalogoLabels.ts
+ * Funções de label para capítulos do catálogo.
+ * Usa capitulo_nome directamente (catalogo_ennova) — sem dependência de JSONs externos.
+ */
 
 const SEP = " — ";
 
-/** Ex.: "B" → "B — Projetos e Estudos" */
+/**
+ * Devolve label para grande capítulo.
+ * Com catalogo_ennova o grande capítulo é o próprio capitulo_nome.
+ */
 export function labelGrandeCapitulo(code: string | null | undefined): string {
   const c = (code ?? "").trim();
   if (!c) return "Sem Grande Capítulo";
-  const d = GRANDE_DESC.get(c);
-  return d ? `${c}${SEP}${d}` : c;
+  return c;
 }
 
-/** Ex.: "B1" → "B1 — Levantamentos e Diagnóstico" */
+/**
+ * Devolve label para capítulo.
+ * Com catalogo_ennova o capítulo é o próprio capitulo_nome.
+ */
 export function labelCapitulo(code: string | null | undefined): string {
   const c = (code ?? "").trim();
   if (!c) return "Sem Capítulo";
-  const d = CAP_DESC.get(c);
-  return d ? `${c}${SEP}${d}` : c;
+  return c;
 }
