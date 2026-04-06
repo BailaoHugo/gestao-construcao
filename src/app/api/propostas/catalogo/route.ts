@@ -3,99 +3,116 @@ import { pool } from "@/lib/db";
 
 /**
  * GET /api/propostas/catalogo
- * Lê da tabela catalogo_ennova (catálogo real com 8000+ artigos).
- * Devolve os campos no formato esperado pelo CatalogoLateralPanel / LinhasEditor.
+ *
+ * Modos:
+ *  ?chaptersOnly=1[&tipo=reabilitacao|nova_construcao]
+ *    → lista de capítulos com contagem de artigos
+ *
+ *  ?capitulo_num=5[&tipo=...]
+ *    → todos os artigos desse capítulo
+ *
+ *  ?q=termo[&tipo=...][&limit=N]
+ *    → pesquisa full-text
  */
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const q = searchParams.get("q")?.trim() ?? "";
-  const rawLimit = searchParams.get("limit");
-  const parsedLimit = rawLimit ? Number(rawLimit) : 50;
-  const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(parsedLimit, 2000)) : 50;
-  const capitulo = searchParams.get("capitulo");
-  const tipo = searchParams.get("tipo");
+  const sp = req.nextUrl.searchParams;
+  const tipo         = sp.get("tipo")?.trim() ?? "";
+  const chaptersOnly = sp.get("chaptersOnly") === "1";
+  const capituloNum  = sp.get("capitulo_num");
+  const q            = sp.get("q")?.trim() ?? "";
+  const rawLimit     = sp.get("limit");
+  const limit        = Math.max(1, Math.min(Number(rawLimit) || 200, 2000));
+
+  const tipoCondition = tipo ? `AND tipo_catalogo = $1` : "";
+  const tipoParam     = tipo ? [tipo] : [];
 
   try {
-    const conditions: string[] = [];
-    const params: (string | number)[] = [];
-    let pi = 1;
-
-    if (q) {
-      conditions.push(
-        `(unaccent(lower(codigo)) LIKE $${pi} OR unaccent(lower(descricao)) LIKE $${pi + 1})`
+    // ── Modo 1: lista de capítulos ────────────────────────────────────────
+    if (chaptersOnly) {
+      const res = await pool.query(
+        `SELECT capitulo_num, capitulo_nome, COUNT(*)::int AS total
+         FROM catalogo_ennova
+         WHERE 1=1 ${tipoCondition}
+         GROUP BY capitulo_num, capitulo_nome
+         ORDER BY capitulo_num`,
+        tipoParam
       );
-      const normalized = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      params.push(`${normalized}%`, `%${normalized}%`);
-      pi += 2;
+      return NextResponse.json({ chapters: res.rows });
     }
 
-    if (capitulo) {
-      conditions.push(`capitulo_num = $${pi++}`);
-      params.push(parseInt(capitulo));
+    // ── Modo 2: artigos de um capítulo específico ─────────────────────────
+    if (capituloNum) {
+      const pi = tipo ? 2 : 1;
+      const res = await pool.query(
+        `SELECT id, codigo, descricao, unidade,
+                capitulo_nome AS grande_capitulo,
+                capitulo_nome AS capitulo,
+                preco_custo   AS pu_custo,
+                ROUND((preco_custo * k_padrao)::numeric, 2) AS pu_venda,
+                tipo_catalogo AS origem
+         FROM catalogo_ennova
+         WHERE capitulo_num = $${pi} ${tipoCondition}
+         ORDER BY codigo`,
+        tipo ? [tipo, parseInt(capituloNum)] : [parseInt(capituloNum)]
+      );
+      return NextResponse.json(res.rows.map(mapRow));
     }
 
-    if (tipo) {
-      conditions.push(`tipo_catalogo = $${pi++}`);
-      params.push(tipo);
-    }
-
-    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-
-    const orderBy = q
-      ? `ORDER BY
-          CASE
-            WHEN unaccent(lower(codigo)) LIKE $${pi} THEN 0
-            WHEN unaccent(lower(descricao)) LIKE $${pi} THEN 1
-            ELSE 2
-          END,
-          capitulo_num, codigo`
-      : `ORDER BY capitulo_num, codigo`;
-
+    // ── Modo 3: pesquisa ──────────────────────────────────────────────────
     if (q) {
-      const normalized = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      params.push(`${normalized}%`);
-      pi++;
+      const norm = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const pi   = tipo ? 3 : 1;
+      const res = await pool.query(
+        `SELECT id, codigo, descricao, unidade,
+                capitulo_nome AS grande_capitulo,
+                capitulo_nome AS capitulo,
+                preco_custo   AS pu_custo,
+                ROUND((preco_custo * k_padrao)::numeric, 2) AS pu_venda,
+                tipo_catalogo AS origem
+         FROM catalogo_ennova
+         WHERE (
+           unaccent(lower(codigo))    LIKE $${pi}
+           OR unaccent(lower(descricao)) LIKE $${pi + 1}
+         ) ${tipoCondition}
+         ORDER BY
+           CASE WHEN unaccent(lower(codigo)) LIKE $${pi} THEN 0 ELSE 1 END,
+           capitulo_num, codigo
+         LIMIT $${pi + 2}`,
+        tipo
+          ? [tipo, `${norm}%`, `%${norm}%`, limit]
+          : [`${norm}%`, `%${norm}%`, limit]
+      );
+      return NextResponse.json(res.rows.map(mapRow));
     }
 
-    params.push(limit);
-
-    const result = await pool.query(
-      `SELECT
-         id,
-         codigo,
-         descricao,
-         unidade,
-         capitulo_nome   AS grande_capitulo,
-         capitulo_nome   AS capitulo,
-         preco_custo     AS pu_custo,
-         ROUND((preco_custo * k_padrao)::numeric, 2) AS pu_venda,
-         tipo_catalogo   AS origem
+    // ── Modo 4: sem filtro — devolver só lista de capítulos ───────────────
+    const res = await pool.query(
+      `SELECT capitulo_num, capitulo_nome, COUNT(*)::int AS total
        FROM catalogo_ennova
-       ${where}
-       ${orderBy}
-       LIMIT $${pi}`,
-      params
+       WHERE 1=1 ${tipoCondition}
+       GROUP BY capitulo_num, capitulo_nome
+       ORDER BY capitulo_num`,
+      tipoParam
     );
+    return NextResponse.json({ chapters: res.rows });
 
-    const data = result.rows.map((row) => ({
-      id:                   row.id,
-      codigo:               row.codigo,
-      descricao:            row.descricao,
-      unidade:              row.unidade,
-      grande_capitulo:      row.grande_capitulo,
-      capitulo:             row.capitulo,
-      preco_custo_unitario: row.pu_custo  == null ? null : Number(row.pu_custo),
-      preco_venda_unitario: row.pu_venda  == null ? null : Number(row.pu_venda),
-      origem:               row.origem,
-    }));
-
-    return NextResponse.json(data);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[api/propostas/catalogo] GET failed:", message);
-    return NextResponse.json(
-      { error: "Failed to load catalog" },
-      { status: 500 }
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[api/propostas/catalogo]", msg);
+    return NextResponse.json({ error: "Failed to load catalog" }, { status: 500 });
   }
+}
+
+function mapRow(row: Record<string, unknown>) {
+  return {
+    id:                   row.id,
+    codigo:               row.codigo,
+    descricao:            row.descricao,
+    unidade:              row.unidade,
+    grande_capitulo:      row.grande_capitulo,
+    capitulo:             row.capitulo,
+    preco_custo_unitario: row.pu_custo  != null ? Number(row.pu_custo)  : null,
+    preco_venda_unitario: row.pu_venda  != null ? Number(row.pu_venda)  : null,
+    origem:               row.origem,
+  };
 }
