@@ -242,6 +242,193 @@ export async function runFullSync(): Promise<SyncResults> {
   return results;
 }
 
+
+// -- Sync Despesas para tabela app (despesas) ----------------------------------
+// Mapeamento: tipo de documento TOC → tipo da app
+const DOC_TYPE_TO_TIPO: Record<string, string> = {
+  'FR': 'materiais',    // Factura/Recibo
+  'FT': 'materiais',    // Factura
+  'VD': 'materiais',    // Venda a dinheiro
+  'FS': 'mao_de_obra',  // Folha de serviços / subempreitada
+  'NC': 'outros',       // Nota de crédito
+};
+
+function docTypeToTipo(docType: string | null): string {
+  if (!docType) return 'outros';
+  const upper = docType.toUpperCase();
+  return DOC_TYPE_TO_TIPO[upper] ?? 'materiais';
+}
+
+export async function syncDespesasToApp(
+  startDate: string,
+  endDate: string,
+): Promise<{ upserted: number; skipped: number; pages: number }> {
+  // Garantir coluna toconline_id na tabela despesas
+  await pool.query(`
+    ALTER TABLE despesas
+      ADD COLUMN IF NOT EXISTS toconline_id TEXT UNIQUE
+  `);
+
+  // Carregar obras para matching de centro de custo
+  const obrasRes = await pool.query(
+    'SELECT id, code, name FROM obras ORDER BY code'
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const obras: { id: string; code: string; name: string }[] = obrasRes.rows;
+
+  function matchCentroCusto(
+    tocCode: string | null,
+    tocName: string | null,
+  ): string | null {
+    if (!tocCode && !tocName) return null;
+    // Exact code match
+    if (tocCode) {
+      const byCode = obras.find(
+        o => o.code.toLowerCase() === tocCode.toLowerCase()
+      );
+      if (byCode) return byCode.id;
+    }
+    // Partial name match
+    if (tocName) {
+      const lcName = tocName.toLowerCase();
+      const byName = obras.find(
+        o => o.name.toLowerCase().includes(lcName) ||
+             lcName.includes(o.name.toLowerCase())
+      );
+      if (byName) return byName.id;
+    }
+    return null;
+  }
+
+  let upserted = 0;
+  let skipped = 0;
+  let pageNum = 1;
+  const pageSize = 100;
+
+  while (true) {
+    const filterExpr = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
+    const qs = new URLSearchParams({
+      'page[number]': String(pageNum),
+      'page[size]':   String(pageSize),
+    });
+
+    const raw = await tocFetch<unknown>(
+      `/commercial_purchases_documents?filter="${filterExpr}"&${qs}`
+    );
+    const data = Array.isArray(raw)
+      ? raw
+      : ((raw as { data?: unknown[] }).data ?? []);
+    const items = data.map(normalizeItem) as TocDespesa[];
+
+    if (items.length === 0) break;
+
+    for (const item of items) {
+      try {
+        // Tentar obter PDF URL do documento
+        let docUrl: string | null = null;
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const detail = await tocFetch<any>(
+            `/commercial_purchases_documents/${item.id}`
+          );
+          const d = detail?.data ? normalizeItem(detail.data) : detail;
+          // Tentar vários campos onde o URL pode estar
+          docUrl =
+            d?.pdf_url ??
+            d?.document_url ??
+            d?.attachment_url ??
+            d?.file_url ??
+            null;
+          // Centro de custo ao nível do documento
+          if (!item.centro_custo) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cc: any =
+              d?.cost_center ??
+              d?.cost_centre ??
+              d?.cost_center_id ??
+              null;
+            if (cc) {
+              item.centro_custo =
+                typeof cc === 'object'
+                  ? (cc.code ?? cc.name ?? String(cc.id ?? ''))
+                  : String(cc);
+            }
+          }
+        } catch {
+          // Se o endpoint de detalhe falhar, continuar sem URL e sem CC
+        }
+
+        const tipo  = docTypeToTipo(item.document_type ?? null);
+        const valor = item.gross_total ?? item.net_total ?? null;
+        if (!valor) { skipped++; continue; }
+
+        const centroCustoId = matchCentroCusto(
+          item.centro_custo ?? null,
+          item.centro_custo ?? null,
+        );
+
+        const descricao =
+          (item.document_no ? `${item.document_no} ` : '') +
+          (item.document_type ? `(${item.document_type}) ` : '') +
+          (item.notes ?? '');
+
+        const notas = [
+          item.supplier_tax_registration_number
+            ? `NIF: ${item.supplier_tax_registration_number}`
+            : null,
+          item.net_total != null
+            ? `Sem IVA: ${item.net_total}€`
+            : null,
+          item.tax_payable != null
+            ? `IVA: ${item.tax_payable}€`
+            : null,
+          item.centro_custo
+            ? `CC TOC: ${item.centro_custo}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' | ') || null;
+
+        await pool.query(
+          `INSERT INTO despesas
+             (toconline_id, data_despesa, descricao, tipo, valor,
+              centro_custo_id, fornecedor, notas, documento_ref)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT (toconline_id) DO UPDATE SET
+             data_despesa    = EXCLUDED.data_despesa,
+             descricao       = EXCLUDED.descricao,
+             tipo            = EXCLUDED.tipo,
+             valor           = EXCLUDED.valor,
+             centro_custo_id = COALESCE(EXCLUDED.centro_custo_id, despesas.centro_custo_id),
+             fornecedor      = EXCLUDED.fornecedor,
+             notas           = EXCLUDED.notas,
+             documento_ref   = COALESCE(EXCLUDED.documento_ref, despesas.documento_ref)`,
+          [
+            String(item.id),
+            item.date ?? new Date().toISOString().slice(0, 10),
+            descricao.trim() || 'Documento TOC Online',
+            tipo,
+            valor,
+            centroCustoId,
+            item.supplier_business_name ?? null,
+            notas,
+            docUrl,
+          ]
+        );
+        upserted++;
+      } catch (e) {
+        console.error('[syncDespesasToApp] doc', item.id, (e as Error).message);
+        skipped++;
+      }
+    }
+
+    if (items.length < pageSize) break;
+    pageNum++;
+  }
+
+  return { upserted, skipped, pages: pageNum };
+}
+
 // -- Utilitarios -----------------------------------------------------------------
 
 export function isConfigured(): boolean {

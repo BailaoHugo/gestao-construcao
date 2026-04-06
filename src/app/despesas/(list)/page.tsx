@@ -62,6 +62,8 @@ export default function DespesasPage() {
     documento_ref: "",
   });
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
   const [erro, setErro] = useState("");
 
   const loadObras = useCallback(async () => {
@@ -107,6 +109,25 @@ export default function DespesasPage() {
     setShowForm(true);
   };
 
+  const handleSync = async () => {
+    setSyncing(true); setSyncMsg('');
+    try {
+      const r = await fetch('/api/despesas/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate: '2026-01-01', endDate: new Date().toISOString().slice(0, 10) }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Erro');
+      setSyncMsg(`✓ ${j.upserted} despesas importadas`);
+      loadDespesas();
+    } catch (e) {
+      setSyncMsg('Erro: ' + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -146,19 +167,33 @@ export default function DespesasPage() {
           <h1 className="text-2xl font-bold text-gray-900">Despesas</h1>
           <p className="text-sm text-gray-500 mt-1">Registo geral de despesas por centro de custo</p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href="/despesas/scan"
-            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            Digitalizar factura
-          </Link>
-          <button
-            onClick={() => { resetForm(); setShowForm(true); }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            + Nova despesa
-          </button>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex gap-2">
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="flex items-center gap-1 bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white px-3 py-2 rounded-lg text-sm font-medium"
+            >
+              {syncing ? '⟳ A importar...' : '⟳ TOC Online'}
+            </button>
+            <Link
+              href="/despesas/scan"
+              className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Digitalizar factura
+            </Link>
+            <button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              + Nova despesa
+            </button>
+          </div>
+          {syncMsg && (
+            <p className={`text-xs ${syncMsg.startsWith('Erro') ? 'text-red-500' : 'text-green-600'}`}>
+              {syncMsg}
+            </p>
+          )}
         </div>
       </div>
 
