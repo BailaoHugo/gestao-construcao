@@ -2,7 +2,10 @@ import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  max: 1,
+  idleTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? undefined : { rejectUnauthorized: false },
 });
 
 // -- OAuth Token -----------------------------------------------------------------
@@ -324,39 +327,8 @@ export async function syncDespesasToApp(
 
     for (const item of items) {
       try {
-        // Tentar obter PDF URL do documento
-        let docUrl: string | null = null;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const detail = await tocFetch<any>(
-            `/commercial_purchases_documents/${item.id}`
-          );
-          const d = detail?.data ? normalizeItem(detail.data) : detail;
-          // Tentar vários campos onde o URL pode estar
-          docUrl =
-            d?.pdf_url ??
-            d?.document_url ??
-            d?.attachment_url ??
-            d?.file_url ??
-            null;
-          // Centro de custo ao nível do documento
-          if (!item.centro_custo) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cc: any =
-              d?.cost_center ??
-              d?.cost_centre ??
-              d?.cost_center_id ??
-              null;
-            if (cc) {
-              item.centro_custo =
-                typeof cc === 'object'
-                  ? (cc.code ?? cc.name ?? String(cc.id ?? ''))
-                  : String(cc);
-            }
-          }
-        } catch {
-          // Se o endpoint de detalhe falhar, continuar sem URL e sem CC
-        }
+           // URL do documento: sem fetch individual por doc (evita sobrecarga DB/API)
+          const docUrl: string | null = null;
 
         const tipo  = docTypeToTipo(item.document_type ?? null);
         const valor = item.gross_total ?? item.net_total ?? null;
