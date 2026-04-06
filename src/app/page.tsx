@@ -9,6 +9,7 @@ type Metrics = {
   obras: number;
   propostas: number;
   contratos: number;
+  catalogo:    { obra_nova: number; reabilitacao: number; total: number };
 };
 
 const CARDS = [
@@ -65,6 +66,32 @@ export default function DashboardPage() {
               💡 Tens <strong>{metrics.clientes} clientes</strong> importados. O próximo passo é criar obras e associá-las a clientes.
             </div>
           )}
+        
+          {/* Catálogo */}
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Catálogo</span>
+              <a href="/catalogo" className="text-[11px] text-blue-600 hover:underline">Ver →</a>
+            </div>
+            <p className="text-3xl font-bold text-slate-800">
+              {metrics.catalogo.total.toLocaleString("pt-PT")}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">artigos no total</p>
+            <div className="mt-3 flex gap-2">
+              <div className="flex-1 rounded-lg bg-blue-50 px-2 py-2 text-center">
+                <p className="text-base font-bold text-blue-600">
+                  {metrics.catalogo.obra_nova.toLocaleString("pt-PT")}
+                </p>
+                <p className="text-[10px] text-blue-500">Obra Nova</p>
+              </div>
+              <div className="flex-1 rounded-lg bg-emerald-50 px-2 py-2 text-center">
+                <p className="text-base font-bold text-emerald-600">
+                  {metrics.catalogo.reabilitacao.toLocaleString("pt-PT")}
+                </p>
+                <p className="text-[10px] text-emerald-500">Reabilitação</p>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </MainLayout>
