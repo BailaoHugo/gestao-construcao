@@ -1,19 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { pool } from "@/lib/db";
 
-/**
- * GET /api/propostas/catalogo
- *
- * Modos:
- *  ?chaptersOnly=1[&tipo=reabilitacao|nova_construcao]
- *    → lista de capítulos com contagem de artigos
- *
- *  ?capitulo_num=5[&tipo=...]
- *    → todos os artigos desse capítulo
- *
- *  ?q=termo[&tipo=...][&limit=N]
- *    → pesquisa full-text
- */
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const tipo         = sp.get("tipo")?.trim() ?? "";
@@ -27,20 +14,33 @@ export async function GET(req: NextRequest) {
   const tipoParam     = tipo ? [tipo] : [];
 
   try {
-    // ── Modo 1: lista de capítulos ────────────────────────────────────────
+    // Modo 1: lista de capítulos + tipos disponíveis
     if (chaptersOnly) {
-      const res = await pool.query(
-        `SELECT capitulo_num, capitulo_nome, COUNT(*)::int AS total
-         FROM catalogo_ennova
-         WHERE 1=1 ${tipoCondition}
-         GROUP BY capitulo_num, capitulo_nome
-         ORDER BY capitulo_num`,
-        tipoParam
-      );
-      return NextResponse.json({ chapters: res.rows });
+      const [chapRes, tiposRes] = await Promise.all([
+        pool.query(
+          `SELECT capitulo_num, capitulo_nome, COUNT(*)::int AS total
+           FROM catalogo_ennova
+           WHERE 1=1 ${tipoCondition}
+           GROUP BY capitulo_num, capitulo_nome
+           ORDER BY capitulo_num`,
+          tipoParam
+        ),
+        // Só na chamada sem tipo é que devolvemos os tipos disponíveis
+        tipo ? null : pool.query(
+          `SELECT DISTINCT tipo_catalogo, COUNT(*)::int AS total
+           FROM catalogo_ennova
+           WHERE tipo_catalogo IS NOT NULL AND tipo_catalogo != ''
+           GROUP BY tipo_catalogo
+           ORDER BY tipo_catalogo`
+        ),
+      ]);
+      return NextResponse.json({
+        chapters:        chapRes.rows,
+        tiposDisponiveis: tiposRes ? tiposRes.rows : undefined,
+      });
     }
 
-    // ── Modo 2: artigos de um capítulo específico ─────────────────────────
+    // Modo 2: artigos de um capítulo específico
     if (capituloNum) {
       const pi = tipo ? 2 : 1;
       const res = await pool.query(
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(res.rows.map(mapRow));
     }
 
-    // ── Modo 3: pesquisa ──────────────────────────────────────────────────
+    // Modo 3: pesquisa
     if (q) {
       const norm = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const pi   = tipo ? 3 : 1;
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
                 tipo_catalogo AS origem
          FROM catalogo_ennova
          WHERE (
-           unaccent(lower(codigo))    LIKE $${pi}
+           unaccent(lower(codigo))       LIKE $${pi}
            OR unaccent(lower(descricao)) LIKE $${pi + 1}
          ) ${tipoCondition}
          ORDER BY
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(res.rows.map(mapRow));
     }
 
-    // ── Modo 4: sem filtro — devolver só lista de capítulos ───────────────
+    // Fallback: capítulos sem filtro
     const res = await pool.query(
       `SELECT capitulo_num, capitulo_nome, COUNT(*)::int AS total
        FROM catalogo_ennova
