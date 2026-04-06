@@ -13,12 +13,11 @@ async function count(table: string): Promise<number> {
 }
 
 export async function GET() {
-  const [clientes, obras, orcamentos, propostas, contratos] = await Promise.all([
+  const [clientes, obras, propostas, contratos] = await Promise.all([
     count("clientes"),
     count("obras"),
-    count("orcamentos"),
     count("propostas"),
     count("contratos"),
   ]);
-  return NextResponse.json({ clientes, obras, orcamentos, propostas, contratos });
+  return NextResponse.json({ clientes, obras, propostas, contratos });
 }

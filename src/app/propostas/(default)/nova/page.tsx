@@ -117,7 +117,7 @@ async function fetchClientes(q: string): Promise<(ClienteRow & { id: string; lab
 async function fetchObras(q: string): Promise<(ObraRow & { id: string; label: string; sub?: string })[]> {
   const r = await fetch(`/api/obras?search=${encodeURIComponent(q)}&limit=20&estado=ativo`);
   if (!r.ok) return [];
-  const d = await r.json() as { data?: ObraRow[]; items?: ObraRow[] };
+  const d = await r.json() as { rows?: ObraRow[]; data?: ObraRow[]; items?: ObraRow[] };
   const rows = d.rows ?? d.data ?? d.items ?? [];
   return rows.map(o => ({ ...o, label: o.nome, sub: o.code }));
 }

@@ -7,17 +7,15 @@ import Link from "next/link";
 type Metrics = {
   clientes: number;
   obras: number;
-  orcamentos: number;
   propostas: number;
   contratos: number;
 };
 
 const CARDS = [
-  { key: "clientes",   label: "Clientes",   href: "/clientes",   color: "bg-blue-50   text-blue-700",   icon: "👥" },
-  { key: "obras",      label: "Obras",      href: "/obras",      color: "bg-amber-50  text-amber-700",  icon: "🏗️" },
-  { key: "orcamentos", label: "Orçamentos", href: "/orcamentos", color: "bg-green-50  text-green-700",  icon: "📋" },
-  { key: "propostas",  label: "Propostas",  href: "/propostas",  color: "bg-purple-50 text-purple-700", icon: "📄" },
-  { key: "contratos",  label: "Contratos",  href: "/contratos",  color: "bg-rose-50   text-rose-700",   icon: "📝" },
+  { key: "clientes",  label: "Clientes",  href: "/clientes",  color: "bg-blue-50 text-blue-700",   icon: "👥" },
+  { key: "obras",     label: "Obras",     href: "/obras",     color: "bg-amber-50 text-amber-700",  icon: "🏗️" },
+  { key: "propostas", label: "Propostas", href: "/propostas", color: "bg-purple-50 text-purple-700", icon: "📄" },
+  { key: "contratos", label: "Contratos", href: "/contratos", color: "bg-rose-50 text-rose-700",    icon: "📝" },
 ] as const;
 
 export default function DashboardPage() {
@@ -35,11 +33,13 @@ export default function DashboardPage() {
     <MainLayout>
       <TopBar title="Dashboard" />
       <main className="flex flex-col gap-6">
-        {/* Cards de métricas */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {CARDS.map(({ key, label, href, color, icon }) => (
-            <Link key={key} href={href}
-              className="group flex flex-col gap-2 rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-slate-200">
+            <Link
+              key={key}
+              href={href}
+              className="group flex flex-col gap-2 rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-slate-200"
+            >
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl ${color}`}>
                 {icon}
               </div>
@@ -55,7 +55,6 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Mensagem de boas-vindas */}
         <div className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
           <h2 className="text-lg font-semibold text-slate-800">Bem-vindo à Gestão de Obra</h2>
           <p className="mt-2 text-sm text-slate-500">
