@@ -3,18 +3,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/", label: "Dashboard", abbr: "⌂", exact: true },
+  { href: "/",          label: "Dashboard", abbr: "⌂",  exact: true },
   { href: "/propostas", label: "Propostas", abbr: "PR" },
-  { href: "/obras", label: "Obras", abbr: "OB" },
+  { href: "/obras",     label: "Obras",     abbr: "OB" },
+  { href: "/clientes",  label: "Clientes",  abbr: "CL" },
   { href: "/contratos", label: "Contratos", abbr: "CO" },
-  { href: "/orcamentos", label: "Orçamentos", abbr: "OR" },
-  { href: "/catalogo", label: "Catálogo", abbr: "CT" },
-  { href: "/clientes", label: "Clientes", abbr: "CL" },
+  { href: "/catalogo",  label: "Catálogo",  abbr: "CT" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-
   return (
     <aside className="no-print hidden md:block w-52 shrink-0">
       <nav className="sticky top-6 flex flex-col gap-1 rounded-2xl bg-white/80 p-3 shadow-sm ring-1 ring-slate-100">
