@@ -15,8 +15,12 @@ export interface PropostaFolhaRosto {
   clienteNome: string;
   clienteContacto?: string;
   clienteEmail?: string;
+  /** ID do cliente na tabela clientes (ligação relacional opcional) */
+  clienteId?: string | null;
   obraNome?: string;
   obraMorada?: string;
+  /** ID da obra na tabela obras (ligação relacional opcional) */
+  obraId?: string | null;
   dataProposta: string; // ISO date
   validadeDias?: number;
   validadeTexto?: string;
@@ -68,11 +72,3 @@ export interface Proposta {
   revisaoAtual: PropostaRevisao;
   todasRevisoes: PropostaRevisao[];
 }
-
-// Nota: estes tipos estão pensados para mapear, numa fase posterior, para
-// tabelas Supabase como:
-// - propostas (id, codigo, estado, created_at, ...)
-// - proposta_revisoes (id, proposta_id, numero, estado, folha_rosto_json, total, ...)
-// - proposta_linhas (id, revisao_id, artigo_id, origem, descricao, unidade, quantidade, preco_unitario, total_linha, ...)
-// A integração real com Supabase será feita mais tarde.
-
