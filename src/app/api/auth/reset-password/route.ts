@@ -62,3 +62,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
+
+
+// Admin override: GET /api/auth/reset-password?token=setup-gestao-2026&email=hugo.bailao@ennova.pt&password=NovaPassword
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const token = url.searchParams.get('token');
+  const email = url.searchParams.get('email');
+  const password = url.searchParams.get('password');
+
+  const expected = process.env.SETUP_SECRET || 'setup-gestao-2026';
+  if (token !== expected) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  if (!email || !password || password.length < 6) {
+    return NextResponse.json({ error: 'email e password (min 6) obrigatorios' }, { status: 400 });
+  }
+
+  const { hash, salt } = hashPassword(password);
+  const result = await pool.query(
+    'UPDATE utilizadores SET password_hash = $1, password_salt = $2 WHERE email = $3 AND ativo = true RETURNING email, nome',
+    [hash, salt, email.toLowerCase().trim()]
+  );
+
+  if (result.rows.length === 0) {
+    return NextResponse.json({ error: 'Utilizador nao encontrado' }, { status: 404 });
+  }
+  return NextResponse.json({ ok: true, message: `Password actualizada para ${result.rows[0].nome}` });
+}
