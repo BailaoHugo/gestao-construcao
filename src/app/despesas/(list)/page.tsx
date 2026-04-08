@@ -16,6 +16,7 @@ type Despesa = {
   fornecedor: string | null;
   notas: string | null;
   documento_ref: string | null;
+  toconline_id: string | null;
 };
 
 const TIPOS = [
@@ -65,6 +66,7 @@ export default function DespesasPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
   const [erro, setErro] = useState("");
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
 
   const loadObras = useCallback(async () => {
     const r = await fetch("/api/obras?limit=200");
@@ -125,6 +127,36 @@ export default function DespesasPage() {
       setSyncMsg('Erro: ' + (e instanceof Error ? e.message : String(e)));
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleUpload = async (despesa: Despesa, file: File) => {
+    setUploadingId(despesa.id);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const r = await fetch('/api/upload', { method: 'POST', body: fd });
+      if (!r.ok) throw new Error('Upload falhou');
+      const { url } = await r.json();
+      await fetch(`/api/despesas/${despesa.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data_despesa: despesa.data_despesa.slice(0, 10),
+          descricao: despesa.descricao,
+          tipo: despesa.tipo,
+          valor: despesa.valor,
+          centro_custo_id: despesa.centro_custo_id,
+          fornecedor: despesa.fornecedor,
+          notas: despesa.notas,
+          documento_ref: url,
+        }),
+      });
+      loadDespesas();
+    } catch (e) {
+      alert('Erro no upload: ' + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setUploadingId(null);
     }
   };
 
@@ -267,21 +299,46 @@ export default function DespesasPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{d.fornecedor ?? <span className="text-gray-300">—</span>}</td>
                   <td className="px-4 py-3">
-                    {d.documento_ref && d.documento_ref.startsWith('http') ? (
-                      <a
-                        href={d.documento_ref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium"
-                        title="Ver documento"
-                      >
-                        📎 Ver
-                      </a>
-                    ) : d.documento_ref ? (
-                      <span className="text-xs text-gray-500">{d.documento_ref}</span>
-                    ) : (
-                      <span className="text-gray-300">—</span>
-                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {d.documento_ref && d.documento_ref.startsWith('http') ? (
+                        <a
+                          href={d.documento_ref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium"
+                          title="Ver documento"
+                        >
+                          📎 Ver
+                        </a>
+                      ) : null}
+                      {d.toconline_id && !d.documento_ref ? (
+                        <a
+                          href="https://app17.toconline.pt/purchases/invoices"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 text-xs font-medium"
+                          title="Ver no TOC Online"
+                        >
+                          🔗 TOC
+                        </a>
+                      ) : null}
+                      {uploadingId === d.id ? (
+                        <span className="text-xs text-gray-400 animate-pulse">A carregar...</span>
+                      ) : (
+                        <label className="cursor-pointer inline-flex items-center gap-0.5 text-gray-400 hover:text-blue-500 text-xs" title="Anexar documento">
+                          📎
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*,.pdf"
+                            onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(d, f); e.target.value = ''; }}
+                          />
+                        </label>
+                      )}
+                      {!d.documento_ref && !d.toconline_id && uploadingId !== d.id && (
+                        <span className="text-gray-300 text-xs">—</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-gray-900 whitespace-nowrap">{fmt(Number(d.valor))}</td>
                   <td className="px-4 py-3 text-right">
@@ -346,6 +403,38 @@ export default function DespesasPage() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Notas</label>
                 <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" rows={2} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Anexo (PDF / imagem)</label>
+                {form.documento_ref && form.documento_ref.startsWith('http') ? (
+                  <div className="flex items-center gap-2 text-sm">
+                    <a href={form.documento_ref} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs">📎 Ver anexo actual</a>
+                    <button type="button" onClick={() => setForm(f => ({ ...f, documento_ref: '' }))} className="text-red-400 hover:text-red-600 text-xs">Remover</button>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2 cursor-pointer border border-dashed rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors">
+                    <span>📎 {saving ? 'A guardar...' : 'Clica para anexar ficheiro'}</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*,.pdf"
+                      onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        setSaving(true);
+                        try {
+                          const r = await fetch('/api/upload', { method: 'POST', body: fd });
+                          const { url } = await r.json();
+                          setForm(f => ({ ...f, documento_ref: url }));
+                        } catch { setErro('Erro no upload do ficheiro'); }
+                        finally { setSaving(false); }
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                )}
               </div>
               {erro && <p className="text-red-500 text-xs">{erro}</p>}
               <div className="flex justify-end gap-3 pt-2">
