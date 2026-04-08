@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -29,6 +30,12 @@ export function Sidebar() {
       localStorage.setItem("sidebar-collapsed", String(!prev));
       return !prev;
     });
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
   };
 
   // Avoid hydration mismatch — render expanded on server
@@ -92,8 +99,21 @@ export function Sidebar() {
           );
         })}
 
-        {/* Toggle button */}
-        <div className="mt-2 pt-2 border-t border-slate-100">
+        {/* Logout + Toggle */}
+        <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-1">
+          <button
+            onClick={handleLogout}
+            title={isCollapsed ? "Sair" : undefined}
+            className={`flex w-full items-center rounded-xl px-2 py-2 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors ${
+              isCollapsed ? "justify-center" : "gap-2"
+            }`}
+          >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-500">
+              ⏻
+            </span>
+            {!isCollapsed && <span className="text-xs font-medium">Sair</span>}
+          </button>
+
           <button
             onClick={toggle}
             title={isCollapsed ? "Expandir menu" : "Colapsar menu"}
