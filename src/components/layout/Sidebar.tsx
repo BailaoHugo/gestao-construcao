@@ -11,6 +11,7 @@ const navItems = [
   { href: "/contratos", label: "Contratos", abbr: "CO" },
   { href: "/catalogo", label: "Catálogo", abbr: "CT" },
   { href: "/despesas", label: "Despesas", abbr: "DE" },
+  { href: "/ponto", label: "Ponto", abbr: "PT" },
 ];
 
 export function Sidebar() {
@@ -113,7 +114,6 @@ export function Sidebar() {
             </span>
             {!isCollapsed && <span className="text-xs font-medium">Sair</span>}
           </button>
-
           <button
             onClick={toggle}
             title={isCollapsed ? "Expandir menu" : "Colapsar menu"}
