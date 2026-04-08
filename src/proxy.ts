@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC = ['/login', '/api/auth/login', '/api/auth/logout', '/api/auth/setup', '/api/auth/reset-password'];
+const PUBLIC = [
+  '/login',
+  '/recuperar-password',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/setup',
+  '/api/auth/reset-password',
+  '/api/auth/recuperar',
+];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
