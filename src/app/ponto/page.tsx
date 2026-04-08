@@ -112,6 +112,14 @@ export default function PontoPage() {
     if (!mapaHoras.has(r.trabalhadorId)) mapaHoras.set(r.trabalhadorId, new Map());
     mapaHoras.get(r.trabalhadorId)!.set(r.data, r.horas);
   }
+  // Map: trabalhadorId → date → obraCode
+  const mapaObra = new Map<string, Map<string, string>>();
+  for (const r of registos) {
+    if (r.obraCode) {
+        if (!mapaObra.has(r.trabalhadorId)) mapaObra.set(r.trabalhadorId, new Map());
+            mapaObra.get(r.trabalhadorId)!.set(r.data, r.obraCode);
+              }
+              }
 
   const totalMes = (trabId: string) => {
     const m = mapaHoras.get(trabId);
@@ -218,6 +226,7 @@ export default function PontoPage() {
                 ) : (
                   trabalhadores.map((t, ti) => {
                     const mHoras = mapaHoras.get(t.id) ?? new Map();
+                    const mObra = mapaObra.get(t.id) ?? new Map();
                     const total = totalMes(t.id);
                     return (
                       <tr key={t.id} className={`border-b border-slate-200 ${ti % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
@@ -229,6 +238,7 @@ export default function PontoPage() {
                           const wd = isWeekday(d);
                           const data = isoDate(d);
                           const h = mHoras.get(data) ?? 0;
+                          const obraCode = mObra.get(data) ?? null;
                           let cls = 'border-r border-slate-100 text-center transition-colors select-none ';
                           if (!wd) {
                             cls += 'bg-slate-100/60 text-slate-300';
@@ -244,7 +254,10 @@ export default function PontoPage() {
                               <span className="block py-1.5 text-[11px] font-semibold">
                                 {!wd ? '' : h > 0 ? (h % 1 === 0 ? h : h.toFixed(1)) : '!'}
                               </span>
-                            </td>
+                              {wd && h > 0 && obraCode && (
+                                              <div className="text-[8px] font-normal opacity-50 leading-none truncate">{obraCode}</div>
+                                                          )}
+                              </td>
                           );
                         })}
                         <td className="px-3 py-2 text-center font-semibold">
