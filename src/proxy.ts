@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const PUBLIC = ['/login', '/api/auth/login', '/api/auth/logout', '/api/auth/setup'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
