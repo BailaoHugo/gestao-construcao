@@ -11,11 +11,11 @@ import { CatalogoLateralPanel } from "@/components/propostas/CatalogoLateralPane
 import { CollapsibleSection } from "@/components/propostas/CollapsibleSection";
 import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPanel";
 
-// ── tipos auxiliares ────────────────────────────────────────────────────────
+// ââ tipos auxiliares ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 type ClienteRow = { id: string; nome: string; telefone?: string; email?: string };
 type ObraRow    = { id: string; code: string; nome: string };
 
-// ── Combobox genérico ────────────────────────────────────────────────────────
+// ââ Combobox genÃ©rico ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function Combobox<T extends { id: string; label: string; sub?: string }>({
   value,
   onChange,
@@ -105,7 +105,7 @@ function Combobox<T extends { id: string; label: string; sub?: string }>({
   );
 }
 
-// ── helpers de fetch ─────────────────────────────────────────────────────────
+// ââ helpers de fetch âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function fetchClientes(q: string): Promise<(ClienteRow & { id: string; label: string; sub?: string })[]> {
   const r = await fetch(`/api/clientes?search=${encodeURIComponent(q)}&limit=20`);
   if (!r.ok) return [];
@@ -122,7 +122,7 @@ async function fetchObras(q: string): Promise<(ObraRow & { id: string; label: st
   return rows.map(o => ({ ...o, label: o.nome, sub: o.code }));
 }
 
-// ── utilidades ───────────────────────────────────────────────────────────────
+// ââ utilidades âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function createEmptyFolhaRosto(): PropostaFolhaRosto {
   const today = new Date().toISOString().slice(0, 10);
   return {
@@ -144,7 +144,7 @@ function createEmptyLinha(): PropostaLinha {
   };
 }
 
-// ── página principal ─────────────────────────────────────────────────────────
+// ââ pÃ¡gina principal âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export default function NovaPropostaPage() {
   const router = useRouter();
   const [folhaRosto, setFolhaRosto] = useState<PropostaFolhaRosto>(createEmptyFolhaRosto);
@@ -198,7 +198,7 @@ export default function NovaPropostaPage() {
 
   const handleGuardar = async () => {
     if (!folhaRosto.clienteNome) { setError("Indique o nome do cliente."); return; }
-    if (linhas.length === 0)     { setError("Adicione pelo menos uma linha à proposta."); return; }
+    if (linhas.length === 0)     { setError("Adicione pelo menos uma linha Ã  proposta."); return; }
     try {
       setIsSaving(true); setError(null);
       const res = await fetch("/api/propostas", {
@@ -244,7 +244,7 @@ export default function NovaPropostaPage() {
       {error && (
         <div ref={errorBannerRef} role="alert"
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
-          <p className="font-medium">Não foi possível gravar</p>
+          <p className="font-medium">NÃ£o foi possÃ­vel gravar</p>
           <p className="mt-1 text-red-700">{error}</p>
         </div>
       )}
@@ -253,14 +253,14 @@ export default function NovaPropostaPage() {
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
 
-            {/* Coluna esquerda — Cliente */}
+            {/* Coluna esquerda â Cliente */}
             <div className="space-y-3">
               <div>
                 <label className="mb-1 block text-[11px] font-medium text-slate-700">
                   Cliente
                   {folhaRosto.clienteId && (
                     <span className="ml-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-700">
-                      ligado ✓
+                      ligado â
                     </span>
                   )}
                 </label>
@@ -274,7 +274,7 @@ export default function NovaPropostaPage() {
                     clienteContacto: item.telefone ?? p.clienteContacto,
                     clienteEmail:    item.email    ?? p.clienteEmail,
                   }))}
-                  placeholder="Pesquisar cliente…"
+                  placeholder="Pesquisar clienteâ¦"
                   fetchOptions={fetchClientes}
                   inputClassName={inputCls}
                 />
@@ -285,7 +285,7 @@ export default function NovaPropostaPage() {
                   <input type="text" className={inputCls}
                     value={folhaRosto.clienteContacto ?? ""}
                     onChange={e => setFolhaRosto(p => ({ ...p, clienteContacto: e.target.value }))}
-                    placeholder="Telefone ou telemóvel" />
+                    placeholder="Telefone ou telemÃ³vel" />
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] font-medium text-slate-700">Email</label>
@@ -295,16 +295,27 @@ export default function NovaPropostaPage() {
                     placeholder="email@cliente.pt" />
                 </div>
               </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">NIF / NIPC (opcional)</label>
+                <input
+                  type="text"
+                  className={inputCls}
+                  value={folhaRosto.clienteNipc ?? ""}
+                  onChange={e => setFolhaRosto(p => ({ ...p, clienteNipc: e.target.value }))}
+                  placeholder="Ex: 123456789"
+                  maxLength={9}
+                />
+              </div>
             </div>
 
-            {/* Coluna direita — Obra */}
+            {/* Coluna direita â Obra */}
             <div className="space-y-3">
               <div>
                 <label className="mb-1 block text-[11px] font-medium text-slate-700">
                   Obra (opcional)
                   {folhaRosto.obraId && (
                     <span className="ml-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-700">
-                      ligado ✓
+                      ligado â
                     </span>
                   )}
                 </label>
@@ -316,7 +327,7 @@ export default function NovaPropostaPage() {
                     obraId:   item.id,
                     obraNome: item.nome,
                   }))}
-                  placeholder="Pesquisar obra…"
+                  placeholder="Pesquisar obraâ¦"
                   fetchOptions={fetchObras}
                   inputClassName={inputCls}
                 />
@@ -328,12 +339,12 @@ export default function NovaPropostaPage() {
                 <input type="text" className={inputCls}
                   value={folhaRosto.obraMorada ?? ""}
                   onChange={e => setFolhaRosto(p => ({ ...p, obraMorada: e.target.value }))}
-                  placeholder="Rua, nº, localidade" />
+                  placeholder="Rua, nÂº, localidade" />
               </div>
             </div>
           </div>
 
-          {/* Segunda fila — datas, validade, referência, notas */}
+          {/* Segunda fila â datas, validade, referÃªncia, notas */}
           <div className="grid gap-3 md:grid-cols-4">
             <div>
               <label className="mb-1 block text-[11px] font-medium text-slate-700">Data da proposta</label>
@@ -348,7 +359,7 @@ export default function NovaPropostaPage() {
                 onChange={e => setFolhaRosto(p => ({ ...p, validadeDias: Number(e.target.value) || 0 }))} />
             </div>
             <div>
-              <label className="mb-1 block text-[11px] font-medium text-slate-700">Referência interna</label>
+              <label className="mb-1 block text-[11px] font-medium text-slate-700">ReferÃªncia interna</label>
               <input type="text" className={inputCls}
                 value={folhaRosto.referenciaInterna ?? ""}
                 onChange={e => setFolhaRosto(p => ({ ...p, referenciaInterna: e.target.value }))}
@@ -365,8 +376,8 @@ export default function NovaPropostaPage() {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Maria Orcamentista (em formação)"
-        subtitle="Assistente local para pesquisar e inserir linhas do catálogo.">
+      <CollapsibleSection title="Maria Orcamentista (em formaÃ§Ã£o)"
+        subtitle="Assistente local para pesquisar e inserir linhas do catÃ¡logo.">
         <MariaPanel embed podeEditar={true}
           onInsertArtigo={(artigo, quantidade) => handleAddLinhaFromCatalogo(artigo, quantidade)} />
       </CollapsibleSection>
@@ -377,7 +388,7 @@ export default function NovaPropostaPage() {
         <div className={catalogoLinhasLayout === "split"
           ? "w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]"
           : catalogoLinhasLayout === "linhasFull" ? "order-2 w-full" : "order-1 w-full"}>
-          <CollapsibleSection title="Catálogo" headerActions={
+          <CollapsibleSection title="CatÃ¡logo" headerActions={
             <button type="button"
               onClick={() => setCatalogoLinhasLayout(p => p === "catalogoFull" ? "split" : "catalogoFull")}
               className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
@@ -429,7 +440,7 @@ export default function NovaPropostaPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={handleGuardar} disabled={isSaving}
             className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500">
-            {isSaving ? "A gravar…" : "Guardar"}
+            {isSaving ? "A gravarâ¦" : "Guardar"}
           </button>
         </div>
       </section>
