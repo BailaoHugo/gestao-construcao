@@ -15,11 +15,13 @@ export interface PropostaFolhaRosto {
   clienteNome: string;
   clienteContacto?: string;
   clienteEmail?: string;
-  /** ID do cliente na tabela clientes (ligação relacional opcional) */
+  /** NIF ou NIPC do cliente (opcional) */
+  clienteNipc?: string;
+  /** ID do cliente na tabela clientes (ligacao relacional opcional) */
   clienteId?: string | null;
   obraNome?: string;
   obraMorada?: string;
-  /** ID da obra na tabela obras (ligação relacional opcional) */
+  /** ID da obra na tabela obras (ligacao relacional opcional) */
   obraId?: string | null;
   dataProposta: string; // ISO date
   validadeDias?: number;
@@ -30,7 +32,6 @@ export interface PropostaFolhaRosto {
 
 export interface PropostaLinha {
   id: string;
-  /** Ordem de exibição na revisão (opcional; backend pode derivar do array). */
   ordem?: number | null;
   artigoId?: string | null;
   codigoArtigo?: string | null;
@@ -39,14 +40,12 @@ export interface PropostaLinha {
   unidade: string;
   grandeCapitulo?: string | null;
   capitulo?: string | null;
-  /** Coeficiente de venda (ex.: 1.30). Default em BD: 1.30. */
   k?: number | null;
   quantidade: number;
   precoCustoUnitario: number;
   totalCustoLinha: number;
   precoVendaUnitario: number;
   totalVendaLinha: number;
-  /** Observações da linha (texto livre). */
   observacoes?: string | null;
 }
 
