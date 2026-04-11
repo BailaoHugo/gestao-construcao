@@ -18,6 +18,7 @@ type PropostaRow = {
   cliente_nome: string;
   cliente_contacto: string | null;
   cliente_email: string | null;
+  cliente_nipc: string | null;
   obra_nome: string | null;
   obra_morada: string | null;
   referencia_interna: string | null;
@@ -79,27 +80,19 @@ export async function loadPropostasResumo(): Promise<PropostaResumo[]> {
       total_venda: string | number | null;
     }> = await client.query(
       `
-        select
-          p.id,
-          p.codigo,
-          p.cliente_nome,
-          p.obra_nome,
-          p.estado_atual,
-          p.created_at,
-          r.numero_revisao,
-          r.total_venda
-        from propostas p
-        left join lateral (
-          select numero_revisao, total_venda
-          from proposta_revisoes
-          where proposta_id = p.id
-          order by numero_revisao desc
-          limit 1
-        ) r on true
-        order by p.created_at desc
-      `,
+      select p.id, p.codigo, p.cliente_nome, p.obra_nome, p.estado_atual, p.created_at,
+             r.numero_revisao, r.total_venda
+      from propostas p
+      left join lateral (
+        select numero_revisao, total_venda
+        from proposta_revisoes
+        where proposta_id = p.id
+        order by numero_revisao desc
+        limit 1
+      ) r on true
+      order by p.created_at desc
+    `,
     );
-
     return result.rows.map((row) => ({
       id: row.id,
       codigo: row.codigo,
@@ -122,23 +115,12 @@ export async function loadPropostaCompleta(
   try {
     const propostaRes: QueryResult<PropostaRow> = await client.query(
       `
-        select
-          id,
-          codigo,
-          obra_id,
-          cliente_nome,
-          cliente_contacto,
-          cliente_email,
-          obra_nome,
-          obra_morada,
-          referencia_interna,
-          notas,
-          estado_atual,
-          created_at,
-          updated_at
-        from propostas
-        where id = $1
-      `,
+      select id, codigo, obra_id, cliente_nome, cliente_contacto, cliente_email,
+             cliente_nipc, obra_nome, obra_morada, referencia_interna, notas,
+             estado_atual, created_at, updated_at
+      from propostas
+      where id = $1
+    `,
       [id],
     );
 
@@ -150,20 +132,12 @@ export async function loadPropostaCompleta(
 
     const revisoesRes: QueryResult<RevisaoRow> = await client.query(
       `
-        select
-          id,
-          proposta_id,
-          numero_revisao,
-          estado,
-          data_proposta,
-          validade_texto,
-          total,
-          created_at,
-          updated_at
-        from proposta_revisoes
-        where proposta_id = $1
-        order by numero_revisao asc
-      `,
+      select id, proposta_id, numero_revisao, estado, data_proposta, validade_texto,
+             total, created_at, updated_at
+      from proposta_revisoes
+      where proposta_id = $1
+      order by numero_revisao asc
+    `,
       [id],
     );
 
@@ -175,30 +149,15 @@ export async function loadPropostaCompleta(
 
     const linhasRes: QueryResult<LinhaRow> = await client.query(
       `
-        select
-          id,
-          revisao_id,
-          ordem,
-          origem,
-          artigo_id,
-          codigo_artigo,
-          descricao,
-          unidade,
-          quantidade,
-          preco_unitario,
-          total_linha,
-          preco_custo_unitario,
-          total_custo_linha,
-          preco_venda_unitario,
-          total_venda_linha,
-          grande_capitulo,
-          capitulo,
-          k,
-          observacoes
-        from proposta_linhas
-        where revisao_id = any($1::uuid[])
-        order by revisao_id, ordem, created_at
-      `,
+      select id, revisao_id, ordem, origem, artigo_id, codigo_artigo, descricao,
+             unidade, quantidade, preco_unitario, total_linha,
+             preco_custo_unitario, total_custo_linha,
+             preco_venda_unitario, total_venda_linha,
+             grande_capitulo, capitulo, k, observacoes
+      from proposta_linhas
+      where revisao_id = any($1::uuid[])
+      order by revisao_id, ordem, created_at
+    `,
       [revisaoIds],
     );
 
@@ -228,10 +187,7 @@ export async function loadPropostaCompleta(
         unidade: row.unidade ?? "",
         grandeCapitulo: row.grande_capitulo ?? null,
         capitulo: row.capitulo ?? null,
-        k:
-          row.k !== null && row.k !== undefined
-            ? Number(row.k)
-            : undefined,
+        k: row.k !== null && row.k !== undefined ? Number(row.k) : undefined,
         quantidade,
         precoCustoUnitario: precoCusto,
         totalCustoLinha: totalCusto,
@@ -250,6 +206,7 @@ export async function loadPropostaCompleta(
         clienteNome: propostaRow.cliente_nome,
         clienteContacto: propostaRow.cliente_contacto ?? undefined,
         clienteEmail: propostaRow.cliente_email ?? undefined,
+        clienteNipc: propostaRow.cliente_nipc ?? undefined,
         obraNome: propostaRow.obra_nome ?? undefined,
         obraMorada: propostaRow.obra_morada ?? undefined,
         dataProposta: row.data_proposta ?? propostaRow.created_at.slice(0, 10),
@@ -258,7 +215,6 @@ export async function loadPropostaCompleta(
         referenciaInterna: propostaRow.referencia_interna ?? undefined,
         notas: propostaRow.notas ?? undefined,
       };
-
       return {
         id: row.id,
         propostaId: row.proposta_id,
@@ -322,9 +278,9 @@ export type LinhaOrganizadaResumo = {
 };
 
 /**
- * Atribui `grande_capitulo` e `capitulo` a cada linha da revisão atual com base na
- * `descricao`. Não altera preços, quantidades nem k.
- * Com `preview: true`, não grava na BD e devolve a proposta atual sem alterações.
+ * Atribui `grande_capitulo` e `capitulo` a cada linha da revisÃ£o atual com base na
+ * `descricao`. NÃ£o altera preÃ§os, quantidades nem k.
+ * Com `preview: true`, nÃ£o grava na BD e devolve a proposta atual sem alteraÃ§Ãµes.
  */
 export async function organizarOrcamentoProposta(
   propostaId: string,
@@ -337,12 +293,11 @@ export async function organizarOrcamentoProposta(
 }> {
   const proposta = await loadPropostaCompleta(propostaId);
   if (!proposta) {
-    throw new Error("Proposta não encontrada");
+    throw new Error("Proposta nÃ£o encontrada");
   }
-
   const rev = proposta.revisaoAtual;
   if (rev.estado !== "RASCUNHO") {
-    throw new Error("Só é possível organizar o orçamento em modo Rascunho");
+    throw new Error("SÃ³ Ã© possÃ­vel organizar o orÃ§amento em modo Rascunho");
   }
 
   const preview = Boolean(options?.preview);
@@ -389,22 +344,15 @@ export async function organizarOrcamentoProposta(
         const cp = (linha.capitulo ?? "").trim();
         if (gc !== "" || cp !== "") continue;
       }
-
       const c = classificarCapituloPorDescricaoCompleto(linha.descricao);
-
       const r = await client.query(
         `
-          update proposta_linhas
-          set
-            grande_capitulo = $2,
-            capitulo = $3,
-            updated_at = now()
-          where id = $1::uuid
-            and revisao_id = $4::uuid
-        `,
+        update proposta_linhas
+        set grande_capitulo = $2, capitulo = $3, updated_at = now()
+        where id = $1::uuid and revisao_id = $4::uuid
+      `,
         [linha.id, c.grande_capitulo, c.capitulo, rev.id],
       );
-
       if ((r.rowCount ?? 0) > 0) {
         linhasAtualizadas += 1;
         pushDetalhe(linha, c);
@@ -414,9 +362,8 @@ export async function organizarOrcamentoProposta(
 
   const atualizada = await loadPropostaCompleta(propostaId);
   if (!atualizada) {
-    throw new Error("Proposta não encontrada após organização");
+    throw new Error("Proposta nÃ£o encontrada apÃ³s organizaÃ§Ã£o");
   }
-
   return {
     proposta: atualizada,
     linhasAtualizadas,
@@ -431,7 +378,7 @@ export async function updatePropostaWithRevisao(
   linhas: PropostaLinha[],
 ): Promise<void> {
   if (!folhaRosto.clienteNome || linhas.length === 0) {
-    throw new Error("Cliente e pelo menos uma linha são obrigatórios");
+    throw new Error("Cliente e pelo menos uma linha sÃ£o obrigatÃ³rios");
   }
 
   const now = new Date().toISOString();
@@ -461,29 +408,31 @@ export async function updatePropostaWithRevisao(
     0,
   );
   const margemValor = totalVenda - totalCusto;
-  const margemPercentagem = totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
+  const margemPercentagem =
+    totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
 
   await withTransaction(async (client) => {
-    // Atualizar cabeçalho da proposta
+    // Atualizar cabeÃ§alho da proposta
     await client.query(
       `
-        update propostas
-        set
-          cliente_nome = $2,
+      update propostas
+      set cliente_nome = $2,
           cliente_contacto = $3,
           cliente_email = $4,
-          obra_nome = $5,
-          obra_morada = $6,
-          referencia_interna = $7,
-          notas = $8,
-          updated_at = $9
-        where id = $1
-      `,
+          cliente_nipc = $5,
+          obra_nome = $6,
+          obra_morada = $7,
+          referencia_interna = $8,
+          notas = $9,
+          updated_at = $10
+      where id = $1
+    `,
       [
         propostaId,
         folhaRosto.clienteNome,
         folhaRosto.clienteContacto ?? null,
         folhaRosto.clienteEmail ?? null,
+        folhaRosto.clienteNipc ?? null,
         folhaRosto.obraNome ?? null,
         folhaRosto.obraMorada ?? null,
         folhaRosto.referenciaInterna ?? null,
@@ -492,34 +441,32 @@ export async function updatePropostaWithRevisao(
       ],
     );
 
-    // Obter revisão ativa (última revisão)
+    // Obter revisÃ£o ativa (Ãºltima revisÃ£o)
     const revisaoRes: QueryResult<{ id: string }> = await client.query(
       `
-        select id
-        from proposta_revisoes
-        where proposta_id = $1
-        order by numero_revisao desc
-        limit 1
-      `,
+      select id from proposta_revisoes
+      where proposta_id = $1
+      order by numero_revisao desc
+      limit 1
+    `,
       [propostaId],
     );
 
     if (revisaoRes.rowCount === 0) {
-      throw new Error("Revisão da proposta não encontrada");
+      throw new Error("RevisÃ£o da proposta nÃ£o encontrada");
     }
 
     const revisaoId = revisaoRes.rows[0].id;
 
-    // Atualizar revisão
+    // Atualizar revisÃ£o
     const validadeTexto =
       folhaRosto.validadeTexto ??
       (folhaRosto.validadeDias ? `${folhaRosto.validadeDias} dias` : null);
 
     await client.query(
       `
-        update proposta_revisoes
-        set
-          data_proposta = $2,
+      update proposta_revisoes
+      set data_proposta = $2,
           validade_texto = $3,
           total = $4,
           total_custo = $5,
@@ -527,8 +474,8 @@ export async function updatePropostaWithRevisao(
           margem_valor = $7,
           margem_percentagem = $8,
           updated_at = $9
-        where id = $1
-      `,
+      where id = $1
+    `,
       [
         revisaoId,
         folhaRosto.dataProposta || null,
@@ -542,12 +489,11 @@ export async function updatePropostaWithRevisao(
       ],
     );
 
-    // Apagar linhas atuais da revisão
+    // Apagar linhas atuais da revisÃ£o
     await client.query(
       `
-        delete from proposta_linhas
-        where revisao_id = $1
-      `,
+      delete from proposta_linhas where revisao_id = $1
+    `,
       [revisaoId],
     );
 
@@ -556,49 +502,18 @@ export async function updatePropostaWithRevisao(
     for (const linha of linhasEnriquecidas) {
       await client.query(
         `
-          insert into proposta_linhas (
-            id,
-            revisao_id,
-            ordem,
-            origem,
-            artigo_id,
-            codigo_artigo,
-            descricao,
-            unidade,
-            quantidade,
-            preco_custo_unitario,
-            total_custo_linha,
-            preco_venda_unitario,
-            total_venda_linha,
-            grande_capitulo,
-            capitulo,
-            k,
-            observacoes,
-            created_at,
-            updated_at
-          )
-          values (
-            gen_random_uuid(),
-            $1,
-            $2,
-            $3,
-            $4,
-            $5,
-            $6,
-            $7,
-            $8,
-            $9,
-            $10,
-            $11,
-            $12,
-            $13,
-            $14,
-            $15,
-            $16,
-            now(),
-            now()
-          )
-        `,
+        insert into proposta_linhas (
+          id, revisao_id, ordem, origem, artigo_id, codigo_artigo,
+          descricao, unidade, quantidade,
+          preco_custo_unitario, total_custo_linha,
+          preco_venda_unitario, total_venda_linha,
+          grande_capitulo, capitulo, k, observacoes,
+          created_at, updated_at
+        ) values (
+          gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8,
+          $9, $10, $11, $12, $13, $14, $15, $16, now(), now()
+        )
+      `,
         [
           revisaoId,
           ordem++,
@@ -621,12 +536,13 @@ export async function updatePropostaWithRevisao(
     }
   });
 }
+
 export async function createPropostaWithRevisao(
   folhaRosto: PropostaFolhaRosto,
   linhas: PropostaLinha[],
 ): Promise<{ id: string }> {
   if (!folhaRosto.clienteNome || linhas.length === 0) {
-    throw new Error("Cliente e pelo menos uma linha são obrigatórios");
+    throw new Error("Cliente e pelo menos uma linha sÃ£o obrigatÃ³rios");
   }
 
   const now = new Date().toISOString();
@@ -658,40 +574,28 @@ export async function createPropostaWithRevisao(
     0,
   );
   const margemValor = totalVenda - totalCusto;
-  const margemPercentagem = totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
+  const margemPercentagem =
+    totalVenda > 0 ? (margemValor / totalVenda) * 100 : 0;
 
   const codigo =
-    "P-" +
-    new Date().getFullYear() +
-    "-" +
-    propostaId.slice(0, 4).toUpperCase();
+    "P-" + new Date().getFullYear() + "-" + propostaId.slice(0, 4).toUpperCase();
 
   await withTransaction(async (client) => {
     await client.query(
       `
-        insert into propostas (
-          id,
-          codigo,
-          obra_id,
-          cliente_nome,
-          cliente_contacto,
-          cliente_email,
-          obra_nome,
-          obra_morada,
-          referencia_interna,
-          notas,
-          estado_atual,
-          created_at,
-          updated_at
-        )
-        values ($1, $2, null, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
-      `,
+      insert into propostas (
+        id, codigo, obra_id, cliente_nome, cliente_contacto, cliente_email,
+        cliente_nipc, obra_nome, obra_morada, referencia_interna, notas,
+        estado_atual, created_at, updated_at
+      ) values ($1, $2, null, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12)
+    `,
       [
         propostaId,
         codigo,
         folhaRosto.clienteNome,
         folhaRosto.clienteContacto ?? null,
         folhaRosto.clienteEmail ?? null,
+        folhaRosto.clienteNipc ?? null,
         folhaRosto.obraNome ?? null,
         folhaRosto.obraMorada ?? null,
         folhaRosto.referenciaInterna ?? null,
@@ -703,23 +607,12 @@ export async function createPropostaWithRevisao(
 
     await client.query(
       `
-        insert into proposta_revisoes (
-          id,
-          proposta_id,
-          numero_revisao,
-          estado,
-          data_proposta,
-          validade_texto,
-          total,
-          total_custo,
-          total_venda,
-          margem_valor,
-          margem_percentagem,
-          created_at,
-          updated_at
-        )
-        values ($1, $2, 1, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
-      `,
+      insert into proposta_revisoes (
+        id, proposta_id, numero_revisao, estado, data_proposta, validade_texto,
+        total, total_custo, total_venda, margem_valor, margem_percentagem,
+        created_at, updated_at
+      ) values ($1, $2, 1, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
+    `,
       [
         revisaoId,
         propostaId,
@@ -743,31 +636,15 @@ export async function createPropostaWithRevisao(
       const linhaId = randomUUID();
       await client.query(
         `
-          insert into proposta_linhas (
-            id,
-            revisao_id,
-            ordem,
-            origem,
-            artigo_id,
-            codigo_artigo,
-            descricao,
-            unidade,
-            quantidade,
-            preco_unitario,
-            total_linha,
-            preco_custo_unitario,
-            total_custo_linha,
-            preco_venda_unitario,
-            total_venda_linha,
-            grande_capitulo,
-            capitulo,
-            k,
-            observacoes,
-            created_at,
-            updated_at
-          )
-          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
-        `,
+        insert into proposta_linhas (
+          id, revisao_id, ordem, origem, artigo_id, codigo_artigo,
+          descricao, unidade, quantidade, preco_unitario, total_linha,
+          preco_custo_unitario, total_custo_linha,
+          preco_venda_unitario, total_venda_linha,
+          grande_capitulo, capitulo, k, observacoes,
+          created_at, updated_at
+        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+      `,
         [
           linhaId,
           revisaoId,
@@ -803,43 +680,25 @@ export async function criarNovaRevisao(
 ): Promise<{ revisaoId: string; numeroRevisao: number }> {
   return withTransaction(async (client) => {
     const res = await client.query<{ id: string; numero_revisao: number }>(
-      `SELECT id, numero_revisao FROM proposta_revisoes
-       WHERE proposta_id = $1
-       ORDER BY numero_revisao DESC LIMIT 1`,
+      `SELECT id, numero_revisao FROM proposta_revisoes WHERE proposta_id = $1 ORDER BY numero_revisao DESC LIMIT 1`,
       [propostaId],
     );
-    if ((res.rowCount ?? 0) === 0) throw new Error('Proposta não encontrada');
-
+    if ((res.rowCount ?? 0) === 0) throw new Error("Proposta nÃ£o encontrada");
     const { id: sourceRevisaoId, numero_revisao: currentNum } = res.rows[0];
     const novoNum = currentNum + 1;
     const novoRevisaoId = randomUUID();
 
     await client.query(
-      `INSERT INTO proposta_revisoes
-         (id, proposta_id, numero_revisao, estado,
-          data_proposta, validade_texto, total, total_custo, total_venda,
-          margem_valor, margem_percentagem, created_at, updated_at)
-       SELECT $1, proposta_id, $2, 'RASCUNHO',
-              data_proposta, validade_texto, total, total_custo, total_venda,
-              margem_valor, margem_percentagem, now(), now()
+      `INSERT INTO proposta_revisoes (id, proposta_id, numero_revisao, estado, data_proposta, validade_texto, total, total_custo, total_venda, margem_valor, margem_percentagem, created_at, updated_at)
+       SELECT $1, proposta_id, $2, 'RASCUNHO', data_proposta, validade_texto, total, total_custo, total_venda, margem_valor, margem_percentagem, now(), now()
        FROM proposta_revisoes WHERE id = $3`,
       [novoRevisaoId, novoNum, sourceRevisaoId],
     );
 
     await client.query(
-      `INSERT INTO proposta_linhas
-         (id, revisao_id, ordem, origem, artigo_id, codigo_artigo,
-          descricao, unidade, quantidade, preco_unitario, total_linha,
-          preco_custo_unitario, total_custo_linha, preco_venda_unitario,
-          total_venda_linha, grande_capitulo, capitulo, k, observacoes,
-          created_at, updated_at)
-       SELECT gen_random_uuid(), $1, ordem, origem, artigo_id, codigo_artigo,
-              descricao, unidade, quantidade, preco_unitario, total_linha,
-              preco_custo_unitario, total_custo_linha, preco_venda_unitario,
-              total_venda_linha, grande_capitulo, capitulo, k, observacoes,
-              now(), now()
-       FROM proposta_linhas WHERE revisao_id = $2
-       ORDER BY ordem`,
+      `INSERT INTO proposta_linhas (id, revisao_id, ordem, origem, artigo_id, codigo_artigo, descricao, unidade, quantidade, preco_unitario, total_linha, preco_custo_unitario, total_custo_linha, preco_venda_unitario, total_venda_linha, grande_capitulo, capitulo, k, observacoes, created_at, updated_at)
+       SELECT gen_random_uuid(), $1, ordem, origem, artigo_id, codigo_artigo, descricao, unidade, quantidade, preco_unitario, total_linha, preco_custo_unitario, total_custo_linha, preco_venda_unitario, total_venda_linha, grande_capitulo, capitulo, k, observacoes, now(), now()
+       FROM proposta_linhas WHERE revisao_id = $2 ORDER BY ordem`,
       [novoRevisaoId, sourceRevisaoId],
     );
 
@@ -851,5 +710,3 @@ export async function criarNovaRevisao(
     return { revisaoId: novoRevisaoId, numeroRevisao: novoNum };
   });
 }
-
-
