@@ -5,7 +5,7 @@ interface Trabalhador { id: string; nome: string; cargo: string | null; custoHor
 interface Obra { id: string; code: string; nome: string; }
 interface Registo {
   id: string; trabalhadorId: string; obraId: string | null; data: string;
-  horas: number; custo: number | null; notas: string | null;
+  horas: number; custo: number | null; notas: string | null; tipo: string;
   trabalhadorNome: string; obraNome: string | null; obraCode: string | null;
 }
 interface FormEntry { id?: string; obraId: string; horas: string; notas: string; }
@@ -63,10 +63,16 @@ export default function PontoPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Aggregate: sum horas per worker+day; collect obra codes
+  // Maps: aggregate hours (exclude faltas), collect obra codes, track faltas
   const mapaHoras = new Map<string, Map<string, number>>();
   const mapaObras = new Map<string, Map<string, string[]>>();
+  const mapaFaltas = new Map<string, Set<string>>();
   for (const r of registos) {
+    if (r.tipo === 'falta') {
+      if (!mapaFaltas.has(r.trabalhadorId)) mapaFaltas.set(r.trabalhadorId, new Set());
+      mapaFaltas.get(r.trabalhadorId)!.add(r.data);
+      continue;
+    }
     if (!mapaHoras.has(r.trabalhadorId)) mapaHoras.set(r.trabalhadorId, new Map());
     mapaHoras.get(r.trabalhadorId)!.set(r.data, (mapaHoras.get(r.trabalhadorId)!.get(r.data) ?? 0) + r.horas);
     if (r.obraCode) {
@@ -85,7 +91,7 @@ export default function PontoPage() {
 
   const openModal = (trabalhador: Trabalhador, dia: Date) => {
     const data = isoDate(dia);
-    const dayRegs = registos.filter(r => r.trabalhadorId === trabalhador.id && r.data === data);
+    const dayRegs = registos.filter(r => r.trabalhadorId === trabalhador.id && r.data === data && r.tipo !== 'falta');
     setModal({ trabalhador, data });
     setFormEntries(dayRegs.length > 0
       ? dayRegs.map(r => ({ id: r.id, obraId: r.obraId ?? '', horas: String(r.horas), notas: r.notas ?? '' }))
@@ -106,11 +112,13 @@ export default function PontoPage() {
   const selectDiasUteis = () =>
     setSelectedDias(dias.filter(isWeekday).map(isoDate).filter(d => d !== modal?.data));
 
+  const allDatesForAction = () => modal ? [modal.data, ...selectedDias] : [];
+
   const saveRegisto = async () => {
     if (!modal || formEntries.length === 0) return;
     setSaving(true);
     try {
-      const allDates = [modal.data, ...selectedDias];
+      const allDates = allDatesForAction();
       const clearDates = allDates.map(d => ({ trabalhadorId: modal.trabalhador.id, data: d }));
       const bulk = allDates.flatMap(date =>
         formEntries.map(entry => ({
@@ -119,13 +127,29 @@ export default function PontoPage() {
           data: date,
           horas: parseFloat(entry.horas) || 8,
           notas: entry.notas || null,
+          tipo: 'normal',
         }))
       );
-      const r = await fetch('/api/ponto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bulk, clearDates }),
-      });
+      const r = await fetch('/api/ponto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bulk, clearDates }) });
+      if (r.ok) { await loadData(); setModal(null); }
+    } finally { setSaving(false); }
+  };
+
+  const markFalta = async () => {
+    if (!modal) return;
+    setSaving(true);
+    try {
+      const allDates = allDatesForAction();
+      const clearDates = allDates.map(d => ({ trabalhadorId: modal.trabalhador.id, data: d }));
+      const bulk = allDates.map(date => ({
+        trabalhadorId: modal.trabalhador.id,
+        obraId: null,
+        data: date,
+        horas: 0,
+        notas: null,
+        tipo: 'falta',
+      }));
+      const r = await fetch('/api/ponto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bulk, clearDates }) });
       if (r.ok) { await loadData(); setModal(null); }
     } finally { setSaving(false); }
   };
@@ -134,7 +158,7 @@ export default function PontoPage() {
     if (!modal) return;
     setSaving(true);
     try {
-      const allDates = [modal.data, ...selectedDias];
+      const allDates = allDatesForAction();
       for (const date of allDates) {
         const dayRegs = registos.filter(r => r.trabalhadorId === modal.trabalhador.id && r.data === date);
         for (const reg of dayRegs) await fetch(`/api/ponto?id=${reg.id}`, { method: 'DELETE' });
@@ -150,7 +174,8 @@ export default function PontoPage() {
   };
 
   const modalDayRegs = modal ? registos.filter(r => r.trabalhadorId === modal.trabalhador.id && r.data === modal.data) : [];
-  const totalHorasModal = modalDayRegs.reduce((s, r) => s + r.horas, 0);
+  const modalIsFalta = modalDayRegs.some(r => r.tipo === 'falta');
+  const totalHorasModal = modalDayRegs.filter(r => r.tipo !== 'falta').reduce((s, r) => s + r.horas, 0);
 
   return (
     <div className="p-4 md:p-6 max-w-full">
@@ -193,6 +218,7 @@ export default function PontoPage() {
                 ) : trabalhadores.map((t, ti) => {
                   const mHoras = mapaHoras.get(t.id) ?? new Map();
                   const mObras = mapaObras.get(t.id) ?? new Map();
+                  const mFaltas = mapaFaltas.get(t.id) ?? new Set();
                   const total = totalMes(t.id);
                   return (
                     <tr key={t.id} className={`border-b border-slate-200 ${ti % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
@@ -203,9 +229,12 @@ export default function PontoPage() {
                       {dias.map(d => {
                         const wd = isWeekday(d); const data = isoDate(d);
                         const h = mHoras.get(data) ?? 0;
+                        const isFalta = mFaltas.has(data);
                         const obraCodes = mObras.get(data) ?? [];
                         let cls = 'border-r border-slate-100 text-center transition-colors select-none ';
-                        if (!wd) {
+                        if (isFalta) {
+                          cls += 'bg-amber-50 text-amber-500 hover:bg-amber-100 cursor-pointer';
+                        } else if (!wd) {
                           cls += h === 0 ? 'bg-slate-100/60 text-slate-300 hover:bg-slate-200/60 cursor-pointer'
                             : h >= 8 ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 cursor-pointer'
                             : 'bg-orange-50/70 text-orange-600 hover:bg-orange-100/70 cursor-pointer';
@@ -215,11 +244,11 @@ export default function PontoPage() {
                             : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 cursor-pointer';
                         }
                         return (
-                          <td key={data} className={cls} onClick={() => openModal(t, d)} title={obraCodes.join(' + ')}>
-                            <span className="block py-1.5 text-[11px] font-semibold">
-                              {h > 0 ? (h % 1 === 0 ? h : h.toFixed(1)) : (wd ? '!' : '')}
+                          <td key={data} className={cls} onClick={() => openModal(t, d)} title={isFalta ? 'Falta' : obraCodes.join(' + ')}>
+                            <span className="block py-1.5 text-[11px] font-semibold leading-none">
+                              {isFalta ? '✕' : h > 0 ? (h % 1 === 0 ? h : h.toFixed(1)) : (wd ? '!' : '')}
                             </span>
-                            {obraCodes.length > 0 && (
+                            {!isFalta && obraCodes.length > 0 && (
                               <div className="text-[7px] font-normal opacity-50 leading-none truncate px-0.5 pb-0.5">
                                 {obraCodes.slice(0, 2).join('+')}
                                 {obraCodes.length > 2 ? '…' : ''}
@@ -243,6 +272,7 @@ export default function PontoPage() {
             <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-green-200"></span>≥ 8h OK</span>
             <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-yellow-200"></span>Parcial (&lt; 8h)</span>
             <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-red-200"></span>! Sem registo (dia útil)</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-amber-100 border border-amber-300 text-amber-500 text-[9px] font-bold flex items-center justify-center">✕</span>Falta</span>
             <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-orange-200"></span>Sáb/Dom c/ horas</span>
             <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-slate-200"></span>Fim de semana s/ registo</span>
           </div>
@@ -262,117 +292,166 @@ export default function PontoPage() {
               <button onClick={() => setModal(null)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none ml-2">×</button>
             </div>
 
-            {totalHorasModal > 0 && (
+            {modalIsFalta ? (
+              <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">✕</span>
+                  <span className="text-sm text-amber-700 font-semibold">Falta registada</span>
+                </div>
+                <button onClick={clearDay} disabled={saving} className="text-xs text-red-400 hover:text-red-600 font-medium">Remover</button>
+              </div>
+            ) : totalHorasModal > 0 ? (
               <div className="mb-4 bg-blue-50 rounded-xl px-4 py-2.5 flex items-center justify-between">
                 <span className="text-sm text-blue-700 font-medium">
-                  {totalHorasModal}h · {modalDayRegs.length} {modalDayRegs.length === 1 ? 'entrada' : 'entradas'}
+                  {totalHorasModal}h · {modalDayRegs.filter(r => r.tipo !== 'falta').length} {modalDayRegs.filter(r => r.tipo !== 'falta').length === 1 ? 'entrada' : 'entradas'}
                 </span>
                 <button onClick={clearDay} disabled={saving} className="text-xs text-red-400 hover:text-red-600 font-medium">Limpar dia</button>
               </div>
+            ) : null}
+
+            {!modalIsFalta && (
+              <>
+                <div className="space-y-2 mb-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    {totalHorasModal > 0 ? 'Substituir por:' : 'Novo registo'}
+                  </p>
+                  {formEntries.map((entry, i) => (
+                    <div key={i} className="border border-slate-200 rounded-xl p-3 space-y-2 relative">
+                      {formEntries.length > 1 && (
+                        <button onClick={() => removeEntry(i)} className="absolute top-2 right-2 text-slate-300 hover:text-red-400 text-lg leading-none">×</button>
+                      )}
+                      <div>
+                        <label className="text-xs font-medium text-slate-600 block mb-1">Obra</label>
+                        <select value={entry.obraId} onChange={e => updateEntry(i, 'obraId', e.target.value)}
+                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">— Sem obra —</option>
+                          {obras.map(o => <option key={o.id} value={o.id}>{o.code} · {o.nome}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-slate-600 block mb-1">Horas</label>
+                        <div className="flex gap-2">
+                          {['4', '8'].map(h => (
+                            <button key={h} type="button" onClick={() => updateEntry(i, 'horas', h)}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${entry.horas === h ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{h}h</button>
+                          ))}
+                          <input type="number" min="0.5" max="24" step="0.5" value={entry.horas}
+                            onChange={e => updateEntry(i, 'horas', e.target.value)}
+                            className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-slate-600 block mb-1">Notas (opcional)</label>
+                        <input type="text" value={entry.notas} onChange={e => updateEntry(i, 'notas', e.target.value)}
+                          placeholder="Ausência, trabalho extra..."
+                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={addEntry}
+                    className="w-full py-2 border border-dashed border-slate-300 rounded-xl text-xs text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors">
+                    + Adicionar outra obra
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <button onClick={() => setShowMultiDias(!showMultiDias)}
+                    className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1.5 font-medium">
+                    <span className="text-[10px]">{showMultiDias ? '▲' : '▼'}</span>
+                    Aplicar a outros dias
+                    {selectedDias.length > 0 && (
+                      <span className="bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 text-[10px] font-semibold">+{selectedDias.length}</span>
+                    )}
+                  </button>
+                  {showMultiDias && (
+                    <div className="mt-2 p-3 bg-slate-50 rounded-xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] text-slate-500">Seleciona os dias (azul = dia atual):</p>
+                        <div className="flex gap-3">
+                          <button onClick={selectDiasUteis} className="text-[10px] text-blue-500 hover:text-blue-700 font-medium">Dias úteis</button>
+                          <button onClick={() => setSelectedDias([])} className="text-[10px] text-slate-400 hover:text-slate-600">Limpar</button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-7 gap-0.5">
+                        {DIAS_SEMANA.map(ds => (
+                          <div key={ds} className="text-[8px] text-center text-slate-400 font-medium py-0.5">{ds}</div>
+                        ))}
+                        {Array.from({ length: dias[0].getDay() }).map((_, i) => <div key={`e${i}`} />)}
+                        {dias.map(d => {
+                          const dateStr = isoDate(d);
+                          const isPrimary = dateStr === modal.data;
+                          const isSelected = selectedDias.includes(dateStr);
+                          const wd = isWeekday(d);
+                          return (
+                            <button key={dateStr} onClick={() => !isPrimary && toggleDia(dateStr)} disabled={isPrimary}
+                              className={`w-full aspect-square text-[10px] rounded font-medium transition-colors ${
+                                isPrimary ? 'bg-blue-700 text-white cursor-default'
+                                : isSelected ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                : wd ? 'bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300'
+                                : 'bg-white border border-slate-100 text-slate-300 hover:bg-orange-50'
+                              }`}>
+                              {d.getDate()}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {selectedDias.length > 0 && (
+                        <p className="text-[10px] text-blue-600 mt-2 font-medium">✓ Guardará em {selectedDias.length + 1} dias</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
-            <div className="space-y-2 mb-3">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                {totalHorasModal > 0 ? 'Substituir por:' : 'Novo registo'}
-              </p>
-              {formEntries.map((entry, i) => (
-                <div key={i} className="border border-slate-200 rounded-xl p-3 space-y-2 relative">
-                  {formEntries.length > 1 && (
-                    <button onClick={() => removeEntry(i)} className="absolute top-2 right-2 text-slate-300 hover:text-red-400 text-lg leading-none">×</button>
-                  )}
-                  <div>
-                    <label className="text-xs font-medium text-slate-600 block mb-1">Obra</label>
-                    <select value={entry.obraId} onChange={e => updateEntry(i, 'obraId', e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="">— Sem obra —</option>
-                      {obras.map(o => <option key={o.id} value={o.id}>{o.code} · {o.nome}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-600 block mb-1">Horas</label>
-                    <div className="flex gap-2">
-                      {['4', '8'].map(h => (
-                        <button key={h} type="button" onClick={() => updateEntry(i, 'horas', h)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${entry.horas === h ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{h}h</button>
-                      ))}
-                      <input type="number" min="0.5" max="24" step="0.5" value={entry.horas}
-                        onChange={e => updateEntry(i, 'horas', e.target.value)}
-                        className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-slate-600 block mb-1">Notas (opcional)</label>
-                    <input type="text" value={entry.notas} onChange={e => updateEntry(i, 'notas', e.target.value)}
-                      placeholder="Ausência, trabalho extra..."
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            {modalIsFalta && showMultiDias && (
+              <div className="mb-4 p-3 bg-slate-50 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] text-slate-500">Aplicar falta a outros dias:</p>
+                  <div className="flex gap-3">
+                    <button onClick={selectDiasUteis} className="text-[10px] text-blue-500 hover:text-blue-700 font-medium">Dias úteis</button>
+                    <button onClick={() => setSelectedDias([])} className="text-[10px] text-slate-400 hover:text-slate-600">Limpar</button>
                   </div>
                 </div>
-              ))}
-              <button onClick={addEntry}
-                className="w-full py-2 border border-dashed border-slate-300 rounded-xl text-xs text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-colors">
-                + Adicionar outra obra
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <button onClick={() => setShowMultiDias(!showMultiDias)}
-                className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1.5 font-medium">
-                <span className="text-[10px]">{showMultiDias ? '▲' : '▼'}</span>
-                Aplicar a outros dias
-                {selectedDias.length > 0 && (
-                  <span className="bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 text-[10px] font-semibold">+{selectedDias.length}</span>
-                )}
-              </button>
-              {showMultiDias && (
-                <div className="mt-2 p-3 bg-slate-50 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] text-slate-500">Seleciona os dias (azul escuro = dia atual):</p>
-                    <div className="flex gap-3">
-                      <button onClick={selectDiasUteis} className="text-[10px] text-blue-500 hover:text-blue-700 font-medium">Dias úteis</button>
-                      <button onClick={() => setSelectedDias([])} className="text-[10px] text-slate-400 hover:text-slate-600">Limpar</button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-7 gap-0.5">
-                    {DIAS_SEMANA.map(ds => (
-                      <div key={ds} className="text-[8px] text-center text-slate-400 font-medium py-0.5">{ds}</div>
-                    ))}
-                    {Array.from({ length: dias[0].getDay() }).map((_, i) => <div key={`e${i}`} />)}
-                    {dias.map(d => {
-                      const dateStr = isoDate(d);
-                      const isPrimary = dateStr === modal.data;
-                      const isSelected = selectedDias.includes(dateStr);
-                      const wd = isWeekday(d);
-                      return (
-                        <button key={dateStr} onClick={() => !isPrimary && toggleDia(dateStr)} disabled={isPrimary}
-                          className={`w-full aspect-square text-[10px] rounded font-medium transition-colors ${
-                            isPrimary ? 'bg-blue-700 text-white cursor-default'
-                            : isSelected ? 'bg-blue-500 text-white hover:bg-blue-600'
-                            : wd ? 'bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300'
-                            : 'bg-white border border-slate-100 text-slate-300 hover:bg-orange-50'
-                          }`}>
-                          {d.getDate()}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {selectedDias.length > 0 && (
-                    <p className="text-[10px] text-blue-600 mt-2 font-medium">
-                      ✓ Guardará em {selectedDias.length + 1} dias
-                    </p>
-                  )}
+                <div className="grid grid-cols-7 gap-0.5">
+                  {DIAS_SEMANA.map(ds => <div key={ds} className="text-[8px] text-center text-slate-400 font-medium py-0.5">{ds}</div>)}
+                  {Array.from({ length: dias[0].getDay() }).map((_, i) => <div key={`e${i}`} />)}
+                  {dias.map(d => {
+                    const dateStr = isoDate(d);
+                    const isPrimary = dateStr === modal.data;
+                    const isSelected = selectedDias.includes(dateStr);
+                    const wd = isWeekday(d);
+                    return (
+                      <button key={dateStr} onClick={() => !isPrimary && toggleDia(dateStr)} disabled={isPrimary}
+                        className={`w-full aspect-square text-[10px] rounded font-medium transition-colors ${
+                          isPrimary ? 'bg-amber-500 text-white cursor-default'
+                          : isSelected ? 'bg-amber-400 text-white hover:bg-amber-500'
+                          : wd ? 'bg-white border border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-200'
+                          : 'bg-white border border-slate-100 text-slate-300'
+                        }`}>{d.getDate()}</button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button type="button" onClick={() => setModal(null)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition-colors min-w-[80px]">
                 Cancelar
               </button>
-              <button type="button" onClick={saveRegisto} disabled={saving || formEntries.length === 0}
-                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                {saving ? 'A guardar…' : selectedDias.length > 0 ? `Guardar (${selectedDias.length + 1} dias)` : 'Guardar'}
-              </button>
+              {!modalIsFalta && (
+                <button type="button" onClick={() => { setShowMultiDias(true); markFalta(); }} disabled={saving}
+                  className="px-4 py-2.5 border border-amber-300 text-amber-600 rounded-xl text-sm font-medium hover:bg-amber-50 disabled:opacity-50 transition-colors">
+                  {saving ? '…' : selectedDias.length > 0 ? `✕ Falta (${selectedDias.length + 1}d)` : '✕ Marcar falta'}
+                </button>
+              )}
+              {!modalIsFalta && (
+                <button type="button" onClick={saveRegisto} disabled={saving || formEntries.length === 0}
+                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors min-w-[80px]">
+                  {saving ? 'A guardar…' : selectedDias.length > 0 ? `Guardar (${selectedDias.length + 1}d)` : 'Guardar'}
+                </button>
+              )}
             </div>
           </div>
         </div>
