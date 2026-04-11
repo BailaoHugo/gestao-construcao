@@ -20,7 +20,7 @@ function getDiasDoMes(ano: number, mes: number): Date[] {
   return dias;
 }
 function isWeekday(d: Date) { const dow = d.getDay(); return dow !== 0 && dow !== 6; }
-function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
+function isoDate(d: Date) { const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${day}`; }
 
 export default function PontoPage() {
   const today = new Date();
