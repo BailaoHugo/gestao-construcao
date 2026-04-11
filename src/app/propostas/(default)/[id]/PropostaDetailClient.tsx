@@ -1,4 +1,5 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import type { Proposta, PropostaLinha } from "@/propostas/domain";
 import {
@@ -18,9 +19,11 @@ import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPane
 function computeTotal(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
 }
+
 function computeTotalCusto(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalCustoLinha, 0);
 }
+
 type CatalogoLinhasLayout = "split" | "catalogoFull" | "linhasFull";
 
 function createEmptyLinha(): PropostaLinha {
@@ -173,16 +176,18 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     handleAddLinhaFromCatalogo(artigo, 1);
   };
 
-    const handleCriarNovaRevisao = async () => {
+  const handleCriarNovaRevisao = async () => {
     try {
       setIsSaving(true);
       setError(null);
       const res = await fetch(`/api/propostas/${proposta.id}/revisao`, {
-        method: 'POST',
+        method: "POST",
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(data?.error ?? 'Falha ao criar nova revisão.');
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(data?.error ?? "Falha ao criar nova revisÃ£o.");
       }
       window.location.reload();
     } catch (err) {
@@ -191,6 +196,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       setIsSaving(false);
     }
   };
+
   const handleGerarContrato = async () => {
     try {
       setIsSaving(true);
@@ -198,7 +204,10 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       const res = await fetch("/api/contratos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propostaId: proposta.id, revisaoId: revisaoAtivaId }),
+        body: JSON.stringify({
+          propostaId: proposta.id,
+          revisaoId: revisaoAtivaId,
+        }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Falha ao criar contrato");
@@ -220,7 +229,9 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         body: JSON.stringify({ estado: "EMITIDA" }),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
         throw new Error(data?.error ?? "Falha ao emitir proposta.");
       }
       window.location.reload();
@@ -241,7 +252,9 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         body: JSON.stringify({ estado: "APROVADA" }),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
         throw new Error(data?.error ?? "Falha ao aprovar proposta.");
       }
       window.location.reload();
@@ -293,7 +306,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 Nova proposta
               </h1>
               <p className="max-w-2xl text-sm text-slate-500">
-                Preencha a folha de rosto e as linhas da proposta. Ao gravar, os dados são guardados na base de dados (Supabase).
+                Preencha a folha de rosto e as linhas da proposta. Ao gravar,
+                os dados sÃ£o guardados na base de dados (Supabase).
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -323,7 +337,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 Proposta {proposta.codigo}
               </h1>
               <p className="text-sm text-slate-500">
-                Revisão R{revisaoAtiva.numeroRevisao} ·{" "}
+                RevisÃ£o R{revisaoAtiva.numeroRevisao} Â·{" "}
                 <span className="font-medium">
                   {formatEstadoLabel(revisaoAtiva.estado)}
                 </span>
@@ -362,8 +376,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                   revisaoAtiva.estado === "APROVADA"
                     ? "bg-sky-700"
                     : revisaoAtiva.estado === "EMITIDA"
-                    ? "bg-emerald-700"
-                    : "bg-slate-900"
+                      ? "bg-emerald-700"
+                      : "bg-slate-900"
                 }`}
               >
                 {formatEstadoLabel(revisaoAtiva.estado)}
@@ -374,7 +388,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                   onClick={handleCriarNovaRevisao}
                   className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
-                  Criar nova revisão
+                  Criar nova revisÃ£o
                 </button>
               )}
             </div>
@@ -382,10 +396,10 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         )}
       </header>
 
-      {/* Selector de revisões */}
+      {/* Selector de revisÃµes */}
       {!podeEditar && (
         <section className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm text-[11px]">
-          <span className="font-medium text-slate-700">Revisões:</span>
+          <span className="font-medium text-slate-700">RevisÃµes:</span>
           {proposta.todasRevisoes.map((rev) => {
             const ativo = rev.id === revisaoAtiva.id;
             return (
@@ -399,7 +413,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
+                R{rev.numeroRevisao} Â· {formatEstadoLabel(rev.estado)}
               </button>
             );
           })}
@@ -450,13 +464,27 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                     className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
                     value={revisaoAtiva.folhaRosto.clienteEmail ?? ""}
                     onChange={(e) =>
-                      handleFolhaRostoChange({
-                        clienteEmail: e.target.value,
-                      })
+                      handleFolhaRostoChange({ clienteEmail: e.target.value })
                     }
                     disabled={!podeEditar}
                   />
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                  NIF / NIPC (opcional)
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
+                  value={revisaoAtiva.folhaRosto.clienteNipc ?? ""}
+                  onChange={(e) =>
+                    handleFolhaRostoChange({ clienteNipc: e.target.value })
+                  }
+                  disabled={!podeEditar}
+                  placeholder="Ex: 123456789"
+                  maxLength={9}
+                />
               </div>
             </div>
             <div className="space-y-3 text-xs text-slate-700">
@@ -529,8 +557,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Maria Orcamentista (em formação)"
-        subtitle="Assistente local para pesquisar e inserir linhas do catálogo."
+        title="Maria Orcamentista (em formaÃ§Ã£o)"
+        subtitle="Assistente local para pesquisar e inserir linhas do catÃ¡logo."
       >
         <MariaPanel
           embed
@@ -553,12 +581,12 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             catalogoLinhasLayout === "split"
               ? "w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]"
               : catalogoLinhasLayout === "linhasFull"
-              ? "order-2 w-full"
-              : "order-1 w-full"
+                ? "order-2 w-full"
+                : "order-1 w-full"
           }
         >
           <CollapsibleSection
-            title="Catálogo"
+            title="CatÃ¡logo"
             headerActions={
               <button
                 type="button"
@@ -582,13 +610,14 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             />
           </CollapsibleSection>
         </div>
+
         <div
           className={
             catalogoLinhasLayout === "split"
               ? "min-w-0 flex-1"
               : catalogoLinhasLayout === "linhasFull"
-              ? "order-1 w-full"
-              : "order-2 w-full"
+                ? "order-1 w-full"
+                : "order-2 w-full"
           }
         >
           <CollapsibleSection
@@ -672,8 +701,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           )}
           <p className="text-[11px] text-slate-500">
             {podeEditar
-              ? "Os totais de custo e venda são calculados automaticamente a partir das linhas; a margem é apenas informativa neste MVP."
-              : "Estes valores são calculados a partir das linhas da revisão ativa."}
+              ? "Os totais de custo e venda sÃ£o calculados automaticamente a partir das linhas; a margem Ã© apenas informativa neste MVP."
+              : "Estes valores sÃ£o calculados a partir das linhas da revisÃ£o ativa."}
           </p>
           {error && (
             <p className="text-[11px] text-red-600">
