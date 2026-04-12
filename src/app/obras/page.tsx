@@ -12,14 +12,16 @@ type Obra = {
   cliente_nome?: string;
   data_inicio?: string;
   data_fim?: string;
+  morada?: string;
+  nipc?: string;
 };
 
 // Valores que existem na BD (CHECK constraint)
 const ESTADOS = [
-  { value: "ativo",     label: "Ativa",      color: "bg-blue-100 text-blue-700" },
-  { value: "concluido", label: "Concluída",   color: "bg-green-100 text-green-700" },
-  { value: "suspenso",  label: "Suspensa",    color: "bg-amber-100 text-amber-700" },
-  { value: "cancelado", label: "Cancelada",   color: "bg-red-100 text-red-700" },
+  { value: "ativo",     label: "Ativa",     color: "bg-blue-100 text-blue-700"  },
+  { value: "concluido", label: "Concluída", color: "bg-green-100 text-green-700" },
+  { value: "suspenso",  label: "Suspensa",  color: "bg-amber-100 text-amber-700" },
+  { value: "cancelado", label: "Cancelada", color: "bg-red-100 text-red-700"    },
 ];
 
 function estadoBadge(estado: string) {
@@ -39,27 +41,29 @@ const EMPTY = {
   cliente_id: "",
   data_inicio: "",
   data_fim: "",
+  morada: "",
+  nipc: "",
 };
 
 const FILTROS = [
-  { value: "",         label: "Todas"      },
-  { value: "ativo",    label: "Ativas"     },
-  { value: "concluido",label: "Concluídas" },
-  { value: "suspenso", label: "Suspensas"  },
-  { value: "cancelado",label: "Canceladas" },
+  { value: "",          label: "Todas"     },
+  { value: "ativo",     label: "Ativas"    },
+  { value: "concluido", label: "Concluídas"},
+  { value: "suspenso",  label: "Suspensas" },
+  { value: "cancelado", label: "Canceladas"},
 ];
 
 export default function ObrasPage() {
-  const [obras, setObras]     = useState<Obra[]>([]);
-  const [total, setTotal]     = useState(0);
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [search, setSearch]   = useState("");
+  const [obras, setObras]         = useState<Obra[]>([]);
+  const [total, setTotal]         = useState(0);
+  const [clientes, setClientes]   = useState<Cliente[]>([]);
+  const [search, setSearch]       = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal]     = useState(false);
-  const [editId, setEditId]   = useState<string | null>(null);
-  const [form, setForm]       = useState<typeof EMPTY>({ ...EMPTY });
-  const [saving, setSaving]   = useState(false);
+  const [loading, setLoading]     = useState(true);
+  const [modal, setModal]         = useState(false);
+  const [editId, setEditId]       = useState<string | null>(null);
+  const [form, setForm]           = useState<typeof EMPTY>({ ...EMPTY });
+  const [saving, setSaving]       = useState(false);
 
   const load = useCallback(async (q = search, est = filtroEstado) => {
     setLoading(true);
@@ -73,12 +77,10 @@ export default function ObrasPage() {
   }, [search, filtroEstado]);
 
   useEffect(() => { load(); }, []);
-
   useEffect(() => {
     const t = setTimeout(() => load(search, filtroEstado), 300);
     return () => clearTimeout(t);
   }, [search, filtroEstado]);
-
   useEffect(() => {
     fetch("/api/clientes?limit=200")
       .then((r) => r.json())
@@ -93,13 +95,15 @@ export default function ObrasPage() {
 
   function openEdit(o: Obra) {
     setForm({
-      code:        o.code ?? "",
-      nome:        o.nome,
-      descricao:   o.descricao ?? "",
-      estado:      o.estado,
-      cliente_id:  o.cliente_id ? String(o.cliente_id) : "",
+      code:       o.code ?? "",
+      nome:       o.nome,
+      descricao:  o.descricao ?? "",
+      estado:     o.estado,
+      cliente_id: o.cliente_id ? String(o.cliente_id) : "",
       data_inicio: o.data_inicio?.slice(0, 10) ?? "",
       data_fim:    o.data_fim?.slice(0, 10) ?? "",
+      morada:     o.morada ?? "",
+      nipc:       o.nipc ?? "",
     });
     setEditId(o.id);
     setModal(true);
@@ -109,13 +113,15 @@ export default function ObrasPage() {
     if (!form.nome.trim() || !form.code.trim()) return;
     setSaving(true);
     const body = {
-      code:        form.code.trim(),
-      name:        form.nome.trim(),   // API espera 'name'
-      descricao:   form.descricao || null,
-      estado:      form.estado,
-      cliente_id:  form.cliente_id ? form.cliente_id : null,
+      code:       form.code.trim(),
+      name:       form.nome.trim(),
+      descricao:  form.descricao || null,
+      estado:     form.estado,
+      cliente_id: form.cliente_id ? form.cliente_id : null,
       data_inicio: form.data_inicio || null,
       data_fim:    form.data_fim    || null,
+      morada:     form.morada || null,
+      nipc:       form.nipc   || null,
     };
     if (editId) {
       await fetch(`/api/obras/${editId}`, {
@@ -143,7 +149,6 @@ export default function ObrasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
@@ -199,7 +204,7 @@ export default function ObrasPage() {
             <thead>
               <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                 <th className="px-4 py-3 w-16">Cód.</th>
-                <th className="px-4 py-3">Nome</th>
+                <th className="px-4 py-3">Nome / Morada</th>
                 <th className="px-4 py-3">Cliente</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3">Início</th>
@@ -211,7 +216,12 @@ export default function ObrasPage() {
               {obras.map((o) => (
                 <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-500">{o.code}</td>
-                  <td className="px-4 py-3 font-medium text-slate-800">{o.nome}</td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-800">{o.nome}</div>
+                    {o.morada && (
+                      <div className="text-xs text-slate-400 mt-0.5">{o.morada}</div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-slate-500">
                     {o.cliente_nome ?? <span className="text-slate-300 italic">—</span>}
                   </td>
@@ -244,12 +254,11 @@ export default function ObrasPage() {
       {/* Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="mb-5 text-lg font-semibold text-slate-800">
               {editId ? "Editar Obra" : "Nova Obra"}
             </h2>
             <div className="flex flex-col gap-4">
-
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-500">Código *</label>
@@ -271,6 +280,16 @@ export default function ObrasPage() {
               </div>
 
               <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Morada</label>
+                <input
+                  value={form.morada}
+                  onChange={(e) => setForm({ ...form, morada: e.target.value })}
+                  placeholder="Rua, número, código postal…"
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              <div>
                 <label className="mb-1 block text-xs font-medium text-slate-500">Cliente</label>
                 <select
                   value={form.cliente_id}
@@ -282,6 +301,17 @@ export default function ObrasPage() {
                     <option key={c.id} value={c.id}>{c.nome}</option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">NIF / NIPC do cliente</label>
+                <input
+                  value={form.nipc}
+                  onChange={(e) => setForm({ ...form, nipc: e.target.value })}
+                  placeholder="500000000"
+                  maxLength={9}
+                  className="w-full rounded-xl border-0 bg-slate-50 px-4 py-2.5 text-sm font-mono ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
               </div>
 
               <div>
