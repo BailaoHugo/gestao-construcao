@@ -187,7 +187,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         const data = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        throw new Error(data?.error ?? "Falha ao criar nova revisÃ£o.");
+        throw new Error(data?.error ?? "Falha ao criar nova revisão.");
       }
       window.location.reload();
     } catch (err) {
@@ -307,7 +307,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               </h1>
               <p className="max-w-2xl text-sm text-slate-500">
                 Preencha a folha de rosto e as linhas da proposta. Ao gravar,
-                os dados sÃ£o guardados na base de dados (Supabase).
+                os dados são guardados na base de dados (Supabase).
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -317,7 +317,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 disabled={isSaving}
                 className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-900 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "A guardarâ¦" : "Emitir proposta"}
+                {isSaving ? "A guardar…" : "Emitir proposta"}
               </button>
               <a
                 href={`/api/propostas/${proposta.id}/pdf?revisaoId=${revisaoAtivaId}`}
@@ -337,7 +337,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 Proposta {proposta.codigo}
               </h1>
               <p className="text-sm text-slate-500">
-                RevisÃ£o R{revisaoAtiva.numeroRevisao} Â·{" "}
+                Revisão R{revisaoAtiva.numeroRevisao} ·{" "}
                 <span className="font-medium">
                   {formatEstadoLabel(revisaoAtiva.estado)}
                 </span>
@@ -388,7 +388,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                   onClick={handleCriarNovaRevisao}
                   className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
-                  Criar nova revisÃ£o
+                  Criar nova revisão
                 </button>
               )}
             </div>
@@ -396,10 +396,10 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         )}
       </header>
 
-      {/* Selector de revisÃµes */}
+      {/* Selector de revisões */}
       {!podeEditar && (
         <section className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm text-[11px]">
-          <span className="font-medium text-slate-700">RevisÃµes:</span>
+          <span className="font-medium text-slate-700">Revisões:</span>
           {proposta.todasRevisoes.map((rev) => {
             const ativo = rev.id === revisaoAtiva.id;
             return (
@@ -413,7 +413,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                R{rev.numeroRevisao} Â· {formatEstadoLabel(rev.estado)}
+                R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
               </button>
             );
           })}
@@ -557,8 +557,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Maria Orcamentista (em formaÃ§Ã£o)"
-        subtitle="Assistente local para pesquisar e inserir linhas do catÃ¡logo."
+        title="Maria Orcamentista (em formação)"
+        subtitle="Assistente local para pesquisar e inserir linhas do catálogo."
       >
         <MariaPanel
           embed
@@ -586,7 +586,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           }
         >
           <CollapsibleSection
-            title="CatÃ¡logo"
+            title="Catálogo"
             headerActions={
               <button
                 type="button"
@@ -701,8 +701,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
           )}
           <p className="text-[11px] text-slate-500">
             {podeEditar
-              ? "Os totais de custo e venda sÃ£o calculados automaticamente a partir das linhas; a margem Ã© apenas informativa neste MVP."
-              : "Estes valores sÃ£o calculados a partir das linhas da revisÃ£o ativa."}
+              ? "Os totais de custo e venda são calculados automaticamente a partir das linhas; a margem é apenas informativa neste MVP."
+              : "Estes valores são calculados a partir das linhas da revisão ativa."}
           </p>
           {error && (
             <p className="text-[11px] text-red-600">
@@ -718,7 +718,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
               disabled={isSaving}
               className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500"
             >
-              {isSaving ? "A gravarâ¦" : "Guardar"}
+              {isSaving ? "A gravar…" : "Guardar"}
             </button>
           </div>
         )}
