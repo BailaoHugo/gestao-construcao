@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+import { pool } from "@/lib/db";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,16 +26,34 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       // obra sem proposta ligada ou tabelas inexistentes — ignorar
     }
 
-    // Custos reais agrupados por categoria
-    const { rows: custos } = await pool.query(`
-      SELECT
-        categoria,
-        SUM(valor) AS gasto
-      FROM obra_custos
-      WHERE obra_id = $1
-      GROUP BY categoria
-      ORDER BY categoria
+    // Custos: despesas agrupadas por tipo
+    const { rows: despesasCustos } = await pool.query(`
+      SELECT tipo AS categoria, SUM(valor) AS gasto
+      FROM despesas
+      WHERE centro_custo_id = $1
+      GROUP BY tipo
+      ORDER BY tipo
     `, [id]);
+
+    // Custos: mao de obra do ponto agrupada
+    let pontoCustos: { categoria: string; gasto: string }[] = [];
+    try {
+      const { rows } = await pool.query(`
+        SELECT
+          'mao_obra' AS categoria,
+          SUM(COALESCE(rp.custo, rp.horas * t.custo_hora)) AS gasto
+        FROM registos_ponto rp
+        JOIN trabalhadores t ON t.id = rp.trabalhador_id
+        WHERE rp.obra_id = $1 AND rp.tipo != 'falta'
+      `, [id]);
+      if (rows[0]?.gasto && parseFloat(rows[0].gasto) > 0) {
+        pontoCustos = rows;
+      }
+    } catch {
+      // tabela registos_ponto pode nao existir
+    }
+
+    const custos = [...despesasCustos, ...pontoCustos];
 
     const totalOrcado = orcamento.reduce((s, r) => s + parseFloat(r.orcado || "0"), 0);
     const totalGasto = custos.reduce((s: number, r: { gasto: string }) => s + parseFloat(r.gasto || "0"), 0);
