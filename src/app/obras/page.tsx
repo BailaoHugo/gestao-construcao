@@ -230,6 +230,12 @@ export default function ObrasPage() {
                   <td className="px-4 py-3 text-slate-500">{o.data_fim?.slice(0, 10) ?? "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
+                      <a
+                        href={`/obras/${o.id}`}
+                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-600 ring-1 ring-blue-100 hover:bg-blue-50"
+                      >
+                        Controlo
+                      </a>
                       <button
                         onClick={() => openEdit(o)}
                         className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
