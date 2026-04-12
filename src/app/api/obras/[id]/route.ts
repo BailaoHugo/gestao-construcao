@@ -3,6 +3,19 @@ import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const { rows } = await pool.query(
+    `SELECT o.*, c.nome AS cliente_nome
+     FROM obras o
+     LEFT JOIN clientes c ON c.id = o.cliente_id
+     WHERE o.id = $1`,
+    [id]
+  );
+  if (rows.length === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(rows[0]);
+}
+
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const body = await req.json();
@@ -13,8 +26,8 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
   const clienteId = body.cliente_id !== undefined ? (body.cliente_id || null) : undefined;
   const dataIni   = body.data_inicio !== undefined ? (body.data_inicio || null) : undefined;
   const dataFim   = body.data_fim    !== undefined ? (body.data_fim    || null) : undefined;
-  const morada    = body.morada !== undefined ? (body.morada ?? null) : undefined;
-  const nipc      = body.nipc   !== undefined ? (body.nipc   ?? null) : undefined;
+  const morada    = body.morada    !== undefined ? (body.morada    ?? null) : undefined;
+  const nipc      = body.nipc      !== undefined ? (body.nipc      ?? null) : undefined;
 
   const sets: string[] = [];
   const vals: unknown[] = [];
