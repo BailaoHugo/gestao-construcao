@@ -1,5 +1,4 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import type { Proposta, PropostaLinha } from "@/propostas/domain";
 import {
@@ -19,11 +18,9 @@ import { ResumoCapitulosPanel } from "@/components/propostas/ResumoCapitulosPane
 function computeTotal(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalVendaLinha, 0);
 }
-
 function computeTotalCusto(linhas: PropostaLinha[]): number {
   return linhas.reduce((sum, l) => sum + l.totalCustoLinha, 0);
 }
-
 type CatalogoLinhasLayout = "split" | "catalogoFull" | "linhasFull";
 
 function createEmptyLinha(): PropostaLinha {
@@ -176,25 +173,10 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     handleAddLinhaFromCatalogo(artigo, 1);
   };
 
-  const handleCriarNovaRevisao = async () => {
-    try {
-      setIsSaving(true);
-      setError(null);
-      const res = await fetch(`/api/propostas/${proposta.id}/revisao`, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(data?.error ?? "Falha ao criar nova revisão.");
-      }
-      window.location.reload();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsSaving(false);
-    }
+  const handleCriarNovaRevisao = () => {
+    // Futuro: criar nova revisão em Supabase
+    // eslint-disable-next-line no-console
+    console.log("Criar nova revisão (ainda não suportado nesta versão).");
   };
 
   const handleGerarContrato = async () => {
@@ -204,10 +186,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       const res = await fetch("/api/contratos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propostaId: proposta.id,
-          revisaoId: revisaoAtivaId,
-        }),
+        body: JSON.stringify({ propostaId: proposta.id, revisaoId: revisaoAtivaId }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Falha ao criar contrato");
@@ -229,9 +208,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         body: JSON.stringify({ estado: "EMITIDA" }),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(data?.error ?? "Falha ao emitir proposta.");
       }
       window.location.reload();
@@ -252,9 +229,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
         body: JSON.stringify({ estado: "APROVADA" }),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(data?.error ?? "Falha ao aprovar proposta.");
       }
       window.location.reload();
@@ -306,8 +281,7 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 Nova proposta
               </h1>
               <p className="max-w-2xl text-sm text-slate-500">
-                Preencha a folha de rosto e as linhas da proposta. Ao gravar,
-                os dados são guardados na base de dados (Supabase).
+                Preencha a folha de rosto e as linhas da proposta. Ao gravar, os dados são guardados na base de dados (Supabase).
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -376,13 +350,14 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                   revisaoAtiva.estado === "APROVADA"
                     ? "bg-sky-700"
                     : revisaoAtiva.estado === "EMITIDA"
-                      ? "bg-emerald-700"
-                      : "bg-slate-900"
+                    ? "bg-emerald-700"
+                    : "bg-slate-900"
                 }`}
               >
                 {formatEstadoLabel(revisaoAtiva.estado)}
               </span>
-              {revisaoAtiva.estado === "EMITIDA" && (
+              {(revisaoAtiva.estado === "EMITIDA" ||
+                revisaoAtiva.estado === "APROVADA") && (
                 <button
                   type="button"
                   onClick={handleCriarNovaRevisao}
@@ -400,23 +375,32 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
       {!podeEditar && (
         <section className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm text-[11px]">
           <span className="font-medium text-slate-700">Revisões:</span>
-          {proposta.todasRevisoes.map((rev) => {
-            const ativo = rev.id === revisaoAtiva.id;
-            return (
-              <button
-                key={rev.id}
-                type="button"
-                onClick={() => setRevisaoAtivaId(rev.id)}
-                className={`rounded-full border px-3 py-1 text-[11px] ${
-                  ativo
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
-              </button>
-            );
-          })}
+          {(() => {
+            const ultimaNaoRascunho = proposta.todasRevisoes
+              .filter((r) => r.estado !== "RASCUNHO")
+              .sort((a, b) => b.numeroRevisao - a.numeroRevisao)[0];
+            return proposta.todasRevisoes.map((rev) => {
+              const ativo = rev.id === revisaoAtiva.id;
+              const ehAtiva = ultimaNaoRascunho
+                ? rev.id === ultimaNaoRascunho.id
+                : false;
+              return (
+                <button
+                  key={rev.id}
+                  type="button"
+                  onClick={() => setRevisaoAtivaId(rev.id)}
+                  className={`rounded-full border px-3 py-1 text-[11px] ${
+                    ativo
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  R{rev.numeroRevisao} · {formatEstadoLabel(rev.estado)}
+                  {ehAtiva ? " ✓" : ""}
+                </button>
+              );
+            });
+          })()}
         </section>
       )}
 
@@ -464,27 +448,13 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                     className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
                     value={revisaoAtiva.folhaRosto.clienteEmail ?? ""}
                     onChange={(e) =>
-                      handleFolhaRostoChange({ clienteEmail: e.target.value })
+                      handleFolhaRostoChange({
+                        clienteEmail: e.target.value,
+                      })
                     }
                     disabled={!podeEditar}
                   />
                 </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-[11px] font-medium text-slate-700">
-                  NIF / NIPC (opcional)
-                </label>
-                <input
-                  type="text"
-                  className="w-full rounded border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-slate-400"
-                  value={revisaoAtiva.folhaRosto.clienteNipc ?? ""}
-                  onChange={(e) =>
-                    handleFolhaRostoChange({ clienteNipc: e.target.value })
-                  }
-                  disabled={!podeEditar}
-                  placeholder="Ex: 123456789"
-                  maxLength={9}
-                />
               </div>
             </div>
             <div className="space-y-3 text-xs text-slate-700">
@@ -581,8 +551,8 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             catalogoLinhasLayout === "split"
               ? "w-full shrink-0 md:w-[min(380px,100%)] md:max-w-[380px]"
               : catalogoLinhasLayout === "linhasFull"
-                ? "order-2 w-full"
-                : "order-1 w-full"
+              ? "order-2 w-full"
+              : "order-1 w-full"
           }
         >
           <CollapsibleSection
@@ -610,14 +580,13 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
             />
           </CollapsibleSection>
         </div>
-
         <div
           className={
             catalogoLinhasLayout === "split"
               ? "min-w-0 flex-1"
               : catalogoLinhasLayout === "linhasFull"
-                ? "order-1 w-full"
-                : "order-2 w-full"
+              ? "order-1 w-full"
+              : "order-2 w-full"
           }
         >
           <CollapsibleSection
