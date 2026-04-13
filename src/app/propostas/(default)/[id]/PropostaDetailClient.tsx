@@ -173,10 +173,21 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
     handleAddLinhaFromCatalogo(artigo, 1);
   };
 
-  const handleCriarNovaRevisao = () => {
-    // Futuro: criar nova revisão em Supabase
-    // eslint-disable-next-line no-console
-    console.log("Criar nova revisão (ainda não suportado nesta versão).");
+  const handleCriarNovaRevisao = async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+      const res = await fetch(`/api/propostas/${proposta.id}/revisao`, {
+        method: "POST",
+      });
+      const data = (await res.json()) as { revisaoId?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Falha ao criar nova revisão.");
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleGerarContrato = async () => {
@@ -360,10 +371,11 @@ export function PropostaDetailClient({ initial }: { initial: Proposta }) {
                 revisaoAtiva.estado === "APROVADA") && (
                 <button
                   type="button"
-                  onClick={handleCriarNovaRevisao}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                  onClick={() => void handleCriarNovaRevisao()}
+                  disabled={isSaving}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
                 >
-                  Criar nova revisão
+                  {isSaving ? "A criar…" : "Criar nova revisão"}
                 </button>
               )}
             </div>
