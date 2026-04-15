@@ -29,8 +29,9 @@ export async function POST(req: Request) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
     const filename = `despesas/${safeName}`;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blob = await put(filename, file, {
-      access: 'private',
+      access: 'private' as any,
       contentType: file.type || 'application/octet-stream',
       addRandomSuffix: false,
     });
