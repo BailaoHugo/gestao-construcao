@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react"
 
 type Obra = { id: string; code: string; nome: string };
 
@@ -11,7 +11,7 @@ type DespesaLinha = {
   quantidade: number;
   unidade: string;
   preco_unit_sem_iva: number;
-  taxa_iva: number;
+  taxa_iva: number
   desconto_pct: number;
   total_sem_iva: number;
 };
@@ -418,8 +418,7 @@ export default function DespesasPage() {
                           </a>
                         ) : d.toconline_id ? (
                           <span className="text-teal-600 text-xs" title="TOC Online">🔗</span>
-                        ) : null}
-                        {uploadingId === d.id ? (
+                        ) : uploadingId === d.id ? (
                           <span className="text-xs text-gray-400 animate-pulse">...</span>
                         ) : (
                           <label className="cursor-pointer text-gray-300 hover:text-blue-500 text-xs" title="Anexar ficheiro">
