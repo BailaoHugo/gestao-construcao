@@ -58,7 +58,7 @@ export async function getAccessToken(): Promise<string> {
             if (fresh && fresh !== refreshToken) {
               console.log('[toconline] token rotacionado por outra instância, a tentar...');
               refreshToken = fresh;
-              resp = await doRefresh(refreshToken);
+              resp = await doRefresh(fresh);
             }
           } catch (_) {}
         }
