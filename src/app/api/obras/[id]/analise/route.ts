@@ -6,19 +6,19 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
 
     // Orcamento: capitulos e totais da revisao ativa (ultima nao-RASCUNHO, ou ultima se todas RASCUNHO)
+    // Junta obras -> propostas via obraNome (sem depender de contratos.obra_id)
     let orcamento: { capitulo: string; orcado: string }[] = [];
     try {
       const { rows } = await pool.query(`
         SELECT prl.capitulo, SUM(prl.quantidade * prl.preco_venda_unitario) AS orcado
         FROM obras o
-        JOIN contratos c ON c.obra_id = o.id
-        JOIN propostas p ON p.id = c.proposta_id
+        JOIN propostas p ON p."obraNome" = o.name
         JOIN proposta_revisoes pr ON pr.proposta_id = p.id
           AND pr.id = (
             SELECT pr2.id FROM proposta_revisoes pr2
             WHERE pr2.proposta_id = p.id
             ORDER BY CASE WHEN pr2.estado != 'RASCUNHO' THEN 0 ELSE 1 END,
-                     pr2.numero_revisao DESC
+              pr2.numero_revisao DESC
             LIMIT 1
           )
         JOIN proposta_linhas prl ON prl.revisao_id = pr.id
