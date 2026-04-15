@@ -17,9 +17,11 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const file = form.get('file');
+
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: 'Campo file em falta' }, { status: 400, headers: CORS });
     }
+
     if (file.size > 20 * 1024 * 1024) {
       return NextResponse.json({ error: 'Ficheiro demasiado grande (max 20MB)' }, { status: 413, headers: CORS });
     }
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
     const filename = `despesas/${safeName}`;
 
     const blob = await put(filename, file, {
-      access: 'public',
+      access: 'private',
       contentType: file.type || 'application/octet-stream',
       addRandomSuffix: false,
     });
