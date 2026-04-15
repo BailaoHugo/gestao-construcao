@@ -5,14 +5,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const { id } = await params;
 
-    // Orcamento: capitulos e totais da revisao ativa (ultima nao-RASCUNHO, ou ultima se todas RASCUNHO)
-    // Junta obras -> propostas via obraNome (sem depender de contratos.obra_id)
+    // Orcamento: capitulos e totais da revisao ativa
+    // Usa obra_nome (snake_case, coluna real na BD) para join com obras.name
     let orcamento: { capitulo: string; orcado: string }[] = [];
     try {
       const { rows } = await pool.query(`
         SELECT prl.capitulo, SUM(prl.quantidade * prl.preco_venda_unitario) AS orcado
         FROM obras o
-        JOIN propostas p ON p."obraNome" = o.name
+        JOIN propostas p ON p.obra_nome = o.name
         JOIN proposta_revisoes pr ON pr.proposta_id = p.id
           AND pr.id = (
             SELECT pr2.id FROM proposta_revisoes pr2
@@ -27,8 +27,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         ORDER BY prl.capitulo
       `, [id]);
       orcamento = rows;
-    } catch {
-      // obra sem proposta ligada ou tabelas inexistentes
+    } catch (e) {
+      console.error("orcamento query error:", e);
     }
 
     // Custos: despesas agrupadas por tipo
