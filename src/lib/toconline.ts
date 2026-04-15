@@ -1,55 +1,24 @@
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 1,
-  idleTimeoutMillis: 5000,
-  connectionTimeoutMillis: 10000,
-  ssl: process.env.DATABASE_URL?.includes('localhost') ? undefined : { rejectUnauthorized: false },
-});
-
-// -- OAuth Token -----------------------------------------------------------------
-
-let _tokenCache: { token: string; expiresAt: number } | null = null;
-
-export async function getAccessToken(): Promise<string> {
-  if (_tokenCache && Date.now() < _tokenCache.expiresAt - 60_000) {
-    return _tokenCache.token;
+  // Race-condition guard: se 401, esperar e re-ler DB (outra instância pode ter rotacionado o token)
+  if (!resp.ok && resp.status === 401) {
+    await new Promise(r => setTimeout(r, 700));
+    try {
+      const rr = await pool.query(
+        `SELECT value FROM app_config WHERE key = 'toconline_refresh_token'`
+      );
+      const fresh = rr.rows[0]?.value;
+      if (fresh && fresh !== refreshToken) {
+        console.log('[toconline] token rotacionado por outra instância, a tentar...');
+        refreshToken = fresh;
+        resp = await doRefresh(refreshToken);
+      }
+    } catch (_) {}
   }
-  const staticToken = process.env.TOCONLINE_ACCESS_TOKEN;
-  if (staticToken) {
-    _tokenCache = { token: staticToken, expiresAt: Date.now() + 3600 * 1000 };
-    return staticToken;
-  }
-  const clientId = process.env.TOCONLINE_CLIENT_ID;
-  const secret = process.env.TOCONLINE_SECRET;
-  const oauthUrl = process.env.TOCONLINE_OAUTH_URL;
-  // Read refresh token: prefer DB (rotating tokens), fallback to env var
-  const envRefreshToken = process.env.TOCONLINE_REFRESH_TOKEN;
-  let refreshToken = envRefreshToken;
-  let usedDbToken = false;
-  try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
-    const cfgRow = await pool.query(`SELECT value FROM app_config WHERE key = 'toconline_refresh_token'`);
-    if (cfgRow.rows[0]?.value) { refreshToken = cfgRow.rows[0].value; usedDbToken = true; }
-  } catch (_) {}
-  if (!clientId || !secret || !oauthUrl) throw new Error('TOConline nao configurado');
-  if (!refreshToken) throw new Error('TOConline: TOCONLINE_REFRESH_TOKEN nao definido');
-  const credentials = Buffer.from(clientId + ':' + secret).toString('base64');
-  const doRefresh = (token: string) => fetch(oauthUrl + '/token', {
-    method: 'POST',
-    headers: {
-      Authorization: 'Basic ' + credentials,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    },
-    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: token }).toString(),
-  });
-  let resp = await doRefresh(refreshToken);
-  // Se o token da BD falhou com 401, tentar o env var e limpar BD
-  if (!resp.ok && resp.status === 401 && usedDbToken && envRefreshToken && envRefreshToken !== refreshToken) {
-    console.log('[toconline] token BD inválido (401), a usar env var token...');
-    try { await pool.query(`DELETE FROM app_config WHERE key = 'toconline_refresh_token'`); } catch (_) {}
+  // Se ainda 401, tentar env var como último recurso
+  if (!resp.ok && resp.status === 401 && envRefreshToken && envRefreshToken !== refreshToken) {
+    console.log('[toconline] token inválido, a usar env var como fallback...');
+    try {
+      await pool.query(`DELETE FROM app_config WHERE key = 'toconline_refresh_token'`);
+    } catch (_) {}
     refreshToken = envRefreshToken;
     resp = await doRefresh(refreshToken);
   }
