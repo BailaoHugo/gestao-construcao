@@ -40,7 +40,7 @@ const TIPOS = [
   { value: "materiais", label: "Materiais" },
   { value: "subempreitada", label: "Subempreitada" },
   { value: "equipamentos", label: "Equipamentos" },
-  { value: "mao_de_obra", label: "MÃ£o de Obra" },
+  { value: "mao_de_obra", label: "Mão de Obra" },
   { value: "outros", label: "Outros" },
 ];
 
@@ -56,8 +56,8 @@ const fmt = (v: number) =>
   v.toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 const fmtN = (v: number | null | undefined) =>
   v != null
-    ? v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " â¬"
-    : "â";
+    ? v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    : "—";
 const today = () => new Date().toISOString().slice(0, 10);
 
 const emptyLinha = (): DespesaLinha => ({
@@ -196,7 +196,7 @@ export default function DespesasPage() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Erro");
-      setSyncMsg(`â ${j.upserted} despesas importadas`);
+      setSyncMsg(`✓ ${j.upserted} despesas importadas`);
       loadDespesas();
     } catch (e) {
       setSyncMsg("Erro: " + (e instanceof Error ? e.message : String(e)));
@@ -282,7 +282,7 @@ export default function DespesasPage() {
           <div className="flex gap-2">
             <button onClick={handleSync} disabled={syncing}
               className="flex items-center gap-1 bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white px-3 py-2 rounded-lg text-sm font-medium">
-              {syncing ? "â³ A importar..." : "â³ TOC Online"}
+              {syncing ? "⟳ A importar..." : "⟳ TOC Online"}
             </button>
             <Link href="/despesas/scan"
               className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -311,7 +311,7 @@ export default function DespesasPage() {
         ))}
       </div>
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 flex justify-between items-center">
-        <span className="text-sm font-medium text-blue-800">Total s/IVA no perÃ­odo</span>
+        <span className="text-sm font-medium text-blue-800">Total s/IVA no período</span>
         <span className="text-xl font-bold text-blue-900">{fmt(total)}</span>
       </div>
 
@@ -326,7 +326,7 @@ export default function DespesasPage() {
           className="border rounded px-3 py-1.5 text-sm">
           <option value="">Todos os centros</option>
           {obras.map((o) => (
-            <option key={o.id} value={o.id}>{o.code} â {o.nome}</option>
+            <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>
           ))}
         </select>
         <input type="date" value={filtroFrom} onChange={(e) => setFiltroFrom(e.target.value)}
@@ -353,8 +353,8 @@ export default function DespesasPage() {
               <tr>
                 <th className="px-2 py-3 w-5"></th>
                 <th className="px-3 py-3 text-left">Data</th>
-                <th className="px-3 py-3 text-left">N.Âº Fatura</th>
-                <th className="px-3 py-3 text-left">DescriÃ§Ã£o</th>
+                <th className="px-3 py-3 text-left">N.º Fatura</th>
+                <th className="px-3 py-3 text-left">Descrição</th>
                 <th className="px-3 py-3 text-left">Tipo</th>
                 <th className="px-3 py-3 text-left">Centro</th>
                 <th className="px-3 py-3 text-left">Fornecedor</th>
@@ -374,7 +374,7 @@ export default function DespesasPage() {
                       {hasDetail && (
                         <button onClick={() => setExpandedId(isOpen ? null : d.id)}
                           className="text-gray-400 hover:text-gray-700 text-xs font-mono">
-                          {isOpen ? "â¼" : "â¶"}
+                          {isOpen ? "▼" : "▶"}
                         </button>
                       )}
                     </td>
@@ -382,7 +382,7 @@ export default function DespesasPage() {
                       {new Date(d.data_despesa).toLocaleDateString("pt-PT")}
                     </td>
                     <td className="px-3 py-3 text-gray-500 text-xs whitespace-nowrap">
-                      {d.numero_fatura ?? <span className="text-gray-300">â</span>}
+                      {d.numero_fatura ?? <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-3 py-3 font-medium text-gray-900 text-sm">
                       {d.descricao}
@@ -398,26 +398,26 @@ export default function DespesasPage() {
                       </span>
                     </td>
                     <td className="px-3 py-3 text-gray-600 text-xs">
-                      {d.centro_custo_code ?? <span className="text-gray-300">â</span>}
+                      {d.centro_custo_code ?? <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-3 py-3 text-gray-600 text-xs">
-                      {d.fornecedor ?? <span className="text-gray-300">â</span>}
+                      {d.fornecedor ?? <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1">
                         {d.documento_ref?.startsWith("http") ? (
                           <a href={d.documento_ref} target="_blank" rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm" title="Ver documento">
-                            ð
+                            📎
                           </a>
                         ) : d.toconline_id ? (
-                          <span className="text-teal-600 text-xs" title="TOC Online">ð</span>
+                          <span className="text-teal-600 text-xs" title="TOC Online">🔗</span>
                         ) : null}
                         {uploadingId === d.id ? (
                           <span className="text-xs text-gray-400 animate-pulse">...</span>
                         ) : (
                           <label className="cursor-pointer text-gray-300 hover:text-blue-500 text-xs" title="Anexar ficheiro">
-                            ï¼ð
+                            ＋📎
                             <input type="file" className="hidden" accept="image/*,.pdf"
                               onChange={(e) => {
                                 const f = e.target.files?.[0];
@@ -434,7 +434,7 @@ export default function DespesasPage() {
                     <td className="px-3 py-3 text-right text-gray-500 text-xs whitespace-nowrap">
                       {d.valor_total_civa != null
                         ? fmt(Number(d.valor_total_civa))
-                        : <span className="text-gray-300">â</span>}
+                        : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
                       <button onClick={() => openEdit(d)}
@@ -451,7 +451,7 @@ export default function DespesasPage() {
                               <thead>
                                 <tr className="text-gray-400 uppercase text-[10px] border-b border-gray-200">
                                   <th className="text-left pb-1.5 pr-3">Ref.</th>
-                                  <th className="text-left pb-1.5 pr-3">DescriÃ§Ã£o</th>
+                                  <th className="text-left pb-1.5 pr-3">Descrição</th>
                                   <th className="text-right pb-1.5 pr-3">Qtd</th>
                                   <th className="text-left pb-1.5 pr-3">Un.</th>
                                   <th className="text-right pb-1.5 pr-3">P.Unit s/IVA</th>
@@ -463,14 +463,14 @@ export default function DespesasPage() {
                               <tbody className="divide-y divide-gray-100">
                                 {d.linhas.map((l, i) => (
                                   <tr key={i}>
-                                    <td className="py-1.5 pr-3 text-gray-400">{l.referencia || "â"}</td>
+                                    <td className="py-1.5 pr-3 text-gray-400">{l.referencia || "—"}</td>
                                     <td className="py-1.5 pr-3">{l.descricao}</td>
                                     <td className="py-1.5 pr-3 text-right">{l.quantidade}</td>
                                     <td className="py-1.5 pr-3 text-gray-500">{l.unidade}</td>
                                     <td className="py-1.5 pr-3 text-right">{fmtN(l.preco_unit_sem_iva)}</td>
                                     <td className="py-1.5 pr-3 text-right">{l.taxa_iva}%</td>
                                     <td className="py-1.5 pr-3 text-right">
-                                      {l.desconto_pct ? `${l.desconto_pct}%` : "â"}
+                                      {l.desconto_pct ? `${l.desconto_pct}%` : "—"}
                                     </td>
                                     <td className="py-1.5 text-right font-semibold">
                                       {fmtN(Number(l.total_sem_iva))}
@@ -522,7 +522,7 @@ export default function DespesasPage() {
                 className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Linha 1: Data / Tipo / N.Âº Fatura */}
+              {/* Linha 1: Data / Tipo / N.º Fatura */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Data *</label>
@@ -539,7 +539,7 @@ export default function DespesasPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">N.Âº Fatura</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">N.º Fatura</label>
                   <input value={form.numero_fatura}
                     onChange={(e) => setForm((f) => ({ ...f, numero_fatura: e.target.value }))}
                     className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -547,9 +547,9 @@ export default function DespesasPage() {
                 </div>
               </div>
 
-              {/* DescriÃ§Ã£o */}
+              {/* Descrição */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">DescriÃ§Ã£o *</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Descrição *</label>
                 <input required value={form.descricao}
                   onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))}
                   className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -569,9 +569,9 @@ export default function DespesasPage() {
                   <select value={form.centro_custo_id}
                     onChange={(e) => setForm((f) => ({ ...f, centro_custo_id: e.target.value }))}
                     className="w-full border rounded-lg px-3 py-2 text-sm">
-                    <option value="">â Geral â</option>
+                    <option value="">— Geral —</option>
                     {obras.map((o) => (
-                      <option key={o.id} value={o.id}>{o.code} â {o.nome}</option>
+                      <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>
                     ))}
                   </select>
                 </div>
@@ -591,11 +591,11 @@ export default function DespesasPage() {
                     <table className="w-full text-xs">
                       <thead className="bg-gray-50 text-gray-400 uppercase text-[10px]">
                         <tr>
-                          <th className="px-2 py-2 text-left min-w-[140px]">DescriÃ§Ã£o</th>
+                          <th className="px-2 py-2 text-left min-w-[140px]">Descrição</th>
                           <th className="px-2 py-2 text-left w-20">Ref.</th>
                           <th className="px-2 py-2 text-right w-14">Qtd</th>
                           <th className="px-2 py-2 text-left w-12">Un.</th>
-                          <th className="px-2 py-2 text-right w-20">P.Unit â¬</th>
+                          <th className="px-2 py-2 text-right w-20">P.Unit €</th>
                           <th className="px-2 py-2 text-right w-14">IVA%</th>
                           <th className="px-2 py-2 text-right w-14">Desc%</th>
                           <th className="px-2 py-2 text-right w-20">Total</th>
@@ -615,7 +615,7 @@ export default function DespesasPage() {
                               <input value={l.referencia ?? ""}
                                 onChange={(e) => updateLinha(i, "referencia", e.target.value)}
                                 className="w-full border-0 outline-none text-xs bg-transparent"
-                                placeholder="â" />
+                                placeholder="—" />
                             </td>
                             <td className="px-2 py-1.5">
                               <input type="number" value={l.quantidade} min="0" step="any"
@@ -648,7 +648,7 @@ export default function DespesasPage() {
                             <td className="px-1 py-1.5">
                               <button type="button"
                                 onClick={() => setLinhas((ls) => ls.filter((_, j) => j !== i))}
-                                className="text-red-400 hover:text-red-600 font-bold">Ã</button>
+                                className="text-red-400 hover:text-red-600 font-bold">×</button>
                             </td>
                           </tr>
                         ))}
@@ -709,14 +709,14 @@ export default function DespesasPage() {
                 {form.documento_ref?.startsWith("http") ? (
                   <div className="flex items-center gap-2">
                     <a href={form.documento_ref} target="_blank" rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-xs">ð Ver anexo actual</a>
+                      className="text-blue-600 hover:underline text-xs">📎 Ver anexo actual</a>
                     <button type="button"
                       onClick={() => setForm((f) => ({ ...f, documento_ref: "" }))}
                       className="text-red-400 hover:text-red-600 text-xs">Remover</button>
                   </div>
                 ) : (
                   <label className="flex items-center gap-2 cursor-pointer border border-dashed rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors">
-                    <span>ð {form.documento_ref || "Clica para anexar ficheiro"}</span>
+                    <span>📎 {form.documento_ref || "Clica para anexar ficheiro"}</span>
                     <input type="file" className="hidden" accept="image/*,.pdf"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
