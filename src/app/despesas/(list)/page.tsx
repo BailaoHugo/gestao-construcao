@@ -206,7 +206,13 @@ export default function DespesasPage() {
   const handleUpload = async (despesa: Despesa, file: File) => {
     setUploadingId(despesa.id);
     try {
-      const fd = new FormData(); fd.append("file", file);
+      const dt = despesa.data_despesa.slice(0, 7);
+      const forn = (despesa.fornecedor ?? 'DOC').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').toUpperCase();
+      const nr = (despesa.numero_fatura ?? despesa.id.slice(0, 8)).replace(/[^a-zA-Z0-9]/g, '-');
+      const ext = file.name.split('.').pop() ?? 'pdf';
+      const namedFile = new File([file], dt + '_' + forn + '_' + nr + '.' + ext, { type: file.type });
+      const fd = new FormData();
+      fd.append("file", namedFile);
       const r = await fetch("/api/upload", { method: "POST", body: fd });
       if (!r.ok) throw new Error("Upload falhou");
       const { url } = await r.json();
@@ -342,7 +348,7 @@ export default function DespesasPage() {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white border rounded-lg overflow-hidden">
+      <div className="bg-white border rounded-lg overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center text-gray-400">A carregar...</div>
         ) : despesas.length === 0 ? (
@@ -398,7 +404,7 @@ export default function DespesasPage() {
                       </span>
                     </td>
                     <td className="px-3 py-3 text-gray-600 text-xs">
-                      {d.centro_custo_code ?? <span className="text-gray-300">—</span>}
+                      {d.centro_custo_code ? (<><span className="font-medium">{d.centro_custo_code}</span>{d.centro_custo_nome && <span className="text-gray-400 ml-1">· {d.centro_custo_nome}</span>}</>) : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-3 py-3 text-gray-600 text-xs">
                       {d.fornecedor ?? <span className="text-gray-300">—</span>}
@@ -721,8 +727,14 @@ export default function DespesasPage() {
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        const fd = new FormData(); fd.append("file", file);
-                        setSaving(true);
+                        const dt2 = form.data_despesa.slice(0, 7);
+                const forn2 = (form.fornecedor || 'DOC').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').toUpperCase();
+                const nr2 = (form.numero_fatura || 'DOC').replace(/[^a-zA-Z0-9]/g, '-');
+                const ext2 = file.name.split('.').pop() ?? 'pdf';
+                const namedFile2 = new File([file], dt2 + '_' + forn2 + '_' + nr2 + '.' + ext2, { type: file.type });
+                const fd = new FormData();
+                fd.append("file", namedFile2);
+                setSaving(true);
                         try {
                           const r = await fetch("/api/upload", { method: "POST", body: fd });
                           const { url } = await r.json();
