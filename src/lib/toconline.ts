@@ -337,7 +337,7 @@ export async function syncDespesasToApp(
           const docUrl: string | null = null;
 
         const tipo  = docTypeToTipo(item.document_type ?? null);
-        const valor = item.gross_total ?? item.net_total ?? null;
+        const valor = item.net_total ?? item.gross_total ?? null;
         if (!valor) { skipped++; continue; }
 
         const centroCustoId = matchCentroCusto(
@@ -369,24 +369,33 @@ export async function syncDespesasToApp(
 
         await pool.query(
           `INSERT INTO despesas
-             (toconline_id, data_despesa, descricao, tipo, valor,
-              centro_custo_id, fornecedor, notas, documento_ref)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+             (toconline_id, data_despesa, descricao, tipo,
+              valor, valor_sem_iva, valor_iva, valor_total_civa,
+              numero_fatura, centro_custo_id, fornecedor, notas, documento_ref)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
            ON CONFLICT (toconline_id) DO UPDATE SET
-             data_despesa    = EXCLUDED.data_despesa,
-             descricao       = EXCLUDED.descricao,
-             tipo            = EXCLUDED.tipo,
-             valor           = EXCLUDED.valor,
-             centro_custo_id = COALESCE(EXCLUDED.centro_custo_id, despesas.centro_custo_id),
-             fornecedor      = EXCLUDED.fornecedor,
-             notas           = EXCLUDED.notas,
-             documento_ref   = COALESCE(EXCLUDED.documento_ref, despesas.documento_ref)`,
+             data_despesa     = EXCLUDED.data_despesa,
+             descricao        = EXCLUDED.descricao,
+             tipo             = EXCLUDED.tipo,
+             valor            = EXCLUDED.valor,
+             valor_sem_iva    = EXCLUDED.valor_sem_iva,
+             valor_iva        = EXCLUDED.valor_iva,
+             valor_total_civa = EXCLUDED.valor_total_civa,
+             numero_fatura    = COALESCE(EXCLUDED.numero_fatura, despesas.numero_fatura),
+             centro_custo_id  = COALESCE(EXCLUDED.centro_custo_id, despesas.centro_custo_id),
+             fornecedor       = EXCLUDED.fornecedor,
+             notas            = EXCLUDED.notas,
+             documento_ref    = COALESCE(EXCLUDED.documento_ref, despesas.documento_ref)`,
           [
             String(item.id),
             item.date ?? new Date().toISOString().slice(0, 10),
             descricao.trim() || 'Documento TOC Online',
             tipo,
-            valor,
+            item.net_total ?? item.gross_total ?? null,
+            item.net_total ?? null,
+            item.tax_payable ?? null,
+            item.gross_total ?? null,
+            item.document_no ?? null,
             centroCustoId,
             item.supplier_business_name ?? null,
             notas,
