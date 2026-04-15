@@ -348,14 +348,14 @@ export default function DespesasPage() {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white border rounded-lg overflow-x-auto">
+      <div className="bg-white border rounded-lg overflow-x-auto overflow-y-auto max-h-[calc(100vh-260px)]">
         {loading ? (
           <div className="p-8 text-center text-gray-400">A carregar...</div>
         ) : despesas.length === 0 ? (
           <div className="p-8 text-center text-gray-400">Sem despesas registadas</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+            <thead className="bg-gray-50 text-xs text-gray-500 uppercase sticky top-0 z-10">
               <tr>
                 <th className="px-2 py-3 w-5"></th>
                 <th className="px-3 py-3 text-left">Data</th>
