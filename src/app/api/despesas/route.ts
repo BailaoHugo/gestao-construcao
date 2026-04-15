@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   const { rows } = await pool.query(
     `SELECT d.*,
-      o.nome AS centro_custo_nome,
+      o.name AS centro_custo_nome,
       o.code AS centro_custo_code,
       COALESCE(
         json_agg(
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     LEFT JOIN obras o ON o.id = d.centro_custo_id
     LEFT JOIN despesa_linhas dl ON dl.despesa_id = d.id
     ${where}
-    GROUP BY d.id, o.nome, o.code
+    GROUP BY d.id, o.name, o.code
     ORDER BY d.data_despesa DESC, d.created_at DESC
     LIMIT 500`,
     values
