@@ -412,7 +412,7 @@ export default function DespesasPage() {
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1">
                         {d.documento_ref?.startsWith("http") ? (
-                          <a href={d.documento_ref} target="_blank" rel="noopener noreferrer"
+                          <a href={`/api/despesas/${d.id}/documento`} target="_blank" rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm" title="Ver documento">
                             📎
                           </a>
@@ -714,7 +714,7 @@ export default function DespesasPage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Anexo (PDF / imagem)</label>
                 {form.documento_ref?.startsWith("http") ? (
                   <div className="flex items-center gap-2">
-                    <a href={form.documento_ref} target="_blank" rel="noopener noreferrer"
+                    <a href={`/api/despesas/${editId}/documento`} target="_blank" rel="noopener noreferrer"
                       className="text-blue-600 hover:underline text-xs">📎 Ver anexo actual</a>
                     <button type="button"
                       onClick={() => setForm((f) => ({ ...f, documento_ref: "" }))}
