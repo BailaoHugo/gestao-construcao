@@ -11,6 +11,7 @@ const navItems = [
   { href: "/contratos", label: "Contratos", abbr: "CO" },
   { href: "/catalogo", label: "Catálogo", abbr: "CT" },
   { href: "/despesas", label: "Despesas", abbr: "DE" },
+  { href: "/vendas", label: "Vendas", abbr: "VD" },
   { href: "/ponto", label: "Ponto", abbr: "PT" },
 ];
 
