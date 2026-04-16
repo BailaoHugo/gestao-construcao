@@ -34,8 +34,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     // Custos: despesas agrupadas por tipo
     const { rows: despesasCustos } = await pool.query(`
       SELECT tipo AS categoria, SUM(valor) AS gasto
-      FROM despesas WHERE centro_custo_id = $1
-      GROUP BY tipo ORDER BY tipo
+      FROM despesas
+      WHERE centro_custo_id = $1
+      GROUP BY tipo
+      ORDER BY tipo
     `, [id]);
 
     // Custos: mao de obra do ponto
@@ -56,12 +58,29 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const custos = [...despesasCustos, ...pontoCustos];
+
     const totalOrcado = orcamento.reduce((s, r) => s + parseFloat(r.orcado || "0"), 0);
     const totalGasto = custos.reduce((s: number, r: { gasto: string }) => s + parseFloat(r.gasto || "0"), 0);
 
+    // Faturado: faturas de venda emitidas para esta obra
+    let totalFaturado = 0;
+    try {
+      const { rows: fRows } = await pool.query(`
+        SELECT COALESCE(SUM(total), 0) AS faturado
+        FROM faturas_venda
+        WHERE obra_id = $1
+      `, [id]);
+      totalFaturado = parseFloat(fRows[0]?.faturado ?? "0");
+    } catch {
+      // tabela pode nao existir ainda
+    }
+
     // Ultimo avanco
     const { rows: avancos } = await pool.query(`
-      SELECT * FROM obra_avancos WHERE obra_id = $1 ORDER BY numero DESC LIMIT 1
+      SELECT * FROM obra_avancos
+      WHERE obra_id = $1
+      ORDER BY numero DESC
+      LIMIT 1
     `, [id]);
     const ultimoAvanco = avancos[0] || null;
 
@@ -70,7 +89,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       custos,
       totalOrcado,
       totalGasto,
+      totalFaturado,
       saldo: totalOrcado - totalGasto,
+      margemBruta: totalFaturado > 0 ? ((totalFaturado - totalGasto) / totalFaturado) * 100 : 0,
       percentagemGasto: totalOrcado > 0 ? (totalGasto / totalOrcado) * 100 : 0,
       ultimoAvanco,
     });
