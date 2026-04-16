@@ -38,6 +38,8 @@ type Analise = {
   custos: { categoria: string; gasto: string }[];
   totalOrcado: number; totalGasto: number;
   saldo: number; percentagemGasto: number;
+  totalFaturado?: number;
+  margemBruta?: number;
   ultimoAvanco: Avanco | null;
 };
 
@@ -459,6 +461,16 @@ export default function ObraControlePage() {
                             <span className="capitalize">{c.categoria.replace(/_/g, " ")}</span>
                             <span>{fmt(gasto)}</span>
                           </div>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-slate-50 px-3 py-2">
+                      <p className="text-xs text-slate-400">Total Faturado</p>
+                      <p className="text-sm font-semibold text-slate-700">{fmt(analise.totalFaturado ?? 0)}</p>
+                    </div>
+                    <div className="rounded-xl bg-slate-50 px-3 py-2">
+                      <p className="text-xs text-slate-400">Margem Bruta</p>
+                      <p className={`text-sm font-semibold ${(analise.margemBruta ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>{(analise.margemBruta ?? 0).toFixed(1)}%</p>
+                    </div>
+                  </div>
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                             <div
                               className="h-full rounded-full bg-red-400"
