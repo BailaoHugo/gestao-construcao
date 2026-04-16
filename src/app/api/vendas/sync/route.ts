@@ -17,7 +17,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await syncVendasToApp(from, to);
-    return NextResponse.json({ ok: true, ...result });
+    if (result.error) {
+    return NextResponse.json({ ok: false, error: result.error, upserted: 0 });
+  }
+  return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     console.error("vendas sync error:", e);
     return NextResponse.json(
