@@ -58,7 +58,7 @@ export default function ObrasPage() {
   const [total, setTotal]         = useState(0);
   const [clientes, setClientes]   = useState<Cliente[]>([]);
   const [search, setSearch]       = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("ativo");
   const [loading, setLoading]     = useState(true);
   const [modal, setModal]         = useState(false);
   const [editId, setEditId]       = useState<string | null>(null);
