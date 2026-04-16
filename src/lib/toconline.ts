@@ -631,7 +631,7 @@ export interface TocVenda {
 export async function syncVendasToApp(
   startDate: string,
   endDate: string,
-): Promise<{ upserted: number; skipped: number; pages: number }> {
+): Promise<{ upserted: number; skipped: number; pages: number; error?: string }> {
   // Garantir tabela faturas_venda
   await pool.query(`
     CREATE TABLE IF NOT EXISTS faturas_venda (
@@ -690,8 +690,9 @@ export async function syncVendasToApp(
       const data = Array.isArray(raw) ? raw : ((raw as { data?: unknown[] }).data ?? []);
       items = data.map(normalizeItem) as TocVenda[];
     } catch (e) {
-      console.error('[syncVendasToApp] fetch error:', (e as Error).message);
-      break;
+      const errMsg = (e as Error).message ?? String(e);
+      console.error('[syncVendasToApp] ERR:', errMsg.slice(0, 400));
+      return { upserted, skipped, pages: pageNum, error: errMsg.slice(0, 500) };
     }
 
     if (items.length === 0) break;
