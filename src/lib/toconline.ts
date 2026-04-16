@@ -610,3 +610,144 @@ export async function loadDespesas(
     return [];
   }
 }
+
+
+// -- Vendas (Documentos de Venda) ----------------------------------------
+export interface TocVenda {
+  id: string;
+  document_no?: string | null;
+  document_type?: string | null;
+  date?: string | null;
+  due_date?: string | null;
+  gross_total?: number | null;
+  net_total?: number | null;
+  tax_payable?: number | null;
+  customer_business_name?: string | null;
+  customer_tax_registration_number?: string | null;
+  external_reference?: string | null;
+  notes?: string | null;
+}
+
+export async function syncVendasToApp(
+  startDate: string,
+  endDate: string,
+): Promise<{ upserted: number; skipped: number; pages: number }> {
+  // Garantir tabela faturas_venda
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS faturas_venda (
+      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+      toconline_id text UNIQUE,
+      numero text,
+      tipo_documento text,
+      data date,
+      data_vencimento date,
+      cliente_nome text,
+      cliente_nif text,
+      valor_sem_iva numeric(12,2),
+      valor_iva numeric(12,2),
+      total numeric(12,2),
+      obra_id uuid,
+      notas text,
+      estado text DEFAULT 'emitida',
+      criado_em timestamptz NOT NULL DEFAULT now(),
+      atualizado_em timestamptz NOT NULL DEFAULT now()
+    )
+  `);
+
+  // Carregar propostas para matching por codigo
+  const propostasRes = await pool.query(
+    `SELECT p.obra_id, p.codigo FROM propostas p WHERE p.obra_id IS NOT NULL`
+  );
+  const propostas: { obra_id: string; codigo: string }[] = propostasRes.rows;
+
+  function matchObra(notes: string | null, extRef: string | null): string | null {
+    const text = `${notes ?? ''} ${extRef ?? ''}`.toLowerCase();
+    for (const p of propostas) {
+      if (p.codigo && text.includes(p.codigo.toLowerCase())) {
+        return p.obra_id;
+      }
+    }
+    return null;
+  }
+
+  let upserted = 0;
+  let skipped = 0;
+  let pageNum = 1;
+  const pageSize = 100;
+
+  while (true) {
+    const filterExpr = `sales_documents.date>='${startDate}'::date AND sales_documents.date<='${endDate}'::date`;
+    const qs = new URLSearchParams({
+      'page[number]': String(pageNum),
+      'page[size]': String(pageSize),
+    });
+
+    let items: TocVenda[] = [];
+    try {
+      const raw = await tocFetch<unknown>(
+        `/commercial_sales_documents?filter="${filterExpr}"&${qs}`
+      );
+      const data = Array.isArray(raw) ? raw : ((raw as { data?: unknown[] }).data ?? []);
+      items = data.map(normalizeItem) as TocVenda[];
+    } catch (e) {
+      console.error('[syncVendasToApp] fetch error:', (e as Error).message);
+      break;
+    }
+
+    if (items.length === 0) break;
+
+    for (const item of items) {
+      try {
+        const total = item.gross_total ?? null;
+        if (!total) { skipped++; continue; }
+
+        const obraId = matchObra(item.notes ?? null, item.external_reference ?? null);
+
+        await pool.query(
+          `INSERT INTO faturas_venda
+             (toconline_id, numero, tipo_documento, data, data_vencimento,
+              cliente_nome, cliente_nif, valor_sem_iva, valor_iva, total,
+              obra_id, notas, estado)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+           ON CONFLICT (toconline_id) DO UPDATE SET
+             numero = EXCLUDED.numero,
+             tipo_documento = EXCLUDED.tipo_documento,
+             data = EXCLUDED.data,
+             data_vencimento = EXCLUDED.data_vencimento,
+             cliente_nome = EXCLUDED.cliente_nome,
+             cliente_nif = EXCLUDED.cliente_nif,
+             valor_sem_iva = EXCLUDED.valor_sem_iva,
+             valor_iva = EXCLUDED.valor_iva,
+             total = EXCLUDED.total,
+             obra_id = COALESCE(EXCLUDED.obra_id, faturas_venda.obra_id),
+             notas = EXCLUDED.notas,
+             atualizado_em = now()`,
+          [
+            String(item.id),
+            item.document_no ?? null,
+            item.document_type ?? null,
+            item.date ?? null,
+            item.due_date ?? null,
+            item.customer_business_name ?? null,
+            item.customer_tax_registration_number ?? null,
+            item.net_total ?? null,
+            item.tax_payable ?? null,
+            total,
+            obraId,
+            item.notes ?? null,
+            'emitida',
+          ]
+        );
+        upserted++;
+      } catch (e) {
+        console.error('[syncVendasToApp] doc', item.id, (e as Error).message);
+        skipped++;
+      }
+    }
+
+    if (items.length < pageSize) break;
+    pageNum++;
+  }
+
+  return { upserted, skipped, pages: pageNum };
+}
