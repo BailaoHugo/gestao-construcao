@@ -73,6 +73,25 @@ export async function getAccessToken(): Promise<string> {
         }
   if (!resp.ok) {
     const errText = await resp.text();
+    // Fallback: tentar client_credentials antes de marcar reauth
+    try {
+      const ccResp = await fetch(oauthUrl + '/token', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Basic ' + credentials,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: new URLSearchParams({ grant_type: 'client_credentials' }).toString(),
+      });
+      if (ccResp.ok) {
+        const ccData = await ccResp.json();
+        _tokenCache = { token: ccData.access_token, expiresAt: Date.now() + (ccData.expires_in ?? 3600) * 1000 };
+        console.log('[toconline] client_credentials fallback bem-sucedido');
+        return _tokenCache.token;
+      }
+      console.log('[toconline] client_credentials também falhou:', ccResp.status);
+    } catch (_ccErr) { /* best effort */ }
     // Mark token as needing re-auth in DB so UI can surface it
     try {
       const client2 = await pool.connect();
