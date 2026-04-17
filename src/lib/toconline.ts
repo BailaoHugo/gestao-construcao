@@ -71,8 +71,8 @@ export async function getAccessToken(): Promise<string> {
           refreshToken = envRefreshToken;
           resp = await doRefresh(refreshToken);
         }
-  if (!refreshResp.ok) {
-    const errText = await refreshResp.text();
+  if (!resp.ok) {
+    const errText = await resp.text();
     // Mark token as needing re-auth in DB so UI can surface it
     try {
       const client2 = await pool.connect();
