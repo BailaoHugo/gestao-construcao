@@ -71,9 +71,19 @@ export async function getAccessToken(): Promise<string> {
           refreshToken = envRefreshToken;
           resp = await doRefresh(refreshToken);
         }
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error('TOConline refresh falhou: ' + resp.status + ' ' + text);
+  if (!refreshResp.ok) {
+    const errText = await refreshResp.text();
+    // Mark token as needing re-auth in DB so UI can surface it
+    try {
+      const client2 = await pool.connect();
+      await client2.query(`
+        INSERT INTO app_config (key, value) VALUES ('toconline_needs_reauth', 'true')
+        ON CONFLICT (key) DO UPDATE SET value = 'true'
+      `);
+      client2.release();
+    } catch (_dbErr) { /* best effort */ }
+    const authErr = new Error('TOConline_REAUTH_REQUIRED: ' + errText.slice(0, 200));
+    throw authErr;
   }
   const data = await resp.json();
   _tokenCache = { token: data.access_token, expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000 };
