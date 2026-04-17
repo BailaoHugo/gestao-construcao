@@ -18,8 +18,16 @@ export async function POST(req: NextRequest) {
   try {
     const result = await syncVendasToApp(from, to);
     if (result.error) {
-    return NextResponse.json({ ok: false, error: result.error, upserted: 0 });
-  }
+      if (result.error.includes('TOConline_REAUTH_REQUIRED')) {
+        return NextResponse.json({
+          ok: false,
+          reauth_required: true,
+          error: 'TOConline precisa de re-autorizacao. Acede a /admin/toconline para reconectar.',
+          upserted: 0,
+        });
+      }
+      return NextResponse.json({ ok: false, error: result.error, upserted: 0 });
+    }
   return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     console.error("vendas sync error:", e);
