@@ -362,7 +362,7 @@ export async function syncDespesasToApp(
   const pageSize = 100;
 
   while (true) {
-    const filterExpr = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
+    const filterExpr = `date>='${startDate}' AND date<='${endDate}'`;
     const qs = new URLSearchParams({
       'page[number]': String(pageNum),
       'page[size]':   String(pageSize),
@@ -549,7 +549,7 @@ export async function syncDespesas(
   const pageSize = 100;
 
   while (true) {
-    const filterExpr = `purchases_documents.date>='${startDate}'::date AND purchases_documents.date<='${endDate}'::date`;
+    const filterExpr = `date>='${startDate}' AND date<='${endDate}'`;
     const paginationQs = new URLSearchParams({
       'page[number]': String(pageNum),
       'page[size]': String(pageSize),
@@ -705,7 +705,7 @@ export async function syncVendasToApp(
   const pageSize = 100;
 
   while (true) {
-    const filterExpr = `sales_documents.date>='${startDate}'::date AND sales_documents.date<='${endDate}'::date`;
+    const filterExpr = `date>='${startDate}' AND date<='${endDate}'`;
     const qs = new URLSearchParams({
       'page[number]': String(pageNum),
       'page[size]': String(pageSize),
