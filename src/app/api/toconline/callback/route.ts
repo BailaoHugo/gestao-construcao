@@ -47,11 +47,6 @@ export async function GET(request: NextRequest) {
         'Accept': 'application/json',
       },
       body: body.toString(),
-    });        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + cred,
-        'Accept': 'application/json',
-      },
-      body: body.toString(),
     });
 
     const data = await resp.json();
