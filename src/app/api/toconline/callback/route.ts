@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.TOCONLINE_CLIENT_ID!;
   const clientSecret = process.env.TOCONLINE_SECRET!;
   const oauthUrl = process.env.TOCONLINE_OAUTH_URL!;
-  const redirectUri = `${process.env.NEXTAUTH_URL || 'https://gestao2026.vercel.app'}/api/toconline/callback`;
+  const reqUrl = new URL(request.url);
+  const redirectUri = `${reqUrl.protocol}//${reqUrl.host}/api/toconline/callback`;
 
   try {
     const body = new URLSearchParams({
