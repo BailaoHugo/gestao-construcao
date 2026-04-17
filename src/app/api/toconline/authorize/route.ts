@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.TOCONLINE_CLIENT_ID;
-  if (!clientId) {
-    return NextResponse.json({ error: 'TOCONLINE_CLIENT_ID não configurado' }, { status: 500 });
+  const oauthUrl = process.env.TOCONLINE_OAUTH_URL;
+
+  if (!clientId || !oauthUrl) {
+    return NextResponse.json({
+      error: 'Env vars em falta',
+      hasClientId: !!clientId,
+      hasOauthUrl: !!oauthUrl,
+    }, { status: 500 });
   }
 
-  // Build redirect_uri dynamically from request URL so it always matches the deployment
+  // Build redirect_uri dynamically from request URL
   const reqUrl = new URL(request.url);
   const redirectUri = `${reqUrl.protocol}//${reqUrl.host}/api/toconline/callback`;
 
@@ -17,8 +23,13 @@ export async function GET(request: NextRequest) {
     scope: 'commercial',
   });
 
-  const authUrl = new URL('https://app.toconline.pt/oauth/authorize');
-  authUrl.search = params.toString();
+  const authEndpoint = oauthUrl + '/authorize';
 
-  return NextResponse.redirect(authUrl.toString());
+  // Debug mode: return JSON instead of redirecting
+  if (reqUrl.searchParams.get('debug') === '1') {
+    return NextResponse.json({ authEndpoint, params: Object.fromEntries(params) });
+  }
+
+  const fullUrl = authEndpoint + '?' + params.toString();
+  return NextResponse.redirect(fullUrl);
 }
