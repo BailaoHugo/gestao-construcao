@@ -38,9 +38,19 @@ export async function GET(request: NextRequest) {
       redirect_uri: redirectUri,
     });
 
-    const resp = await fetch(oauthUrl, {
+    const cred = Buffer.from(clientId + ':' + clientSecret).toString('base64');
+    const resp = await fetch(oauthUrl + '/token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + cred,
+        'Accept': 'application/json',
+      },
+      body: body.toString(),
+    });        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + cred,
+        'Accept': 'application/json',
+      },
       body: body.toString(),
     });
 
