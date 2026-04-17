@@ -77,7 +77,11 @@ export default function VendasPage() {
         setSyncMsg(`✓ Sincronizado: ${data.upserted} fatura(s)`);
         await load();
       } else {
+        if (data.reauth_required) {
+        setSyncMsg('__REAUTH__');
+      } else {
         setSyncMsg(`Erro: ${data.error}`);
+      };
       }
     } catch (e) {
       setSyncMsg(`Erro: ${(e as Error).message}`);
@@ -127,7 +131,7 @@ export default function VendasPage() {
 
         {syncMsg && (
           <div className={`rounded-lg px-4 py-2 text-sm ${syncMsg.startsWith("Erro") ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}>
-            {syncMsg}
+            {syncMsg === '__REAUTH__' ? (<><span>TOConline precisa de re-autorização. </span><a href="/admin/toconline" className="underline font-semibold text-blue-600">Reconectar →</a></>) : syncMsg}
           </div>
         )}
 
