@@ -18,6 +18,7 @@ interface Linha {
   quantidade: number | null;
   unidade: string | null;
   preco_unitario: number | null;
+  desconto_pct: number | null;
   total: number | null;
 }
 interface Dados {
@@ -376,6 +377,7 @@ export default function ScanDespesa() {
                           <th className="text-right px-2 py-1.5 text-gray-500 font-medium">Qtd</th>
                           <th className="text-left px-2 py-1.5 text-gray-500 font-medium">Un</th>
                           <th className="text-right px-2 py-1.5 text-gray-500 font-medium">P.Unit</th>
+                          <th className="text-right px-2 py-1.5 text-gray-500 font-medium">Desc%</th>
                           <th className="text-right px-2 py-1.5 text-gray-500 font-medium">Total</th>
                         </tr>
                       </thead>
@@ -429,6 +431,19 @@ export default function ScanDespesa() {
                                   return { ...p, linhas: ls };
                                 })}
                                 className="w-20 text-right bg-transparent focus:outline-none focus:bg-blue-50 rounded px-1"
+                              />
+                            </td>
+                            <td className="px-2 py-1 text-right">
+                              <input
+                                type="number"
+                                step="1"
+                                value={l.desconto_pct ?? ""}
+                                onChange={e => setDados(p => {
+                                  const ls = [...(p?.linhas ?? [])];
+                                  ls[i] = { ...ls[i], desconto_pct: parseFloat(e.target.value) || null };
+                                  return { ...p, linhas: ls };
+                                })}
+                                className="w-14 text-right bg-transparent focus:outline-none focus:bg-blue-50 rounded px-1"
                               />
                             </td>
                             <td className="px-2 py-1 text-right font-medium text-gray-700">
