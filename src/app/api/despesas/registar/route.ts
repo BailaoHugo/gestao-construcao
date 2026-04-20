@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { Resend } from 'resend';
 
 const CATEGORIA_TO_TIPO: Record<string, string> = {
   'Material de obra':       'materiais',
@@ -20,6 +21,76 @@ interface ScanLinha {
   preco_unitario: number | null;
   desconto_pct: number | null;
   total: number | null;
+}
+
+async function sendToconlineEmail(params: {
+  centroCustoId: string | null;
+  fornecedor: string | null;
+  documentoRef: string | null;
+  descricao: string;
+  valor: number;
+  data: string;
+}): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.TOCONLINE_FROM_EMAIL;
+  const tocEmail = process.env.TOCONLINE_EMAIL ?? '515188166@my.toconline.pt';
+
+  if (!apiKey || !fromEmail) {
+    console.warn('[toc-email] RESEND_API_KEY or TOCONLINE_FROM_EMAIL not set — skipping');
+    return false;
+  }
+
+  try {
+    // Get centro custo code
+    let ccCode = '';
+    if (params.centroCustoId) {
+      const { rows } = await pool.query('SELECT code FROM obras WHERE id = $1', [params.centroCustoId]);
+      ccCode = rows[0]?.code ?? '';
+    }
+
+    const fornecedorUp = (params.fornecedor ?? '').toUpperCase();
+    const subject = [ccCode, fornecedorUp].filter(Boolean).join(' - ') || params.descricao;
+
+    const bodyHtml = `<p>${subject}</p><p>${params.descricao} — ${params.valor.toFixed(2)} € — ${params.data}</p>`;
+
+    // Fetch document attachment if available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attachments: any[] = [];
+    if (params.documentoRef) {
+      const token = process.env.BLOB_READ_WRITE_TOKEN;
+      const resp = await fetch(params.documentoRef, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (resp.ok) {
+        const buf = Buffer.from(await resp.arrayBuffer());
+        const rawName = params.documentoRef.split('/').pop() ?? 'fatura';
+        const cleanName = rawName.split('?')[0];
+        attachments.push({ filename: cleanName, content: buf });
+      } else {
+        console.warn('[toc-email] Could not fetch blob:', resp.status);
+      }
+    }
+
+    const resend = new Resend(apiKey);
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: tocEmail,
+      subject,
+      html: bodyHtml,
+      attachments,
+    });
+
+    if (result.error) {
+      console.error('[toc-email] Resend error:', result.error);
+      return false;
+    }
+
+    console.log('[toc-email] Sent OK, id:', result.data?.id);
+    return true;
+  } catch (e) {
+    console.error('[toc-email] Exception:', e);
+    return false;
+  }
 }
 
 export async function POST(req: Request) {
@@ -70,6 +141,7 @@ export async function POST(req: Request) {
       : null;
 
     const client = await pool.connect();
+    let despesaId: number;
     try {
       await client.query('BEGIN');
 
@@ -93,7 +165,7 @@ export async function POST(req: Request) {
         ]
       );
 
-      const despesaId = rows[0].id;
+      despesaId = rows[0].id;
 
       if (Array.isArray(linhas) && linhas.length > 0) {
         for (const l of linhas as ScanLinha[]) {
@@ -116,13 +188,24 @@ export async function POST(req: Request) {
       }
 
       await client.query('COMMIT');
-      return NextResponse.json({ ok: true, id: despesaId });
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
     } finally {
       client.release();
     }
+
+    // Send to TOConline via email (non-blocking — never fails the save)
+    const tocSent = await sendToconlineEmail({
+      centroCustoId: centro_custo_id || null,
+      fornecedor: fornecedor || null,
+      documentoRef: documento_ref || null,
+      descricao,
+      valor,
+      data: data || new Date().toISOString().slice(0, 10),
+    });
+
+    return NextResponse.json({ ok: true, id: despesaId, toc_sent: tocSent });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[api/despesas/registar]', msg);
