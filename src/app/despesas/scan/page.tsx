@@ -50,6 +50,7 @@ export default function ScanDespesa() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [duplicado, setDuplicado] = useState<{ id: number; fornecedor: string | null; data_despesa: string; valor: string } | null>(null);
   const [erro, setErro] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -114,10 +115,10 @@ export default function ScanDespesa() {
     inputRef.current.click();
   };
 
-  const guardar = async () => {
+  const guardar = async (forcar = false) => {
     if (!dados) return;
     if (!centroCustoId) { setErro('Seleciona o centro de custo antes de guardar.'); return; }
-    setSaving(true); setErro('');
+    setSaving(true); setErro(''); setDuplicado(null);
     try {
       const r = await fetch('/api/despesas/registar', {
         method: 'POST',
@@ -127,9 +128,14 @@ export default function ScanDespesa() {
           centro_custo_id: centroCustoId || null,
           notas,
           documento_ref: documentoUrl || null,
+          forcar,
         }),
       });
       const j = await r.json();
+      if (r.status === 409 && j.duplicate) {
+        setDuplicado(j.existing);
+        return;
+      }
       if (!r.ok) throw new Error(j.error || 'Erro');
       setSavedId(j.id ?? null);
       setSaved(true);
@@ -142,7 +148,7 @@ export default function ScanDespesa() {
 
   const resetAll = () => {
     setPreview(''); setDados(null); setSaved(false);
-    setCentroCustoId(''); setNotas(''); setErro(''); setDocumentoUrl(''); setSavedId(null);
+    setCentroCustoId(''); setNotas(''); setErro(''); setDocumentoUrl(''); setSavedId(null); setDuplicado(null);
   };
 
   // ── Ecrã de sucesso ─────────────────────────────────────────────────────────
@@ -501,6 +507,29 @@ export default function ScanDespesa() {
               )}
             </div>
 
+            {/* Duplicado warning */}
+            {duplicado && (
+              <div className="mx-4 mb-0 mt-0 p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                <p className="text-xs font-semibold text-amber-800 mb-1">⚠ Fatura já registada</p>
+                <p className="text-xs text-amber-700">
+                  Nº fatura já existe: <span className="font-medium">{duplicado.fornecedor ?? '—'}</span> · {duplicado.data_despesa} · {Number(duplicado.valor).toFixed(2)} €
+                </p>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => setDuplicado(null)}
+                    className="flex-1 border border-amber-400 text-amber-800 text-xs py-1.5 rounded-lg hover:bg-amber-100"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => guardar(true)}
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs py-1.5 rounded-lg font-medium"
+                  >
+                    Guardar mesmo assim
+                  </button>
+                </div>
+              </div>
+            )}
             {/* Erros e botão guardar */}
             <div className="p-4">
               {erro && (
@@ -510,7 +539,7 @@ export default function ScanDespesa() {
                 <p className="text-xs text-amber-600 mb-2">⚠ Seleciona um centro de custo para guardar</p>
               )}
               <button
-                onClick={guardar}
+                onClick={() => guardar(false)}
                 disabled={saving || uploading || !centroCustoId}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white py-3 rounded-lg text-sm font-medium"
               >
