@@ -377,7 +377,7 @@ export default function DespesasPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {despesas.flatMap((d) => {
+              {despesasFiltradas.flatMap((d) => {
                 const hasDetail = d.linhas && d.linhas.length > 0;
                 const isOpen = expandedId === d.id;
                 return [
