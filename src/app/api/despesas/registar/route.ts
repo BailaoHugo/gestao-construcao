@@ -18,6 +18,7 @@ interface ScanLinha {
   quantidade: number | null;
   unidade: string | null;
   preco_unitario: number | null;
+  desconto_pct: number | null;
   total: number | null;
 }
 
@@ -107,7 +108,7 @@ export async function POST(req: Request) {
               l.unidade ?? 'un',
               l.preco_unitario ?? 0,
               iva ?? 23,
-              0,
+              l.desconto_pct ?? 0,
               l.total ?? 0,
             ]
           );
