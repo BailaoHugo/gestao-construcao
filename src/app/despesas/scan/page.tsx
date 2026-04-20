@@ -49,6 +49,7 @@ export default function ScanDespesa() {
   const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
   const [erro, setErro] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -115,6 +116,7 @@ export default function ScanDespesa() {
 
   const guardar = async () => {
     if (!dados) return;
+    if (!centroCustoId) { setErro('Seleciona o centro de custo antes de guardar.'); return; }
     setSaving(true); setErro('');
     try {
       const r = await fetch('/api/despesas/registar', {
@@ -129,6 +131,7 @@ export default function ScanDespesa() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'Erro');
+      setSavedId(j.id ?? null);
       setSaved(true);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao guardar');
@@ -139,7 +142,7 @@ export default function ScanDespesa() {
 
   const resetAll = () => {
     setPreview(''); setDados(null); setSaved(false);
-    setCentroCustoId(''); setNotas(''); setErro(''); setDocumentoUrl('');
+    setCentroCustoId(''); setNotas(''); setErro(''); setDocumentoUrl(''); setSavedId(null);
   };
 
   // ── Ecrã de sucesso ─────────────────────────────────────────────────────────
@@ -487,14 +490,7 @@ export default function ScanDespesa() {
                 <div className="flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2">
                   <span className="text-gray-400 text-sm">📎</span>
                   <span className="text-xs text-gray-600 flex-1 truncate">Documento anexado</span>
-                  <a
-                    href={documentoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:underline shrink-0"
-                  >
-                    Ver
-                  </a>
+                  <span className="text-xs text-green-600 shrink-0">✓</span>
                 </div>
               )}
               {uploading && !documentoUrl && (
@@ -510,9 +506,12 @@ export default function ScanDespesa() {
               {erro && (
                 <p className="text-xs text-red-500 mb-3">{erro}</p>
               )}
+              {!centroCustoId && dados && (
+                <p className="text-xs text-amber-600 mb-2">⚠ Seleciona um centro de custo para guardar</p>
+              )}
               <button
                 onClick={guardar}
-                disabled={saving || uploading}
+                disabled={saving || uploading || !centroCustoId}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white py-3 rounded-lg text-sm font-medium"
               >
                 {saving ? 'A guardar...' : uploading ? 'A processar documento...' : 'Guardar despesa'}
