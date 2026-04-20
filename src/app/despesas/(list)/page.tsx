@@ -88,6 +88,7 @@ export default function DespesasPage() {
   const [filtroCentro, setFiltroCentro] = useState("");
   const [filtroFrom, setFiltroFrom] = useState("");
   const [filtroTo, setFiltroTo] = useState("");
+  const [filtroFornecedor, setFiltroFornecedor] = useState("");
 
   const [form, setForm] = useState({
     data_despesa: today(),
@@ -268,10 +269,13 @@ export default function DespesasPage() {
     loadDespesas();
   };
 
-  const total = despesas.reduce((s, d) => s + Number(d.valor_sem_iva ?? d.valor), 0);
+  const despesasFiltradas = filtroFornecedor
+    ? despesas.filter(d => (d.fornecedor ?? '').toLowerCase().includes(filtroFornecedor.toLowerCase()))
+    : despesas;
+  const total = despesasFiltradas.reduce((s, d) => s + Number(d.valor_sem_iva ?? d.valor), 0);
   const totaisTipo = TIPOS.map((t) => ({
     ...t,
-    total: despesas
+    total: despesasFiltradas
       .filter((d) => d.tipo === t.value)
       .reduce((s, d) => s + Number(d.valor_sem_iva ?? d.valor), 0),
   }));
@@ -339,8 +343,10 @@ export default function DespesasPage() {
           className="border rounded px-3 py-1.5 text-sm" />
         <input type="date" value={filtroTo} onChange={(e) => setFiltroTo(e.target.value)}
           className="border rounded px-3 py-1.5 text-sm" />
-        {(filtroTipo || filtroCentro || filtroFrom || filtroTo) && (
-          <button onClick={() => { setFiltroTipo(""); setFiltroCentro(""); setFiltroFrom(""); setFiltroTo(""); }}
+        <input type="text" value={filtroFornecedor} onChange={(e) => setFiltroFornecedor(e.target.value)}
+          placeholder="Fornecedor..." className="border rounded px-3 py-1.5 text-sm w-44" />
+        {(filtroTipo || filtroCentro || filtroFrom || filtroTo || filtroFornecedor) && (
+          <button onClick={() => { setFiltroTipo(""); setFiltroCentro(""); setFiltroFrom(""); setFiltroTo(""); setFiltroFornecedor(""); }}
             className="text-sm text-red-600 hover:underline">
             Limpar filtros
           </button>
