@@ -53,11 +53,17 @@ Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
       "descricao": "descricao do artigo ou servico",
       "quantidade": numero ou null,
       "unidade": "un/m2/m3/kg/hr/etc ou null",
-      "preco_unitario": numero ou null,
-      "total": numero ou null
+      "preco_unitario": numero — PRECO UNITARIO ANTES DE QUALQUER DESCONTO (coluna Preco ou P.Unit), NAO o valor monetario do desconto,
+      "desconto_pct": numero — PERCENTAGEM DE DESCONTO ex 60 para 60% (coluna %Desc ou Desc%), ou null se sem desconto,
+      "total": numero — VALOR LIQUIDO TOTAL DA LINHA SEM IVA APOS DESCONTO (coluna Liquido ou Total s/IVA)
     }
   ]
 }
+REGRAS CRITICAS PARA LINHAS:
+- preco_unitario = preco por unidade ANTES do desconto (coluna "Preco" ou "Prec. Unit.") — NUNCA o valor monetario do desconto
+- desconto_pct = percentagem como numero (ex: fatura diz "60%" -> coloca 60), ou null se nao houver
+- total = valor liquido final da linha SEM IVA e APOS desconto (coluna "Liquido" ou "Total s/IVA")
+- Exemplo: Preco=329.06, Qtd=1, %Desc=60 -> preco_unitario=329.06, desconto_pct=60, total=131.62
 Se nao conseguires ler um campo coloca null. O array linhas pode estar vazio [] se nao houver linhas visiveis.`;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
