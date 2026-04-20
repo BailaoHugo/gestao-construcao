@@ -29,7 +29,36 @@ if (typeof (globalThis as any).DOMMatrix === 'undefined') {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-const PROMPT = `Analisa este recibo ou fatura e extrai os dados. Responde APENAS com JSON valido, sem markdown, com estes campos exatos: { "fornecedor": "nome da empresa", "nif": "NIF do fornecedor ou null", "data": "YYYY-MM-DD ou null", "valor_total": numero com IVA ou null, "valor_sem_iva": numero sem IVA ou null, "iva": percentagem ex 23 ou null, "descricao": "descricao resumida do que foi comprado", "categoria": "Material de obra | Ferramentas | Combustivel | Alimentacao | Subcontratacao | Transporte | Outros" } Se nao conseguires ler um campo coloca null.`;
+const PROMPT = `Analisa esta fatura ou recibo.
+
+1. Se existir um QR code ATCUD (fatura portuguesa), le o seu conteudo exacto. O formato tipico e: A:NIF*B:NIF_COMPRADOR*C:PT*D:FT*E:N*F:YYYYMMDD*G:NUM_DOC*H:ATCUD*...*N:IVA_TOTAL*O:TOTAL*Q:HASH*R:CERT
+
+2. Extrai todos os dados da fatura via OCR, incluindo as linhas de artigos/servicos.
+
+Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
+{
+  "qr_atcud": "conteudo completo do QR code ou null",
+  "fornecedor": "nome da empresa emissora",
+  "nif": "NIF do fornecedor ou null",
+  "nif_comprador": "NIF do comprador ou null",
+  "numero_fatura": "numero do documento ex FT 2024/123 ou null",
+  "data": "YYYY-MM-DD ou null",
+  "valor_total": numero com IVA ou null,
+  "valor_sem_iva": numero base tributavel ou null,
+  "iva": percentagem ex 23 ou null,
+  "descricao": "descricao resumida do que foi comprado",
+  "categoria": "Material de obra | Ferramentas | Combustivel | Alimentacao | Subcontratacao | Transporte | Outros",
+  "linhas": [
+    {
+      "descricao": "descricao do artigo ou servico",
+      "quantidade": numero ou null,
+      "unidade": "un/m2/m3/kg/hr/etc ou null",
+      "preco_unitario": numero ou null,
+      "total": numero ou null
+    }
+  ]
+}
+Se nao conseguires ler um campo coloca null. O array linhas pode estar vazio [] se nao houver linhas visiveis.`;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function extractPdfText(buf: Buffer): Promise<string> {
