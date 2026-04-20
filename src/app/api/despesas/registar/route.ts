@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       fornecedor, nif, nif_comprador, data, valor_total, valor_sem_iva, iva,
       descricao, categoria, centro_custo_id, notas, documento_ref,
       numero_fatura, qr_atcud, linhas,
+      forcar,
     } = body;
 
     const tipo = CATEGORIA_TO_TIPO[categoria] ?? 'outros';
@@ -35,6 +36,23 @@ export async function POST(req: Request) {
 
     if (!descricao || !valor) {
       return NextResponse.json({ error: 'descricao e valor sao obrigatorios' }, { status: 400 });
+    }
+
+    // Duplicate check: same numero_fatura already in DB
+    if (numero_fatura && !forcar) {
+      const { rows: dup } = await pool.query(
+        `SELECT id, fornecedor, data_despesa::text AS data_despesa, valor
+           FROM despesas
+          WHERE numero_fatura = $1
+          LIMIT 1`,
+        [numero_fatura]
+      );
+      if (dup.length > 0) {
+        return NextResponse.json(
+          { duplicate: true, existing: dup[0] },
+          { status: 409 }
+        );
+      }
     }
 
     const notasCompletas = [
