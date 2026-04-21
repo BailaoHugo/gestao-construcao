@@ -10,10 +10,8 @@ export const maxDuration = 30;
 if (typeof (globalThis as any).DOMMatrix === 'undefined') {
   (globalThis as any).DOMMatrix = class DOMMatrix {
     a=1; b=0; c=0; d=1; e=0; f=0;
-    m11=1; m12=0; m13=0; m14=0;
-    m21=0; m22=1; m23=0; m24=0;
-    m31=0; m32=0; m33=1; m34=0;
-    m41=0; m42=0; m43=0; m44=1;
+    m11=1; m12=0; m13=0; m14=0; m21=0; m22=1; m23=0; m24=0;
+    m31=0; m32=0; m33=1; m34=0; m41=0; m42=0; m43=0; m44=1;
     is2D=true; isIdentity=true;
     constructor(_init?: any) {}
     static fromMatrix(_o?: any) { return new (globalThis as any).DOMMatrix(); }
@@ -31,7 +29,8 @@ if (typeof (globalThis as any).DOMMatrix === 'undefined') {
 
 const PROMPT = `Analisa esta fatura ou recibo.
 
-1. Se existir um QR code ATCUD (fatura portuguesa), le o seu conteudo exacto. O formato tipico e: A:NIF*B:NIF_COMPRADOR*C:PT*D:FT*E:N*F:YYYYMMDD*G:NUM_DOC*H:ATCUD*...*N:IVA_TOTAL*O:TOTAL*Q:HASH*R:CERT
+1. Se existir um QR code ATCUD (fatura portuguesa), le o seu conteudo exacto. O formato tipico e:
+A:NIF_EMITENTE*B:NIF_COMPRADOR*C:PT*D:FT*E:N*F:YYYYMMDD*G:NUM_DOC*H:ATCUD*...*N:IVA_TOTAL*O:TOTAL*Q:HASH*R:CERT
 
 2. Extrai todos os dados da fatura via OCR, incluindo as linhas de artigos/servicos.
 
@@ -39,8 +38,8 @@ Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
 {
   "qr_atcud": "conteudo completo do QR code ou null",
   "fornecedor": "nome da empresa emissora",
-  "nif": "NIF do fornecedor ou null",
-  "nif_comprador": "NIF do comprador ou null",
+  "nif": "NIF do fornecedor (campo A: do QR code se disponivel) ou null",
+  "nif_comprador": "NIF do adquirente/comprador — usa OBRIGATORIAMENTE o campo B: do QR code ATCUD se disponivel (ex: se QR tem B:515188166 entao nif_comprador=515188166). NAO uses o campo Cliente/codigo de cliente da tabela (ex: 99999999). So usa OCR se nao houver QR code",
   "numero_fatura": "numero do documento ex FT 2024/123 ou null",
   "data": "YYYY-MM-DD ou null",
   "valor_total": numero com IVA ou null,
@@ -53,17 +52,24 @@ Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
       "descricao": "descricao do artigo ou servico",
       "quantidade": numero ou null,
       "unidade": "un/m2/m3/kg/hr/etc ou null",
-      "preco_unitario": numero — PRECO UNITARIO ANTES DE QUALQUER DESCONTO (coluna Preco ou P.Unit), NAO o valor monetario do desconto,
+      "preco_unitario": numero — PRECO UNITARIO ANTES DE QUALQUER DESCONTO (coluna Preco ou P.Unit),
       "desconto_pct": numero — PERCENTAGEM DE DESCONTO ex 60 para 60% (coluna %Desc ou Desc%), ou null se sem desconto,
       "total": numero — VALOR LIQUIDO TOTAL DA LINHA SEM IVA APOS DESCONTO (coluna Liquido ou Total s/IVA)
     }
   ]
 }
+
 REGRAS CRITICAS PARA LINHAS:
 - preco_unitario = preco por unidade ANTES do desconto (coluna "Preco" ou "Prec. Unit.") — NUNCA o valor monetario do desconto
 - desconto_pct = percentagem como numero (ex: fatura diz "60%" -> coloca 60), ou null se nao houver
 - total = valor liquido final da linha SEM IVA e APOS desconto (coluna "Liquido" ou "Total s/IVA")
 - Exemplo: Preco=329.06, Qtd=1, %Desc=60 -> preco_unitario=329.06, desconto_pct=60, total=131.62
+
+REGRAS CRITICAS PARA NIF_COMPRADOR:
+- O campo "Cliente" na tabela (ex: 99999999) e um codigo interno do fornecedor, NAO e o NIF
+- O NIF do comprador esta no campo B: do QR code ATCUD
+- Exemplo QR: A:510367887*B:515188166*... -> nif_comprador=515188166
+
 Se nao conseguires ler um campo coloca null. O array linhas pode estar vazio [] se nao houver linhas visiveis.`;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,11 +81,7 @@ async function extractPdfText(buf: Buffer): Promise<string> {
     const workerPath = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'legacy', 'build', 'pdf.worker.mjs');
     pdfjsLib.GlobalWorkerOptions.workerSrc = `file://${workerPath}`;
   }
-  const pdf = await pdfjsLib.getDocument({
-    data: new Uint8Array(buf),
-    useWorkerFetch: false,
-    isEvalSupported: false,
-  }).promise;
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), useWorkerFetch: false, isEvalSupported: false, }).promise;
   let text = '';
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
@@ -90,13 +92,38 @@ async function extractPdfText(buf: Buffer): Promise<string> {
   return text.trim();
 }
 
+// Parse QR code ATCUD fields (A:val*B:val*...) and override AI-extracted fields
+function applyQrOverrides(extracted: Record<string, unknown>): void {
+  const qr = extracted.qr_atcud;
+  if (typeof qr !== 'string' || !qr) return;
+  const fields: Record<string, string> = {};
+  qr.split('*').forEach(part => {
+    const i = part.indexOf(':');
+    if (i > 0) fields[part.slice(0, i)] = part.slice(i + 1);
+  });
+  // B: = NIF do adquirente (comprador) — sempre mais fiavel que OCR
+  if (fields['B']) extracted.nif_comprador = fields['B'];
+  // A: = NIF do emitente (fornecedor) — fallback se OCR falhou
+  if (fields['A'] && !extracted.nif) extracted.nif = fields['A'];
+  // O: = total com IVA
+  if (fields['O']) {
+    const v = parseFloat(fields['O']);
+    if (!isNaN(v)) extracted.valor_total = v;
+  }
+}
+
 export async function POST(req: Request) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ error: 'OPENAI_API_KEY nao configurada' }, { status: 500 });
   }
+
   let form: FormData;
-  try { form = await req.formData(); }
-  catch { return NextResponse.json({ error: 'Multipart invalido' }, { status: 400 }); }
+  try {
+    form = await req.formData();
+  } catch {
+    return NextResponse.json({ error: 'Multipart invalido' }, { status: 400 });
+  }
+
   const file = form.get('file');
   if (!file || !(file instanceof File)) {
     return NextResponse.json({ error: 'Campo file em falta' }, { status: 400 });
@@ -104,9 +131,11 @@ export async function POST(req: Request) {
   if (file.size > 20 * 1024 * 1024) {
     return NextResponse.json({ error: 'Ficheiro demasiado grande (max 20MB)' }, { status: 413 });
   }
+
   const buf = Buffer.from(await file.arrayBuffer());
   const mimeType = file.type || 'image/jpeg';
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let inputContent: any[];
 
@@ -137,6 +166,7 @@ export async function POST(req: Request) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       input: [{ role: 'user', content: inputContent }] as any,
     });
+
     const text = response.output_text?.trim() || '';
     let extracted: Record<string, unknown> = {};
     try {
@@ -145,6 +175,10 @@ export async function POST(req: Request) {
     } catch {
       return NextResponse.json({ error: 'Nao foi possivel extrair dados', raw: text }, { status: 422 });
     }
+
+    // Sobrescrever campos com dados do QR code ATCUD (mais fiavel que OCR)
+    applyQrOverrides(extracted);
+
     return NextResponse.json({ ok: true, ...extracted });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
