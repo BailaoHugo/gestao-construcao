@@ -72,12 +72,15 @@ export default function ScanDespesa() {
     setUploading(true);
     setScanning(true);
 
-    const form = new FormData();
-    form.append('file', f);
+    // Usar dois FormData separados -- o mesmo objecto nao pode ser lido em paralelo
+    const formUpload = new FormData();
+    formUpload.append('file', f);
+    const formScan = new FormData();
+    formScan.append('file', f);
 
     const [uploadRes, scanRes] = await Promise.allSettled([
-      fetch('/api/upload', { method: 'POST', body: form }),
-      fetch('/api/despesas/scan', { method: 'POST', body: form }),
+      fetch('/api/upload', { method: 'POST', body: formUpload }),
+      fetch('/api/despesas/scan', { method: 'POST', body: formScan }),
     ]);
 
     // Processar upload
@@ -86,6 +89,9 @@ export default function ScanDespesa() {
         const j = await uploadRes.value.json();
         if (j.url) setDocumentoUrl(j.url);
       } catch { /* ignore */ }
+    } else {
+      console.warn('[scan] Upload falhou');
+      setErro('Aviso: o documento nao foi guardado (erro no upload). Podes guardar na mesma, mas sem anexo.');
     }
     setUploading(false);
 
