@@ -140,18 +140,27 @@ export async function POST(req: Request) {
   let inputContent: any[];
 
   if (mimeType === 'application/pdf') {
-    let pdfText: string;
+    let pdfText = '';
     try {
       pdfText = await extractPdfText(buf);
     } catch (e) {
-      return NextResponse.json({ error: 'Erro ao processar PDF: ' + (e instanceof Error ? e.message : String(e)) }, { status: 422 });
+      console.warn('[scan] pdfjs extraction error, using vision fallback:', e instanceof Error ? e.message : e);
     }
-    if (!pdfText) {
-      return NextResponse.json({ error: 'Nao foi possivel extrair texto do PDF' }, { status: 422 });
+
+    if (pdfText) {
+      // PDF com texto embebido — usar extração de texto
+      inputContent = [
+        { type: 'input_text', text: `${PROMPT}\n\nTexto extraido do documento PDF:\n${pdfText}` },
+      ];
+    } else {
+      // PDF baseado em imagem (digitalizado) — enviar para visão do gpt-4o
+      const base64 = buf.toString('base64');
+      inputContent = [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { type: 'input_file', filename: 'fatura.pdf', file_data: `data:application/pdf;base64,${base64}` } as any,
+        { type: 'input_text', text: PROMPT },
+      ];
     }
-    inputContent = [
-      { type: 'input_text', text: `${PROMPT}\n\nTexto extraido do documento PDF:\n${pdfText}` },
-    ];
   } else {
     const base64 = buf.toString('base64');
     inputContent = [
