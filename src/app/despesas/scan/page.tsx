@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { ObraCombobox } from '@/components/ObraCombobox';
 import Link from 'next/link';
 
 const CATS = [
@@ -492,16 +493,7 @@ export default function ScanDespesa() {
               {/* Obra */}
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Centro de custo / Obra</label>
-                <select
-                  value={centroCustoId}
-                  onChange={e => setCentroCustoId(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Geral (sem obra)</option>
-                  {obras.map(o => (
-                    <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>
-                  ))}
-                </select>
+                <ObraCombobox obras={obras} value={centroCustoId} onChange={setCentroCustoId} emptyLabel="Geral (sem obra)" className="w-full" />
               </div>
 
               {/* Notas */}

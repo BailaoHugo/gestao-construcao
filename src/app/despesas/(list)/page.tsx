@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { ObraCombobox } from "@/components/ObraCombobox";
 import { useEffect, useState, useCallback } from "react"
 
 type Obra = { id: string; code: string; nome: string };
@@ -332,13 +333,7 @@ export default function DespesasPage() {
           <option value="">Todos os tipos</option>
           {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
-        <select value={filtroCentro} onChange={(e) => setFiltroCentro(e.target.value)}
-          className="border rounded px-3 py-1.5 text-sm">
-          <option value="">Todos os centros</option>
-          {obras.map((o) => (
-            <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>
-          ))}
-        </select>
+        <ObraCombobox obras={obras} value={filtroCentro} onChange={setFiltroCentro} emptyLabel="Todos os centros" />
         <input type="date" value={filtroFrom} onChange={(e) => setFiltroFrom(e.target.value)}
           className="border rounded px-3 py-1.5 text-sm" />
         <input type="date" value={filtroTo} onChange={(e) => setFiltroTo(e.target.value)}
@@ -577,14 +572,7 @@ export default function DespesasPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Centro de custo</label>
-                  <select value={form.centro_custo_id}
-                    onChange={(e) => setForm((f) => ({ ...f, centro_custo_id: e.target.value }))}
-                    className="w-full border rounded-lg px-3 py-2 text-sm">
-                    <option value="">— Geral —</option>
-                    {obras.map((o) => (
-                      <option key={o.id} value={o.id}>{o.code} — {o.nome}</option>
-                    ))}
-                  </select>
+                  <ObraCombobox obras={obras} value={form.centro_custo_id} onChange={(id) => setForm(f => ({ ...f, centro_custo_id: id }))} emptyLabel="— Geral —" className="w-full" />
                 </div>
               </div>
 
