@@ -72,11 +72,14 @@ export default function ScanDespesa() {
     setUploading(true);
     setScanning(true);
 
-    // Usar dois FormData separados -- o mesmo objecto nao pode ser lido em paralelo
+    // Ler os bytes UMA vez e criar dois Blobs independentes para upload e scan em paralelo
+    const fileBytes = await f.arrayBuffer();
+    const blob1 = new Blob([fileBytes], { type: f.type });
+    const blob2 = new Blob([fileBytes], { type: f.type });
     const formUpload = new FormData();
-    formUpload.append('file', f);
+    formUpload.append('file', blob1, f.name);
     const formScan = new FormData();
-    formScan.append('file', f);
+    formScan.append('file', blob2, f.name);
 
     const [uploadRes, scanRes] = await Promise.allSettled([
       fetch('/api/upload', { method: 'POST', body: formUpload }),
