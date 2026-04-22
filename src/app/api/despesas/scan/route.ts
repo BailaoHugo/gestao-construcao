@@ -157,7 +157,7 @@ export async function POST(req: Request) {
       const pdfFileObj = new File([buf], 'fatura.pdf', { type: 'application/pdf' });
       const uploaded = await openai.files.create({ file: pdfFileObj, purpose: 'user_data' });
       // Limpar ficheiro apos processamento (async, nao bloqueia)
-      void openai.files.del(uploaded.id).catch((e: unknown) => console.warn('[scan] file cleanup:', e));
+      void openai.files.delete(uploaded.id).catch((e: unknown) => console.warn('[scan] file cleanup:', e));
       inputContent = [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { type: 'input_file', file_id: uploaded.id } as any,
