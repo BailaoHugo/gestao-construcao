@@ -40,6 +40,12 @@ async function sendToconlineEmail(params: {
     return false;
   }
 
+  // TOConline rejeita emails sem anexo - so enviar se houver documento
+  if (!params.documentoRef) {
+    console.warn('[toc-email] Sem documento em anexo - a saltar envio para TOConline');
+    return false;
+  }
+
   try {
     // Get centro custo code
     let ccCode = '';
