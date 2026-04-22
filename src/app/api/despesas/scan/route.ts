@@ -153,11 +153,14 @@ export async function POST(req: Request) {
         { type: 'input_text', text: `${PROMPT}\n\nTexto extraido do documento PDF:\n${pdfText}` },
       ];
     } else {
-      // PDF baseado em imagem (digitalizado) — enviar para visão do gpt-4o
-      const base64 = buf.toString('base64');
+      // PDF baseado em imagem (digitalizado) -- fazer upload para OpenAI Files API e usar file_id
+      const pdfFileObj = new File([buf], 'fatura.pdf', { type: 'application/pdf' });
+      const uploaded = await openai.files.create({ file: pdfFileObj, purpose: 'user_data' });
+      // Limpar ficheiro apos processamento (async, nao bloqueia)
+      void openai.files.del(uploaded.id).catch((e: unknown) => console.warn('[scan] file cleanup:', e));
       inputContent = [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        { type: 'input_file', filename: 'fatura.pdf', file_data: `data:application/pdf;base64,${base64}` } as any,
+        { type: 'input_file', file_id: uploaded.id } as any,
         { type: 'input_text', text: PROMPT },
       ];
     }
