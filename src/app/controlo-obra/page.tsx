@@ -20,6 +20,7 @@ interface ObraStats {
 
 interface FornecedorStat {
   fornecedor: string;
+  fornecedor_key: string;
   total_sem_iva: number;
   num_faturas: number;
 }
@@ -42,6 +43,7 @@ export default function ControloObra() {
   const [fornecedores, setFornecedores] = useState<FornecedorStat[]>([]);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [selectedForn, setSelectedForn] = useState<string | null>(null);
+  const [fornExpanded, setFornExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState('2026-01-01');
   const [dateTo, setDateTo] = useState(new Date().toISOString().slice(0, 10));
@@ -68,7 +70,10 @@ export default function ControloObra() {
     setDespesas(d.despesas || []);
   };
 
-  const filt = selectedForn ? despesas.filter(d => d.fornecedor === selectedForn) : despesas;
+  const filt = selectedForn
+    ? despesas.filter(d => d.fornecedor &&
+        d.fornecedor.toUpperCase().replace(/[^A-Za-z0-9 ]/g,'').trim() === selectedForn)
+    : despesas;
   const totalFilt = filt.reduce((s, d) => s + (d.valor_sem_iva || 0), 0);
 
   return (
@@ -151,15 +156,18 @@ export default function ControloObra() {
                 <div className="bg-white border rounded-xl overflow-hidden">
                   <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-gray-700">Por Fornecedor</h3>
-                    {selectedForn && <button onClick={() => setSelectedForn(null)} className="text-xs text-blue-600 hover:underline">ver todos</button>}
+                    <div className="flex gap-3 items-center">
+                      {selectedForn && <button onClick={() => setSelectedForn(null)} className="text-xs text-blue-600 hover:underline">ver todos</button>}
+                      <button onClick={() => setFornExpanded(e => !e)} className="text-xs text-gray-500 hover:text-gray-700">{fornExpanded ? '▲ recolher' : '▼ expandir'}</button>
+                    </div>
                   </div>
-                  <div className="divide-y max-h-48 overflow-y-auto">
+                  <div className={`divide-y overflow-y-auto transition-all ${fornExpanded ? 'max-h-[500px]' : 'max-h-48'}`}>
                     {fornecedores.map(f => {
                       const pct = selectedObra.total_sem_iva > 0 ? (f.total_sem_iva / selectedObra.total_sem_iva * 100) : 0;
                       return (
                         <div key={f.fornecedor}
-                          onClick={() => setSelectedForn(f.fornecedor === selectedForn ? null : f.fornecedor)}
-                          className={`px-4 py-2 cursor-pointer hover:bg-gray-50 ${selectedForn === f.fornecedor ? 'bg-blue-50' : ''}`}>
+                          onClick={() => setSelectedForn(f.fornecedor_key === selectedForn ? null : f.fornecedor_key)}
+                          className={`px-4 py-2 cursor-pointer hover:bg-gray-50 ${selectedForn === f.fornecedor_key ? 'bg-blue-50' : ''}`}>
                           <div className="flex items-center gap-3">
                             <div className="flex-1">
                               <div className="flex justify-between items-center mb-0.5">
@@ -201,7 +209,7 @@ export default function ControloObra() {
                       <tbody className="divide-y divide-gray-50">
                         {filt.map(d => (
                           <tr key={d.id} className="hover:bg-gray-50">
-                            <td className="px-3 py-2 text-gray-600">{d.data_despesa}</td>
+                            <td className="px-3 py-2 text-gray-600">{d.data_despesa?.slice(0,10)}</td>
                             <td className="px-3 py-2 font-medium text-gray-900 max-w-[140px] truncate">{d.fornecedor || '—'}</td>
                             <td className="px-3 py-2 text-gray-600">{d.numero_fatura || '—'}</td>
                             <td className="px-3 py-2">
