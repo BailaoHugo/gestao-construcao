@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     `);
     await pool.query(`
       UPDATE despesas d SET centro_custo_nome = (
-        SELECT o.nome FROM obras o WHERE o.id = d.centro_custo_id
+        SELECT o.name FROM obras o WHERE o.id = d.centro_custo_id
       ) WHERE centro_custo_nome IS NULL AND centro_custo_id IS NOT NULL
     `);
     return NextResponse.json({ ok: true, message: 'Migration completed' });
