@@ -168,11 +168,11 @@ export async function POST(req: Request) {
       let ccNome = '';
       if (centro_custo_id) {
         const ccRows = await client.query(
-          'SELECT code, nome FROM obras WHERE id = $1',
+          'SELECT code, name FROM obras WHERE id = $1',
           [centro_custo_id]
         );
         ccCode = ccRows.rows[0]?.code ?? '';
-        ccNome = ccRows.rows[0]?.nome ?? '';
+        ccNome = ccRows.rows[0]?.name ?? '';
       }
       const nomeFicheiro = generateFileName(
         data || new Date().toISOString().slice(0, 10),
