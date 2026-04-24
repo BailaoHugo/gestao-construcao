@@ -163,6 +163,25 @@ export async function POST(req: Request) {
     try {
       await client.query('BEGIN');
 
+      // Lookup centro de custo para nome estruturado de ficheiro
+      let ccCode = '';
+      let ccNome = '';
+      if (centro_custo_id) {
+        const ccRows = await client.query(
+          'SELECT code, nome FROM obras WHERE id = $1',
+          [centro_custo_id]
+        );
+        ccCode = ccRows.rows[0]?.code ?? '';
+        ccNome = ccRows.rows[0]?.nome ?? '';
+      }
+      const nomeFicheiro = generateFileName(
+        data || new Date().toISOString().slice(0, 10),
+        ccCode,
+        fornecedor || null,
+        numero_fatura || null,
+        documento_ref || null
+      );
+
       const { rows } = await client.query(
         `INSERT INTO despesas
           (data_despesa, descricao, tipo, valor, centro_custo_id, fornecedor, notas, documento_ref,
