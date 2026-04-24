@@ -113,8 +113,8 @@ export default function ControloObra() {
                       className={`px-4 py-3 cursor-pointer hover:bg-blue-50 transition-colors ${selectedObra?.id === obra.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''}`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{obra.code}</p>
-                          <p className="text-xs text-gray-500 truncate max-w-[160px]">{obra.nome}</p>
+                          <p className="text-sm font-medium text-gray-900">{obra.code} <span className="font-normal text-gray-600">— {obra.nome}</span></p>
+                          <p className="text-xs text-gray-400">{obra.num_faturas} fat. · {obra.total_sem_iva.toLocaleString("pt-PT", {minimumFractionDigits:2})} €</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold text-gray-900">{obra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>

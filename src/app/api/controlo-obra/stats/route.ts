@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     SELECT
       o.id,
       o.code,
-      o.name,
+      o.name AS nome,
       COALESCE(SUM(d.valor_sem_iva), 0)::float   AS total_sem_iva,
       COALESCE(SUM(d.valor_total_civa), 0)::float AS total_com_iva,
       COUNT(d.id)::int                             AS num_faturas,
