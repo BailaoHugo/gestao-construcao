@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     SELECT
       o.id,
       o.code,
-      o.nome,
+      o.name,
       COALESCE(SUM(d.valor_sem_iva), 0)::float   AS total_sem_iva,
       COALESCE(SUM(d.valor_total_civa), 0)::float AS total_com_iva,
       COUNT(d.id)::int                             AS num_faturas,
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       ON d.centro_custo_id = o.id
       AND d.data_despesa BETWEEN $1 AND $2
     WHERE EXISTS (SELECT 1 FROM despesas d2 WHERE d2.centro_custo_id = o.id AND d2.data_despesa BETWEEN $1 AND $2)
-    GROUP BY o.id, o.code, o.nome
+    GROUP BY o.id, o.code, o.name
     ORDER BY total_sem_iva DESC
   `, [from, to]);
 
