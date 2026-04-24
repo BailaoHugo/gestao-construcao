@@ -2,6 +2,18 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { Resend } from 'resend';
 
+
+// Gerar nome de ficheiro estruturado: YYYYMMDD_CC_FORNECEDOR_REF.ext
+function generateFileName(date: string, ccCode: string, fornecedor: string | null, ref: string | null, originalUrl: string | null): string {
+  const d = (date || new Date().toISOString().slice(0, 10)).replace(/-/g, '');
+  const cc = (ccCode || 'GERAL').replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 20);
+  const forn = (fornecedor || 'DESCONHECIDO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20).toUpperCase();
+  const refClean = (ref || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20).toUpperCase();
+  const ext = originalUrl ? (originalUrl.split('?')[0].split('.').pop() || 'jpg').toLowerCase() : 'jpg';
+  const parts = [d, cc, forn, refClean].filter(Boolean);
+  return parts.join('_') + '.' + ext;
+}
+
 const CATEGORIA_TO_TIPO: Record<string, string> = {
   'Material de obra':       'materiais',
   'Ferramentas':            'equipamentos',
@@ -154,8 +166,8 @@ export async function POST(req: Request) {
       const { rows } = await client.query(
         `INSERT INTO despesas
           (data_despesa, descricao, tipo, valor, centro_custo_id, fornecedor, notas, documento_ref,
-           numero_fatura, valor_sem_iva, valor_iva, valor_total_civa)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+           numero_fatura, valor_sem_iva, valor_iva, valor_total_civa, nome_ficheiro, centro_custo_nome)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
          RETURNING id`,
         [
           data || new Date().toISOString().slice(0, 10),
@@ -168,6 +180,8 @@ export async function POST(req: Request) {
           valor_sem_iva != null ? valor_sem_iva : null,
           valorIva,
           valor_total || null,
+          nomeFicheiro,
+          ccNome || null,
         ]
       );
 

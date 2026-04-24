@@ -1,117 +1,231 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
-interface Contrato {
+interface Obra {
   id: string;
-  propostaCodigo: string;
-  revisaoNumero: number;
-  clienteNome: string;
-  estado: string;
-  dataContrato: string | null;
-  totalVenda: number;
-  criadoEm: string;
+  code: string;
+  nome: string;
 }
 
-interface Resumo {
-  totalCustos: number;
-  numFaturasPendentes: number;
+interface ObraStats {
+  id: string;
+  code: string;
+  nome: string;
+  total_sem_iva: number;
+  total_com_iva: number;
+  num_faturas: number;
+  num_fornecedores: number;
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(n);
+interface FornecedorStat {
+  fornecedor: string;
+  total_sem_iva: number;
+  num_faturas: number;
 }
 
-export default function ControloObraPage() {
-  const [contratos, setContratos] = useState<Contrato[]>([]);
-  const [resumos, setResumos] = useState<Record<string, Resumo>>({});
+interface Despesa {
+  id: number;
+  data_despesa: string;
+  fornecedor: string;
+  numero_fatura: string;
+  valor_sem_iva: number;
+  valor_total_civa: number;
+  tipo: string;
+  nome_ficheiro: string;
+  documento_ref: string;
+}
+
+export default function ControloObra() {
+  const [obras, setObras] = useState<ObraStats[]>([]);
+  const [selectedObra, setSelectedObra] = useState<ObraStats | null>(null);
+  const [fornecedores, setFornecedores] = useState<FornecedorStat[]>([]);
+  const [despesas, setDespesas] = useState<Despesa[]>([]);
+  const [selectedForn, setSelectedForn] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dateFrom, setDateFrom] = useState('2026-01-01');
+  const [dateTo, setDateTo] = useState(new Date().toISOString().slice(0, 10));
 
-  useEffect(() => {
-    fetch('/api/contratos')
-      .then(r => r.json())
-      .then(async (data: Contrato[]) => {
-        setContratos(data);
-        const entries = await Promise.all(
-          data.map(c =>
-            fetch(`/api/custos-obra/resumo/${c.id}`)
-              .then(r => r.json())
-              .then(res => [c.id, res] as [string, Resumo])
-              .catch(() => [c.id, { totalCustos: 0, numFaturasPendentes: 0 }] as [string, Resumo]),
-          ),
-        );
-        setResumos(Object.fromEntries(entries));
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const loadObras = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/controlo-obra/stats?from=${dateFrom}&to=${dateTo}`);
+      const d = await r.json();
+      setObras(d.obras || []);
+    } finally {
+      setLoading(false);
+    }
+  }, [dateFrom, dateTo]);
+
+  useEffect(() => { loadObras(); }, [loadObras]);
+
+  const loadObraDetail = async (obra: ObraStats) => {
+    setSelectedObra(obra);
+    setSelectedForn(null);
+    const r = await fetch(`/api/controlo-obra/detail?obra_id=${obra.id}&from=${dateFrom}&to=${dateTo}`);
+    const d = await r.json();
+    setFornecedores(d.fornecedores || []);
+    setDespesas(d.despesas || []);
+  };
+
+  const filt = selectedForn ? despesas.filter(d => d.fornecedor === selectedForn) : despesas;
+  const totalFilt = filt.reduce((s, d) => s + (d.valor_sem_iva || 0), 0);
 
   return (
-    <div className="min-h-screen bg-surface px-4 py-6 text-slate-900">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <header className="no-print flex items-center justify-between rounded-xl bg-white/80 px-6 py-4 shadow-sm ring-1 ring-slate-100">
-          <div className="text-sm font-semibold tracking-wide text-slate-800">Gestão Construção</div>
-          <div className="flex gap-3">
-            <Link href="/controlo-obra/faturas" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Faturas</Link>
-            <Link href="/controlo-obra/despesas" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Despesas</Link>
-            <Link href="/despesas/scan" className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100">📷 Registar Despesa</Link>
-            <Link href="/controlo-obra/fornecedores" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Fornecedores</Link>
-            <Link href="/controlo-obra/trabalhadores" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Trabalhadores</Link>
-            <Link href="/" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Dashboard</Link>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4 pb-12">
+
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <Link href="/despesas" className="text-sm text-gray-500 hover:text-gray-700">← Despesas</Link>
+            <h1 className="text-2xl font-bold text-gray-900 mt-1">Controlo de Obra</h1>
+            <p className="text-sm text-gray-500">Totais de custos por obra e fornecedor</p>
           </div>
-        </header>
-        <main className="rounded-2xl bg-white/80 p-8 shadow-sm ring-1 ring-slate-100">
-          <header className="mb-8 space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Controlo de Obra</h1>
-            <p className="text-sm text-slate-500">Acompanhamento de custos e faturas por contrato.</p>
-          </header>
-          {loading ? (
-            <p className="text-sm text-slate-400">A carregar...</p>
-          ) : contratos.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem contratos disponíveis.</p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {contratos.map(c => {
-                const res = resumos[c.id] ?? { totalCustos: 0, numFaturasPendentes: 0 };
-                const margem = c.totalVenda > 0 ? ((c.totalVenda - res.totalCustos) / c.totalVenda) * 100 : null;
-                return (
-                  <Link key={c.id} href={`/controlo-obra/${c.id}`} className="block">
-                    <div className="flex h-full flex-col justify-between rounded-2xl border border-slate-100 bg-white px-6 py-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{c.propostaCodigo}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.estado === 'EMITIDO' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{c.estado}</span>
+          <div className="flex gap-2 items-center">
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="border rounded px-3 py-1.5 text-sm" />
+            <span className="text-gray-400">→</span>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="border rounded px-3 py-1.5 text-sm" />
+            <button onClick={loadObras} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium">Actualizar</button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Lista de Obras */}
+          <div className="lg:col-span-1">
+            <div className="bg-white border rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b bg-gray-50">
+                <h2 className="text-sm font-semibold text-gray-700">Obras / Centros de Custo</h2>
+              </div>
+              {loading ? (
+                <div className="p-8 text-center text-gray-400 text-sm">A carregar...</div>
+              ) : (
+                <ul className="divide-y">
+                  {obras.map(obra => (
+                    <li key={obra.id}
+                      onClick={() => loadObraDetail(obra)}
+                      className={`px-4 py-3 cursor-pointer hover:bg-blue-50 transition-colors ${selectedObra?.id === obra.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''}`}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{obra.code}</p>
+                          <p className="text-xs text-gray-500 truncate max-w-[160px]">{obra.nome}</p>
                         </div>
-                        <h3 className="text-base font-semibold text-slate-900">{c.clienteNome}</h3>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-900">{obra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                          <p className="text-xs text-gray-400">{obra.num_faturas} fat.</p>
+                        </div>
                       </div>
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-slate-50 px-3 py-2">
-                          <p className="text-xs text-slate-400">Venda</p>
-                          <p className="text-sm font-semibold text-slate-700">{fmt(c.totalVenda)}</p>
-                        </div>
-                        <div className="rounded-xl bg-slate-50 px-3 py-2">
-                          <p className="text-xs text-slate-400">Custos</p>
-                          <p className="text-sm font-semibold text-slate-700">{fmt(res.totalCustos)}</p>
-                        </div>
-                        {margem !== null && (
-                          <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2">
-                            <p className="text-xs text-slate-400">Margem estimada</p>
-                            <p className={`text-sm font-semibold ${margem >= 0 ? 'text-green-600' : 'text-red-600'}`}>{margem.toFixed(1)}%</p>
-                          </div>
-                        )}
-                        {res.numFaturasPendentes > 0 && (
-                          <div className="col-span-2 flex items-center gap-1.5">
-                            <span className="h-2 w-2 rounded-full bg-amber-400" />
-                            <span className="text-xs text-amber-600">{res.numFaturasPendentes} fatura(s) pendente(s)</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+                    </li>
+                  ))}
+                  {obras.length === 0 && <li className="p-6 text-center text-gray-400 text-sm">Sem dados no período</li>}
+                </ul>
+              )}
             </div>
-          )}
-        </main>
+          </div>
+
+          {/* Detalhe */}
+          <div className="lg:col-span-2 space-y-4">
+            {!selectedObra ? (
+              <div className="bg-white border rounded-xl p-12 text-center text-gray-400">
+                <p className="text-3xl mb-3">📊</p>
+                <p className="text-sm">Selecciona uma obra para ver o detalhe</p>
+              </div>
+            ) : (
+              <>
+                {/* Header obra seleccionada */}
+                <div className="bg-white border rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900">{selectedObra.code} — {selectedObra.nome}</h2>
+                      <p className="text-sm text-gray-500">{selectedObra.num_faturas} faturas · {selectedObra.num_fornecedores} fornecedores</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-blue-700">{selectedObra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                      <p className="text-xs text-gray-400">s/ IVA · c/ IVA: {selectedObra.total_com_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Por fornecedor */}
+                <div className="bg-white border rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">Por Fornecedor</h3>
+                    {selectedForn && <button onClick={() => setSelectedForn(null)} className="text-xs text-blue-600 hover:underline">ver todos</button>}
+                  </div>
+                  <div className="divide-y max-h-48 overflow-y-auto">
+                    {fornecedores.map(f => {
+                      const pct = selectedObra.total_sem_iva > 0 ? (f.total_sem_iva / selectedObra.total_sem_iva * 100) : 0;
+                      return (
+                        <div key={f.fornecedor}
+                          onClick={() => setSelectedForn(f.fornecedor === selectedForn ? null : f.fornecedor)}
+                          className={`px-4 py-2 cursor-pointer hover:bg-gray-50 ${selectedForn === f.fornecedor ? 'bg-blue-50' : ''}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center mb-0.5">
+                                <span className="text-sm text-gray-800 font-medium truncate max-w-[200px]">{f.fornecedor || '—'}</span>
+                                <span className="text-sm font-semibold text-gray-900 shrink-0">{f.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</span>
+                              </div>
+                              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-400 rounded-full" style={{width: `${pct}%`}} />
+                              </div>
+                              <p className="text-xs text-gray-400 mt-0.5">{pct.toFixed(1)}% · {f.num_faturas} fat.</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Listagem de despesas */}
+                <div className="bg-white border rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      {selectedForn ? `Faturas — ${selectedForn}` : 'Todas as faturas'}
+                    </h3>
+                    <span className="text-sm font-semibold text-gray-700">{totalFilt.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-500">
+                        <tr>
+                          <th className="text-left px-3 py-2">Data</th>
+                          <th className="text-left px-3 py-2">Fornecedor</th>
+                          <th className="text-left px-3 py-2">Nº Fatura</th>
+                          <th className="text-left px-3 py-2">Ficheiro</th>
+                          <th className="text-right px-3 py-2">S/ IVA</th>
+                          <th className="text-right px-3 py-2">C/ IVA</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {filt.map(d => (
+                          <tr key={d.id} className="hover:bg-gray-50">
+                            <td className="px-3 py-2 text-gray-600">{d.data_despesa}</td>
+                            <td className="px-3 py-2 font-medium text-gray-900 max-w-[140px] truncate">{d.fornecedor || '—'}</td>
+                            <td className="px-3 py-2 text-gray-600">{d.numero_fatura || '—'}</td>
+                            <td className="px-3 py-2">
+                              {d.documento_ref ? (
+                                <a href={`/api/despesas/documento/${d.id}`} target="_blank" className="text-blue-600 hover:underline truncate block max-w-[160px]">
+                                  {d.nome_ficheiro || '📎'}
+                                </a>
+                              ) : <span className="text-gray-300">—</span>}
+                            </td>
+                            <td className="px-3 py-2 text-right font-medium">{d.valor_sem_iva?.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</td>
+                            <td className="px-3 py-2 text-right text-gray-500">{d.valor_total_civa?.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</td>
+                          </tr>
+                        ))}
+                        {filt.length === 0 && (
+                          <tr><td colSpan={6} className="px-3 py-6 text-center text-gray-400">Sem faturas</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
