@@ -17,8 +17,8 @@ function generateFileName(date: string, ccCode: string, fornecedor: string | nul
 const CATEGORIA_TO_TIPO: Record<string, string> = {
   'Material de obra':       'materiais',
   'Ferramentas':            'equipamentos',
-  'Subempreitada':          'mao_de_obra',
-  'Subcontratacao':         'mao_de_obra',
+  'Subempreitada':          'subempreitada',
+  'Subcontratacao':         'subempreitada',
   'Prestação de serviços':  'mao_de_obra',
   'Combustivel':            'outros',
   'Alimentacao':            'outros',

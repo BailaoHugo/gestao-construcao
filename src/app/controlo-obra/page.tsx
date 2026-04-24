@@ -12,10 +12,22 @@ interface ObraStats {
   id: string;
   code: string;
   nome: string;
+  total_materiais: number;
+  total_subempreitadas: number;
+  total_outros: number;
   total_sem_iva: number;
   total_com_iva: number;
+  total_ponto: number;
+  total_geral: number;
   num_faturas: number;
   num_fornecedores: number;
+}
+
+interface PontoStat {
+  trabalhador: string;
+  dias: number;
+  total_horas: number;
+  total_custo: number;
 }
 
 interface FornecedorStat {
@@ -42,6 +54,7 @@ export default function ControloObra() {
   const [selectedObra, setSelectedObra] = useState<ObraStats | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorStat[]>([]);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
+  const [ponto, setPonto] = useState<PontoStat[]>([]);
   const [selectedForn, setSelectedForn] = useState<string | null>(null);
   const [fornExpanded, setFornExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,6 +81,7 @@ export default function ControloObra() {
     const d = await r.json();
     setFornecedores(d.fornecedores || []);
     setDespesas(d.despesas || []);
+    setPonto(d.ponto || []);
   };
 
   const filt = selectedForn
@@ -114,10 +128,10 @@ export default function ControloObra() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{obra.code} <span className="font-normal text-gray-600">— {obra.nome}</span></p>
-                          <p className="text-xs text-gray-400">{obra.num_faturas} fat. · {obra.total_sem_iva.toLocaleString("pt-PT", {minimumFractionDigits:2})} €</p>
+                          <p className="text-xs text-gray-400">{obra.num_faturas} fat. · {obra.total_geral.toLocaleString("pt-PT", {minimumFractionDigits:2})} €</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-semibold text-gray-900">{obra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                          <p className="text-sm font-semibold text-gray-900">{obra.total_geral.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
                           <p className="text-xs text-gray-400">{obra.num_faturas} fat.</p>
                         </div>
                       </div>
@@ -146,9 +160,25 @@ export default function ControloObra() {
                       <p className="text-sm text-gray-500">{selectedObra.num_faturas} faturas · {selectedObra.num_fornecedores} fornecedores</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-700">{selectedObra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
-                      <p className="text-xs text-gray-400">s/ IVA · c/ IVA: {selectedObra.total_com_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                      <p className="text-2xl font-bold text-blue-700">{selectedObra.total_geral.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                      <p className="text-xs text-gray-400">Despesas: {selectedObra.total_sem_iva.toLocaleString('pt-PT', {minimumFractionDigits:2})} € · M.O.: {selectedObra.total_ponto.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
                     </div>
+                  </div>
+                </div>
+
+                {/* KPI cards */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white border rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-500 mb-1">Materiais</p>
+                    <p className="text-base font-bold text-gray-900">{selectedObra.total_materiais.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                  </div>
+                  <div className="bg-white border rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-500 mb-1">Subempreitadas</p>
+                    <p className="text-base font-bold text-gray-900">{selectedObra.total_subempreitadas.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
+                  </div>
+                  <div className="bg-white border rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-500 mb-1">Mão de Obra</p>
+                    <p className="text-base font-bold text-blue-600">{selectedObra.total_ponto.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</p>
                   </div>
                 </div>
 
@@ -230,6 +260,37 @@ export default function ControloObra() {
                     </table>
                   </div>
                 </div>
+                {/* Mão de Obra (Ponto) */}
+                {ponto.length > 0 && (
+                  <div className="bg-white border rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-gray-700">Mão de Obra (Ponto)</h3>
+                      <span className="text-sm font-semibold text-blue-600">
+                        {ponto.reduce((s,p) => s + p.total_custo, 0).toLocaleString('pt-PT', {minimumFractionDigits:2})} €
+                      </span>
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-500">
+                        <tr>
+                          <th className="text-left px-3 py-2">Trabalhador</th>
+                          <th className="text-right px-3 py-2">Dias</th>
+                          <th className="text-right px-3 py-2">Horas</th>
+                          <th className="text-right px-3 py-2">Custo</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {ponto.map(p => (
+                          <tr key={p.trabalhador} className="hover:bg-gray-50">
+                            <td className="px-3 py-2 font-medium text-gray-900">{p.trabalhador}</td>
+                            <td className="px-3 py-2 text-right text-gray-600">{p.dias}</td>
+                            <td className="px-3 py-2 text-right text-gray-600">{p.total_horas.toFixed(1)}h</td>
+                            <td className="px-3 py-2 text-right font-semibold text-blue-700">{p.total_custo.toLocaleString('pt-PT', {minimumFractionDigits:2})} €</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </>
             )}
           </div>
