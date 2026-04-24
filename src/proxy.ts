@@ -10,6 +10,7 @@ const PUBLIC = [
   '/api/auth/reset-password',
   '/api/auth/recuperar',
   '/api/upload',
+  '/api/check-dups',
 ];
 
 export async function proxy(request: NextRequest) {
