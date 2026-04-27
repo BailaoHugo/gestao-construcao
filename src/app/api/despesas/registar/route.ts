@@ -19,7 +19,10 @@ const CATEGORIA_TO_TIPO: Record<string, string> = {
   'Ferramentas':            'equipamentos',
   'Subempreitada':          'subempreitada',
   'Subcontratacao':         'subempreitada',
-  'Prestação de serviços':  'mao_de_obra',
+  // Subempreitada / Subcontratação / Prestação de serviços = trabalho de
+  // terceiros à obra. Antes 26/04/2026 estes ficavam misturados com as horas
+  // de trabalhadores internos (mao_de_obra). Ver tidelli_comparacao.xlsx.
+  'Prestação de serviços':  'subempreitada',
   'Combustivel':            'outros',
   'Alimentacao':            'outros',
   'Transporte':             'outros',

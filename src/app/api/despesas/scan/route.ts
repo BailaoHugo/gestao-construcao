@@ -46,7 +46,7 @@ Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
   "valor_sem_iva": numero base tributavel ou null,
   "iva": percentagem ex 23 ou null,
   "descricao": "descricao resumida do que foi comprado",
-  "categoria": "Material de obra | Ferramentas | Combustivel | Alimentacao | Subcontratacao | Transporte | Outros",
+  "categoria": "Material de obra | Ferramentas | Subempreitada | Combustivel | Alimentacao | Transporte | Outros",
   "linhas": [
     {
       "descricao": "descricao do artigo ou servico",
