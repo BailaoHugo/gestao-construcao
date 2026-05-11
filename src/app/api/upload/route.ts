@@ -38,7 +38,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: blob.url }, { headers: CORS });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error('[api/upload]', msg);
-    return NextResponse.json({ error: 'Erro ao fazer upload' }, { status: 500, headers: CORS });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyErr = err as any;
+    const code = anyErr?.code ?? anyErr?.status ?? '';
+    const name = anyErr?.name ?? '';
+    console.error('[api/upload]', JSON.stringify({ name, code, msg }));
+    return NextResponse.json({ error: msg }, { status: 500, headers: CORS });
   }
 }
