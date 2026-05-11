@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const blob = await put(filename, file, {
       access: 'private',
       contentType: file.type || 'application/octet-stream',
-      addRandomSuffix: false,
+      addRandomSuffix: true,
     });
 
     return NextResponse.json({ url: blob.url }, { headers: CORS });
