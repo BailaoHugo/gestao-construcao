@@ -138,6 +138,7 @@ export async function POST(req: Request) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let inputContent: any[];
+  let uploadedFileId: string | null = null;
 
   if (mimeType === 'application/pdf') {
     let pdfText = '';
@@ -156,8 +157,7 @@ export async function POST(req: Request) {
       // PDF baseado em imagem (digitalizado) -- fazer upload para OpenAI Files API e usar file_id
       const pdfFileObj = new File([buf], 'fatura.pdf', { type: 'application/pdf' });
       const uploaded = await openai.files.create({ file: pdfFileObj, purpose: 'user_data' });
-      // Limpar ficheiro apos processamento (async, nao bloqueia)
-      void openai.files.delete(uploaded.id).catch((e: unknown) => console.warn('[scan] file cleanup:', e));
+      uploadedFileId = uploaded.id;
       inputContent = [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { type: 'input_file', file_id: uploaded.id } as any,
@@ -196,5 +196,9 @@ export async function POST(req: Request) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[api/despesas/scan]', msg);
     return NextResponse.json({ error: msg }, { status: 500 });
+  } finally {
+    if (uploadedFileId) {
+      await openai.files.delete(uploadedFileId).catch((e: unknown) => console.warn('[scan] file cleanup:', e));
+    }
   }
 }
