@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import path from 'path';
+import { decodeQr } from '@/lib/qr-decoder';
+import { parseAtcud, AtcudData } from '@/lib/atcud';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -120,6 +122,19 @@ function applyQrOverrides(extracted: Record<string, unknown>): void {
   if (fields['D']) extracted.tipo_documento = fields['D'].toUpperCase();
 }
 
+// Aplica dados do QR ATCUD descodificado server-side ao extracted.
+// Esta funcao tem precedencia sobre tudo o que o GPT-4o devolveu —
+// o QR e fonte canonica fornecida pela Autoridade Tributaria.
+function applyServerQrData(extracted: Record<string, unknown>, qr: AtcudData): void {
+  extracted.qr_atcud = qr.raw;
+  if (qr.nif_emitente) extracted.nif = qr.nif_emitente;
+  if (qr.nif_comprador) extracted.nif_comprador = qr.nif_comprador;
+  if (qr.tipo_documento) extracted.tipo_documento = qr.tipo_documento;
+  if (qr.data) extracted.data = qr.data;
+  if (qr.numero_documento && !extracted.numero_fatura) extracted.numero_fatura = qr.numero_documento;
+  if (qr.total != null) extracted.valor_total = qr.total;
+}
+
 // Inverte sinais de valores para Notas de Credito/Debito
 // (NC reduz custo da obra em vez de o adicionar)
 function invertIfCreditNote(extracted: Record<string, unknown>): void {
@@ -167,6 +182,17 @@ export async function POST(req: Request) {
 
   const buf = Buffer.from(await file.arrayBuffer());
   const mimeType = file.type || 'image/jpeg';
+
+  // Descodifica QR ATCUD server-side ANTES do GPT-4o.
+  // Mais fiavel que pedir ao modelo para ler o QR a partir da imagem.
+  let qrAtcudData: AtcudData | null = null;
+  try {
+    const qrRaw = await decodeQr(buf, mimeType);
+    if (qrRaw) qrAtcudData = parseAtcud(qrRaw);
+  } catch (e) {
+    console.warn('[scan] QR decode failed:', e instanceof Error ? e.message : e);
+  }
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,10 +207,11 @@ export async function POST(req: Request) {
       console.warn('[scan] pdfjs extraction error, using vision fallback:', e instanceof Error ? e.message : e);
     }
 
+    const qrHint = qrAtcudData ? `\n\nQR code ATCUD ja descodificado server-side (usa estes valores como fonte canonica): ${qrAtcudData.raw}` : '';
     if (pdfText) {
       // PDF com texto embebido — usar extração de texto
       inputContent = [
-        { type: 'input_text', text: `${PROMPT}\n\nTexto extraido do documento PDF:\n${pdfText}` },
+        { type: 'input_text', text: `${PROMPT}\n\nTexto extraido do documento PDF:\n${pdfText}${qrHint}` },
       ];
     } else {
       // PDF baseado em imagem (digitalizado) -- fazer upload para OpenAI Files API e usar file_id
@@ -194,14 +221,15 @@ export async function POST(req: Request) {
       inputContent = [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { type: 'input_file', file_id: uploaded.id } as any,
-        { type: 'input_text', text: PROMPT },
+        { type: 'input_text', text: `${PROMPT}${qrHint}` },
       ];
     }
   } else {
     const base64 = buf.toString('base64');
+    const qrHintImg = qrAtcudData ? `\n\nQR code ATCUD ja descodificado server-side (usa estes valores como fonte canonica): ${qrAtcudData.raw}` : '';
     inputContent = [
       { type: 'input_image', image_url: `data:${mimeType};base64,${base64}`, detail: 'auto' },
-      { type: 'input_text', text: PROMPT },
+      { type: 'input_text', text: `${PROMPT}${qrHintImg}` },
     ];
   }
 
@@ -223,6 +251,9 @@ export async function POST(req: Request) {
 
     // Sobrescrever campos com dados do QR code ATCUD (mais fiavel que OCR)
     applyQrOverrides(extracted);
+
+    // QR descodificado server-side tem precedencia sobre OCR e sobre o que o GPT leu do QR
+    if (qrAtcudData) applyServerQrData(extracted, qrAtcudData);
 
     // Notas de credito/debito: inverter sinais para que o valor reduza o custo da obra
     invertIfCreditNote(extracted);
