@@ -118,11 +118,26 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const {
-      fornecedor, nif, nif_comprador, data, valor_total, valor_sem_iva, iva,
+      fornecedor, nif, nif_comprador, data, iva,
       descricao, categoria, centro_custo_id, notas, documento_ref,
-      numero_fatura, qr_atcud, linhas,
+      numero_fatura, qr_atcud, tipo_documento,
       forcar,
     } = body;
+    // valor_total, valor_sem_iva e linhas podem ser invertidos para NCs
+    let { valor_total, valor_sem_iva, linhas } = body;
+
+    // Guard defensivo: se for Nota de Credito/Debito e valores positivos, inverte
+    const tipoDoc = typeof tipo_documento === 'string' ? tipo_documento.toUpperCase() : '';
+    if ((tipoDoc === 'NC' || tipoDoc === 'ND') && Number(valor_total) > 0) {
+      if (typeof valor_total === 'number') valor_total = -valor_total;
+      if (typeof valor_sem_iva === 'number') valor_sem_iva = -valor_sem_iva;
+      if (Array.isArray(linhas)) {
+        linhas = linhas.map((l: Record<string, unknown>) => ({
+          ...l,
+          total: typeof l?.total === 'number' && l.total > 0 ? -l.total : l?.total,
+        }));
+      }
+    }
 
     const tipo = CATEGORIA_TO_TIPO[categoria] ?? 'outros';
     const valor = valor_total ?? valor_sem_iva ?? null;

@@ -41,6 +41,7 @@ Responde APENAS com JSON valido, sem markdown, com estes campos exactos:
   "nif": "NIF do fornecedor (campo A: do QR code se disponivel) ou null",
   "nif_comprador": "NIF do adquirente/comprador — usa OBRIGATORIAMENTE o campo B: do QR code ATCUD se disponivel (ex: se QR tem B:515188166 entao nif_comprador=515188166). NAO uses o campo Cliente/codigo de cliente da tabela (ex: 99999999). So usa OCR se nao houver QR code",
   "numero_fatura": "numero do documento ex FT 2024/123 ou null",
+  "tipo_documento": "tipo do documento — usa OBRIGATORIAMENTE o campo D: do QR code ATCUD se disponivel. Valores possiveis: FT (factura), FS (factura simplificada), FR (factura-recibo), NC (nota de credito), ND (nota de debito), NQ (nota de creditacao invertida). Em cabecalhos de documento procura termos como \"Nota de Credito\", \"Credit Note\", \"NC\" -> NC. \"Factura\", \"Fatura/Recibo\" -> FT ou FR. Default FT se nao conseguires identificar",
   "data": "YYYY-MM-DD ou null",
   "valor_total": numero com IVA ou null,
   "valor_sem_iva": numero base tributavel ou null,
@@ -69,6 +70,11 @@ REGRAS CRITICAS PARA NIF_COMPRADOR:
 - O campo "Cliente" na tabela (ex: 99999999) e um codigo interno do fornecedor, NAO e o NIF
 - O NIF do comprador esta no campo B: do QR code ATCUD
 - Exemplo QR: A:510367887*B:515188166*... -> nif_comprador=515188166
+
+REGRAS CRITICAS PARA NOTAS DE CREDITO (NC):
+- tipo_documento = "NC" quando o QR code tem D:NC, ou o cabecalho diz "Nota de Credito"/"Credit Note"
+- Para NCs, mantem os valores positivos no JSON (o servidor inverte os sinais depois)
+- Para qualquer outro caso default a "FT"
 
 Se nao conseguires ler um campo coloca null. O array linhas pode estar vazio [] se nao houver linhas visiveis.`;
 
@@ -109,6 +115,33 @@ function applyQrOverrides(extracted: Record<string, unknown>): void {
   if (fields['O']) {
     const v = parseFloat(fields['O']);
     if (!isNaN(v)) extracted.valor_total = v;
+  }
+  // D: = tipo de documento (FT/FS/FR/NC/ND/NQ) — fonte canonica do tipo
+  if (fields['D']) extracted.tipo_documento = fields['D'].toUpperCase();
+}
+
+// Inverte sinais de valores para Notas de Credito/Debito
+// (NC reduz custo da obra em vez de o adicionar)
+function invertIfCreditNote(extracted: Record<string, unknown>): void {
+  const tipo = typeof extracted.tipo_documento === 'string' ? extracted.tipo_documento.toUpperCase() : '';
+  if (tipo !== 'NC' && tipo !== 'ND') return;
+
+  const flip = (k: string) => {
+    const v = extracted[k];
+    if (typeof v === 'number' && v > 0) extracted[k] = -v;
+  };
+  flip('valor_total');
+  flip('valor_sem_iva');
+
+  if (Array.isArray(extracted.linhas)) {
+    extracted.linhas = extracted.linhas.map((l: unknown) => {
+      if (l && typeof l === 'object') {
+        const obj = { ...(l as Record<string, unknown>) };
+        if (typeof obj.total === 'number' && obj.total > 0) obj.total = -obj.total;
+        return obj;
+      }
+      return l;
+    });
   }
 }
 
@@ -190,6 +223,9 @@ export async function POST(req: Request) {
 
     // Sobrescrever campos com dados do QR code ATCUD (mais fiavel que OCR)
     applyQrOverrides(extracted);
+
+    // Notas de credito/debito: inverter sinais para que o valor reduza o custo da obra
+    invertIfCreditNote(extracted);
 
     return NextResponse.json({ ok: true, ...extracted });
   } catch (err) {
